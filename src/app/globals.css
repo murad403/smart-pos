@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
+
+
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --surface-bg: #ebebeb;
+    --surface-subtle: #dce3f5;
+    --accent-main: #3f7fe8;
+    --accent-soft: #bdd0f3;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background: var(--surface-bg);
+}
+
+.splash-surface {
+    background: linear-gradient(
+        180deg,
+        var(--surface-bg) 0%,
+        var(--surface-bg) 54%,
+        var(--surface-subtle) 54%,
+        var(--surface-subtle) 100%
+    );
+}
+
+.splash-wave-primary {
+    height: 24px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0 14%,
+        var(--accent-main) 14% 32%,
+        transparent 32% 70%,
+        var(--accent-main) 70% 76%,
+        transparent 76% 100%
+    );
+    transform: skewY(-6deg);
+    animation: wave-drift 2.4s ease-in-out infinite alternate;
+}
+
+.splash-wave-secondary {
+    margin-top: -8px;
+    height: 10px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0 12%,
+        var(--accent-soft) 12% 38%,
+        transparent 38% 67%,
+        var(--accent-soft) 67% 100%
+    );
+    transform: skewY(-6deg);
+    opacity: 0.95;
+}
+
+/* No circular shell — just a soft glow behind the logo */
+.splash-logo-shell {
+    width: 300px;
+    height: 300px;
+    display: grid;
+    place-items: center;
+    background: #F7F7F7;
+    border-radius: 50%;
+    padding: 20px;
+    animation: pop-in 550ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pop-in {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes wave-drift {
+    from {
+        transform: skewY(-6deg) translateX(-6px);
+    }
+    to {
+        transform: skewY(-6deg) translateX(6px);
+    }
 }
