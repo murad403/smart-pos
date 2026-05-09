@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Upload, Minus, Plus } from "lucide-react";
 import Image from "next/image";
+import { MenuItemFormValues, menuItemSchema } from "@/validation/settings.validation";
+import useLocalLanguage from "@/hooks/useLocalLanguage";
 
 type Props = {
   open: boolean;
@@ -26,6 +28,7 @@ const LABEL_OPTIONS = [
 const PRODUCTION_DESTINATIONS = ["Kitchen", "Bar", "Pastry", "Grill"];
 
 const AddMenuModal: React.FC<Props> = ({ open, onClose, onSave }) => {
+  const { t } = useLocalLanguage();
   const {
     register,
     handleSubmit,
@@ -68,7 +71,7 @@ const AddMenuModal: React.FC<Props> = ({ open, onClose, onSave }) => {
   const toggleLabel = (label: string) => {
     const current = selectedLabels;
     if (current.includes(label)) {
-      setValue("labels", current.filter((l) => l !== label));
+      setValue("labels", current.filter((currentLabel: string) => currentLabel !== label));
     } else {
       setValue("labels", [...current, label]);
     }
