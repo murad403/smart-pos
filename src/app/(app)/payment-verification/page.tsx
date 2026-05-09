@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import payment1 from "@/assets/images/payment1.jpg";
 import payment2 from "@/assets/images/payment2.jpg";
 import PaymentVerificationStats from "./PaymentVerificationStats";
@@ -113,7 +113,7 @@ const PaymentVerificationPage = () => {
     <div>
       <div className="mb-6 flex justify-between items-center">
         <div className="">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Payment Proof</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Payment Proof</h1>
           <p className="mt-1 text-sm text-slate-500">Verify all cash transactions and detect fraud.</p>
         </div>
         <div className="relative">

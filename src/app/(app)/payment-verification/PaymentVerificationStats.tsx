@@ -27,7 +27,7 @@ const PaymentVerificationStats = () => {
             {stats.map((item) => (
                 <article
                     key={item.id}
-                    className={`flex items-center justify-between rounded-xl border px-4 py-4 shadow-sm ${item.mismatch
+                    className={`flex items-center justify-between rounded-xl border px-4 py-4 ${item.mismatch
                             ? "bg-red-50 border-red-200"
                             : "bg-white border-gray-100"
                         }`}
