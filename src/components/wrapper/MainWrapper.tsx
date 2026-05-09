@@ -3,14 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, CreditCard, Grid2x2, LayoutDashboard, LogOut, Package, ReceiptText, User } from "lucide-react"
 import brandLogo from "@/assets/logo/logo.png"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
@@ -19,8 +12,8 @@ import { usePathname } from "next/navigation"
 
 const navigationItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Reports", icon: ReceiptText, href: "/reports" },
-  { label: "Payment Proof", icon: CreditCard, href: "/payment-proof" },
+  { label: "Sales Reports", icon: ReceiptText, href: "/reports" },
+  { label: "Payment Verification", icon: CreditCard, href: "/payment-verification" },
   { label: "Inventory Report", icon: Package, href: "/inventory-report" },
   { label: "Menu", icon: Grid2x2, href: "/menu" },
   { label: "Profile", icon: User, href: "/profile" },
