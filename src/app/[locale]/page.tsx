@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
-import SignIn from "./(auth)/auth/sign-in/page";
+import React, { useEffect, useState, use } from "react";
 import Splash from "@/components/shared/Splash";
+import { useRouter } from "next/navigation";
 
-
-
-const Page = () => {
-  const [showSplash, setShowSplash] = useState(() => true);
+const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  const p = params ? use(params) : { locale: "en" };
+  const [showSplash, setShowSplash] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
@@ -18,7 +18,13 @@ const Page = () => {
     };
   }, []);
 
-  return showSplash ? <Splash /> : <SignIn />;
+  useEffect(() => {
+    if (!showSplash) {
+      router.push(`/${p.locale}/auth/sign-in`);
+    }
+  }, [showSplash, router, p.locale]);
+
+  return showSplash ? <Splash /> : null;
 };
 
 export default Page;

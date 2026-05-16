@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, use } from "react";
 import { FileText, FileSpreadsheet } from "lucide-react";
 import SalesSummary from "./SalesSummary";
 import TopSales from "./TopSales";
@@ -9,7 +9,8 @@ import LongestPreTime from "./LongestPreTime";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
 
-const ReportsPage = () => {
+const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) use(params);
   const t = useTranslations("Reports");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);

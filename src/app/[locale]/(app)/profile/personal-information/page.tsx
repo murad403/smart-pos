@@ -21,7 +21,8 @@ const profileSchema = (t: any) => z.object({
 
 type ProfileFormValues = z.infer<ReturnType<typeof profileSchema>>;
 
-const ProfileInformationPage = () => {
+const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) React.use(params);
   const t = useTranslations("Profile");
   const tv = useTranslations("Validation");
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import InventoryReportStats from "./InventoryReportStats";
 import InventoryOverviewTable from "./InventoryOverviewTable";
 import { useTranslations } from "next-intl";
 import AddMenuModal from "@/components/modal/AddMenuModal";
 
-const InventoryReportPage = () => {
+const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) use(params);
   const t = useTranslations("Inventory");
   const [isModalOpen, setIsModalOpen] = useState(false);
 

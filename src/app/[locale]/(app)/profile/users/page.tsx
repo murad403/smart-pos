@@ -15,7 +15,8 @@ type UserData = {
     color: string;
 };
 
-const UserManagementPage = () => {
+const UserManagementPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+    if (params) React.use(params);
     const t = useTranslations("Profile");
     const [isAddAdminOpen, setIsAddAdminOpen] = React.useState(false);
     const [isResetPassOpen, setIsResetPassOpen] = React.useState(false);

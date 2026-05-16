@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import payment1 from "@/assets/images/payment1.jpg";
 import payment2 from "@/assets/images/payment2.jpg";
@@ -89,7 +89,8 @@ const getPageTransactions = (page: number, t: any): PaymentVerificationItem[] =>
   });
 };
 
-const PaymentVerificationPage = () => {
+const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) React.use(params);
   const t = useTranslations("Payment");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");

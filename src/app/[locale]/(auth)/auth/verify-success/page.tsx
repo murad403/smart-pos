@@ -16,7 +16,8 @@ const Illustration = () => (
 );
 
 
-export default function VerifySuccessPage() {
+export default async function VerifySuccessPage({ params }: { params?: Promise<{ locale: string }> }) {
+    if (params) await params;
     return (
         <AuthPageWrapper illustration={<Illustration />}>
             <div className="flex flex-col items-center space-y-5 text-center">

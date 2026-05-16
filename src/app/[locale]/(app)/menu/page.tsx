@@ -56,7 +56,8 @@ const getSeedItems = (layout: SectionLayoutType, sectionNumber: number, t: any) 
   ];
 };
 
-const Page = () => {
+const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) React.use(params);
   const t = useTranslations("Menu");
   const [selectedCategory, setSelectedCategory] = React.useState("Starter");
   const [sections, setSections] = React.useState<SectionState[]>([]);

@@ -12,7 +12,8 @@ type DayConfig = {
   endTime: string;
 };
 
-const OperatingHoursPage = () => {
+const OperatingHoursPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) React.use(params);
   const t = useTranslations("Profile");
   const td = useTranslations("Days");
 

@@ -1,4 +1,5 @@
 "use client";
+import React, { use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +22,8 @@ const Illustration = () => (
 );
 
 /* ── Page ── */
-export default function ForgotPasswordPage() {
+export default function ForgotPasswordPage({ params }: { params?: Promise<{ locale: string }> }) {
+    if (params) use(params);
     const router = useRouter();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ForgotPasswordFormValues>({
         resolver: zodResolver(forgotPasswordSchema),

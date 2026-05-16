@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import ReduxWrapper from "@/components/wrapper/ReduxWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,7 @@ export default async function RootLayout({
     notFound();
   }
 
-  const messages = await getMessages({locale});
+  const messages = await getMessages({ locale });
 
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -47,9 +48,11 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen flex flex-col bg-background text-foreground">
-        <NextIntlClientProvider messages={messages}>
-          <TooltipProvider>{children}</TooltipProvider>
-        </NextIntlClientProvider>
+        <ReduxWrapper>
+          <NextIntlClientProvider messages={messages}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </NextIntlClientProvider>
+        </ReduxWrapper>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
+import React, { useRef, useState, useEffect, KeyboardEvent, ClipboardEvent, use } from "react";
 import Image from "next/image";
-import { useRef, useState, useEffect, KeyboardEvent, ClipboardEvent } from "react";
 import { ArrowRight, Clock } from "lucide-react";
 import verifyIllustration from "@/assets/auth/verifyotp.png";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
@@ -21,7 +21,8 @@ const Illustration = () => (
 );
 
 /* ── Page ── */
-export default function VerifyOtpPage() {
+export default function VerifyOtpPage({ params }: { params?: Promise<{ locale: string }> }) {
+    if (params) use(params);
     const router = useRouter();
     const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
     const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);

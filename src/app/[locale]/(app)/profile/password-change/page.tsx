@@ -18,7 +18,8 @@ const passwordSchema = (t: any) => z.object({
 
 type PasswordFormValues = z.infer<ReturnType<typeof passwordSchema>>;
 
-const PasswordChangePage = () => {
+const PasswordChangePage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+    if (params) React.use(params);
     const t = useTranslations("Profile");
     const tv = useTranslations("Validation");
     const [showCurrent, setShowCurrent] = React.useState(false);

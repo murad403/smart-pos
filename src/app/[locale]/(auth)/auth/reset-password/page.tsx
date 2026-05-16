@@ -1,6 +1,6 @@
 "use client";
+import React, { useState, use } from "react";
 import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,8 @@ const Illustration = () => (
 
 
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage({ params }: { params?: Promise<{ locale: string }> }) {
+    if (params) use(params);
     const router = useRouter();
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);

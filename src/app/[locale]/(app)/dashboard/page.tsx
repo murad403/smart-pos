@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, use } from "react";
 import DashboardStats from "./DashboardStats";
 import SalesOverTime from "./SalesOverTime";
 import OrdersPerHour from "./OrdersPerHour";
@@ -9,7 +9,8 @@ import DateRangePicker from "@/components/shared/DateRangePicker";
 
 import { useTranslations } from "next-intl";
 
-const DashboardPage = () => {
+const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
+  if (params) use(params);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const t = useTranslations("Dashboard");

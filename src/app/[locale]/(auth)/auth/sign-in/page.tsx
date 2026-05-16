@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,12 +21,13 @@ const Illustration = () => (
 );
 
 /* ── Page ── */
-export default function SignInPage() {
+export default function SignInPage({ params }: { params?: Promise<{ locale: string }> }) {
+    if (params) use(params);
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
         resolver: zodResolver(signInSchema),
-        defaultValues: { email: "", password: "", rememberMe: true },
+        defaultValues: { email: "john.doe4@example.com", password: "12345678", rememberMe: true },
     });
 
     const onSubmit = async (values: SignInFormValues) => {
