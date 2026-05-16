@@ -48,7 +48,7 @@ const OrderBreakdown = () => {
                                 <Cell key={i} fill={entry.color} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(v: number) => [`${v} ${td("orders")}`, ""]} />
+                        <Tooltip formatter={(v: any) => [`${v} ${td("orders")}`, ""]} />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
