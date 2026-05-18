@@ -5,8 +5,10 @@ import { ArrowRight, Clock } from "lucide-react";
 import verifyIllustration from "@/assets/auth/verifyotp.png";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
+import { useVerifyOtpMutation, useForgotPasswordMutation } from "@/redux/features/auth.api";
+import { toast } from "sonner";
 
-const OTP_LENGTH = 4;
+const OTP_LENGTH = 6;
 const TIMER_SECONDS = 10 * 60; // 10 minutes
 
 /* ── Illustration ── */
@@ -24,10 +26,22 @@ const Illustration = () => (
 export default function VerifyOtpPage({ params }: { params?: Promise<{ locale: string }> }) {
     if (params) use(params);
     const router = useRouter();
+    const [email, setEmail] = useState("");
     const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
     const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
+    const [forgotPassword, { isLoading: isResending }] = useForgotPasswordMutation();
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const searchParams = new URLSearchParams(window.location.search);
+            const emailParam = searchParams.get("email") || sessionStorage.getItem("reset_email") || "";
+            setEmail(emailParam);
+        }
+    }, []);
 
     /* Countdown */
     useEffect(() => {
@@ -76,19 +90,52 @@ export default function VerifyOtpPage({ params }: { params?: Promise<{ locale: s
         inputRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
     };
 
-    const handleResend = () => {
-        setTimeLeft(TIMER_SECONDS);
-        setOtp(Array(OTP_LENGTH).fill(""));
-        inputRefs.current[0]?.focus();
+    const handleResend = async () => {
+        if (!email) {
+            toast.error("No email address found to resend OTP.");
+            return;
+        }
+        try {
+            const result = await forgotPassword({ email }).unwrap();
+            if (result.success) {
+                toast.success(result.message || "OTP has been resent to your email!");
+                setTimeLeft(TIMER_SECONDS);
+                setOtp(Array(OTP_LENGTH).fill(""));
+                inputRefs.current[0]?.focus();
+            } else {
+                toast.error(result.message || "Failed to resend OTP.");
+            }
+        } catch (err: any) {
+            console.error("Resend OTP error:", err);
+            toast.error(err?.data?.message || err?.message || "Failed to resend OTP. Please try again.");
+        }
     };
 
     const handleSubmit = async () => {
         const code = otp.join("");
         if (code.length < OTP_LENGTH) return;
         setIsSubmitting(true);
-        console.log("OTP:", code);
-        setIsSubmitting(false);
-        router.push("/auth/reset-password");
+        try {
+            const result = await verifyOtp({
+                email,
+                otp: code,
+            }).unwrap();
+
+            if (result.success) {
+                toast.success(result.message || "OTP verified successfully!");
+                if (typeof window !== "undefined") {
+                    sessionStorage.setItem("reset_token", result.data.resetToken);
+                }
+                router.push(`/auth/reset-password?token=${encodeURIComponent(result.data.resetToken)}`);
+            } else {
+                toast.error(result.message || "Invalid OTP code.");
+            }
+        } catch (err: any) {
+            console.error("OTP verification error:", err);
+            toast.error(err?.data?.message || err?.message || "Invalid OTP code. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -100,7 +147,7 @@ export default function VerifyOtpPage({ params }: { params?: Promise<{ locale: s
                         Email OTP Verification
                     </h1>
                     <p className="text-sm leading-6 text-slate-500 sm:text-[15px]">
-                        OTP sent to your Email Address ending ******doe@example.com
+                        OTP sent to your Email Address: <span className="font-medium text-slate-800">{email || "your email"}</span>
                     </p>
                 </div>
 
@@ -146,10 +193,10 @@ export default function VerifyOtpPage({ params }: { params?: Promise<{ locale: s
                 <button
                     type="button"
                     onClick={handleSubmit}
-                    disabled={isSubmitting || otp.join("").length < OTP_LENGTH}
+                    disabled={isSubmitting || isVerifying || otp.join("").length < OTP_LENGTH}
                     className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#3f82f6] px-4 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_rgba(63,130,246,0.9)] transition hover:-translate-y-0.5 hover:bg-[#3277ef] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                    Verify &amp; Proceed
+                    {isSubmitting || isVerifying ? "Verifying..." : "Verify & Proceed"}
                     <ArrowRight className="size-4" />
                 </button>
             </div>

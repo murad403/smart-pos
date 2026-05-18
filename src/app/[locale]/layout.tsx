@@ -7,6 +7,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ReduxWrapper from "@/components/wrapper/ReduxWrapper";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,7 +51,10 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         <ReduxWrapper>
           <NextIntlClientProvider messages={messages}>
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              {children}
+              <Toaster richColors position="top-right" />
+            </TooltipProvider>
           </NextIntlClientProvider>
         </ReduxWrapper>
       </body>

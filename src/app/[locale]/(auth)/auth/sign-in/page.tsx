@@ -9,6 +9,9 @@ import authIllustration from "@/assets/auth/signin.png";
 import { SignInFormValues, signInSchema } from "@/validation/auth.validation";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
+import { useSignInMutation } from "@/redux/features/auth.api";
+import { saveUserData } from "@/utils/auth";
+import { toast } from "sonner";
 
 const Illustration = () => (
     <Image
@@ -25,14 +28,44 @@ export default function SignInPage({ params }: { params?: Promise<{ locale: stri
     if (params) use(params);
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+    const [signIn, { isLoading }] = useSignInMutation();
+
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
         resolver: zodResolver(signInSchema),
-        defaultValues: { email: "john.doe4@example.com", password: "12345678", rememberMe: true },
+        defaultValues: { email: "mdmurad.dev2004@gmail.com", password: "12345%%murad", rememberMe: true },
     });
 
     const onSubmit = async (values: SignInFormValues) => {
-        console.log(values);
-        router.push("/dashboard");
+        setAuthError(null);
+        try {
+            const result = await signIn({
+                email: values.email,
+                password: values.password,
+            }).unwrap();
+
+            if (result.success) {
+                if (result.data.role === "OWNER") {
+                    // Save user data in cookies using the auth.ts helper
+                    saveUserData(result.data, values.rememberMe);
+                    toast.success(result.message || "Login successful!");
+                    router.push("/dashboard");
+                } else {
+                    const errorMsg = "Access denied. Only ADMINs are allowed to access this panel.";
+                    setAuthError(errorMsg);
+                    toast.error(errorMsg);
+                }
+            } else {
+                const errorMsg = result.message || "Failed to sign in. Please try again.";
+                setAuthError(errorMsg);
+                toast.error(errorMsg);
+            }
+        } catch (err: any) {
+            console.error("Sign-in error:", err);
+            const errorMessage = err?.data?.message || err?.message || "An unexpected error occurred. Please try again.";
+            setAuthError(errorMessage);
+            toast.error(errorMessage);
+        }
     };
 
     return (
@@ -46,6 +79,11 @@ export default function SignInPage({ params }: { params?: Promise<{ locale: stri
                     <p className="text-sm leading-6 text-slate-500 sm:text-[15px]">
                         Access the Dreamspos panel using your email and passcode.
                     </p>
+                    {authError && (
+                        <div className="rounded-lg bg-rose-50 border border-rose-100 p-3 text-sm text-rose-600 transition-all duration-300">
+                            <p className="font-medium">{authError}</p>
+                        </div>
+                    )}
                 </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -121,10 +159,10 @@ export default function SignInPage({ params }: { params?: Promise<{ locale: stri
 
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isLoading}
                         className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#3f82f6] px-4 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_rgba(63,130,246,0.9)] transition hover:-translate-y-0.5 hover:bg-[#3277ef] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        Sign In
+                        {isSubmitting || isLoading ? "Signing In..." : "Sign In"}
                         <ArrowRight className="size-4" />
                     </button>
                 </form>

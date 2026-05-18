@@ -8,6 +8,8 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter, Link } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
+import { clearUserData } from "@/utils/auth"
+import { toast } from "sonner"
 
 function SidebarBrand() {
   return (
@@ -32,6 +34,12 @@ function AppSidebar() {
   React.useEffect(() => {
     setProfileOpen(pathName.startsWith("/profile"));
   }, [pathName]);
+
+  const handleLogout = () => {
+    clearUserData();
+    toast.success("Logged out successfully!");
+    router.push("/auth/sign-in");
+  };
 
   const navigationItems = [
     { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard" },
@@ -123,7 +131,7 @@ function AppSidebar() {
 
       <SidebarFooter className="border-t border-slate-200/70 p-3">
         <SidebarMenuButton
-          onClick={() => router.push("/auth/sign-in")}
+          onClick={handleLogout}
           tooltip={t("logout")}
           className="h-11 justify-start rounded-2xl px-3 text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
         >
@@ -145,6 +153,12 @@ function Topbar() {
 
   const handleLocaleChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale });
+  };
+
+  const handleLogout = () => {
+    clearUserData();
+    toast.success("Logged out successfully!");
+    router.push("/auth/sign-in");
   };
 
   return (
@@ -211,7 +225,7 @@ function Topbar() {
               <DropdownMenuSeparator className="my-1 bg-slate-200" />
 
               <DropdownMenuItem 
-                onClick={() => router.push("/auth/sign-in")}
+                onClick={handleLogout}
                 className="cursor-pointer rounded-lg px-3 py-2 text-base text-red-500 focus:bg-red-50 focus:text-red-600"
               >
                 <div className="flex w-full items-center gap-3 text-left">

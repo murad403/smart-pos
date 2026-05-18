@@ -9,6 +9,9 @@ import resetIllustration from "@/assets/auth/resetpassword.png";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { ResetPasswordFormValues, resetPasswordSchema } from "@/validation/auth.validation";
 import { useRouter } from "next/navigation";
+import { useResetPasswordMutation } from "@/redux/features/auth.api";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 
 
@@ -29,14 +32,47 @@ export default function ResetPasswordPage({ params }: { params?: Promise<{ local
     const router = useRouter();
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [token, setToken] = useState("");
+    const [resetPassword, { isLoading }] = useResetPasswordMutation();
+
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ResetPasswordFormValues>({
         resolver: zodResolver(resetPasswordSchema),
         defaultValues: { newPassword: "", confirmPassword: "" },
     });
 
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const searchParams = new URLSearchParams(window.location.search);
+            const tokenParam = searchParams.get("token") || sessionStorage.getItem("reset_token") || "";
+            setToken(tokenParam);
+        }
+    }, []);
+
     const onSubmit = async (values: ResetPasswordFormValues) => {
-        console.log(values);
-        router.push("/auth/verify-success");
+        if (!token) {
+            toast.error("Reset token is missing or has expired. Please verify your OTP again.");
+            return;
+        }
+        try {
+            const result = await resetPassword({
+                resetToken: token,
+                newPassword: values.newPassword,
+            }).unwrap();
+
+            if (result.success) {
+                toast.success(result.message || "Password reset successfully!");
+                if (typeof window !== "undefined") {
+                    sessionStorage.removeItem("reset_token");
+                    sessionStorage.removeItem("reset_email");
+                }
+                router.push("/auth/verify-success");
+            } else {
+                toast.error(result.message || "Failed to reset password.");
+            }
+        } catch (err: any) {
+            console.error("Reset password error:", err);
+            toast.error(err?.data?.message || err?.message || "Failed to reset password. Please try again.");
+        }
     };
 
     return (
@@ -113,10 +149,10 @@ export default function ResetPasswordPage({ params }: { params?: Promise<{ local
 
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isLoading}
                         className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#3f82f6] px-4 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_rgba(63,130,246,0.9)] transition hover:-translate-y-0.5 hover:bg-[#3277ef] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        Change Password
+                        {isSubmitting || isLoading ? "Saving Password..." : "Change Password"}
                         <ArrowRight className="size-4" />
                     </button>
                 </form>

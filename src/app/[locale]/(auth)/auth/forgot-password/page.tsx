@@ -9,6 +9,8 @@ import forgotIllustration from "@/assets/auth/forgotpassword.png";
 import { ForgotPasswordFormValues, forgotPasswordSchema } from "@/validation/auth.validation";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
+import { useForgotPasswordMutation } from "@/redux/features/auth.api";
+import { toast } from "sonner";
 
 
 const Illustration = () => (
@@ -25,14 +27,28 @@ const Illustration = () => (
 export default function ForgotPasswordPage({ params }: { params?: Promise<{ locale: string }> }) {
     if (params) use(params);
     const router = useRouter();
+    const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ForgotPasswordFormValues>({
         resolver: zodResolver(forgotPasswordSchema),
         defaultValues: { email: "" },
     });
 
     const onSubmit = async (values: ForgotPasswordFormValues) => {
-        console.log(values);
-        router.push("/auth/verify-otp");
+        try {
+            const result = await forgotPassword({ email: values.email }).unwrap();
+            if (result.success) {
+                toast.success(result.message || "OTP has been sent to your email!");
+                if (typeof window !== "undefined") {
+                    sessionStorage.setItem("reset_email", values.email);
+                }
+                router.push(`/auth/verify-otp?email=${encodeURIComponent(values.email)}`);
+            } else {
+                toast.error(result.message || "Failed to submit request.");
+            }
+        } catch (err: any) {
+            console.error("Forgot password error:", err);
+            toast.error(err?.data?.message || err?.message || "Something went wrong. Please try again.");
+        }
     };
 
     return (
@@ -74,10 +90,10 @@ export default function ForgotPasswordPage({ params }: { params?: Promise<{ loca
 
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isLoading}
                         className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#3f82f6] px-4 text-sm font-semibold text-white shadow-[0_16px_28px_-18px_rgba(63,130,246,0.9)] transition hover:-translate-y-0.5 hover:bg-[#3277ef] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        Submit
+                        {isSubmitting || isLoading ? "Submitting..." : "Submit"}
                         <ArrowRight className="size-4" />
                     </button>
                 </form>
