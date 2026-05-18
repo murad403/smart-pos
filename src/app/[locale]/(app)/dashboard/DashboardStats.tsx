@@ -1,38 +1,73 @@
 "use client";
 import { ShoppingCart, DollarSign, Package } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { OverviewStats, OrderTypeBreakdown } from "@/redux/features/dashboard/dashboard.type";
 
-const DashboardStats = () => {
+interface DashboardStatsProps {
+    overview?: OverviewStats;
+    orderTypeBreakdown?: OrderTypeBreakdown[];
+    isLoading?: boolean;
+}
+
+const DashboardStats = ({ overview, orderTypeBreakdown, isLoading }: DashboardStatsProps) => {
     const t = useTranslations("Dashboard");
+
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
+                    <div
+                        key={i}
+                        className={`animate-pulse rounded-xl h-[134px] border border-slate-100 bg-white p-5 shadow-sm`}
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    const isPositive = (overview?.percentageChange ?? 0) >= 0;
+    const formattedChange = `${isPositive ? "+" : ""}${overview?.percentageChange ?? 0}% ${t("fromLastWeek")}`;
+
+    const getTypeName = (type: string) => {
+        const lower = type.toLowerCase();
+        if (lower.includes("dine")) return t("dineIn") || type;
+        if (lower.includes("take")) return t("takeaway") || type;
+        return type;
+    };
 
     const stats = [
         {
             label: t("totalRevenue"),
-            value: "Rp 464,000",
-            change: `+12.5% ${t("fromLastWeek")}`,
+            value: `Rp ${(overview?.totalRevenue ?? 0).toLocaleString("en-US")}`,
+            change: formattedChange,
             icon: <DollarSign className="size-5 text-white" />,
             variant: "blue" as const,
         },
         {
             label: t("totalOrders"),
-            value: "745",
-            change: `+8.2% ${t("fromLastWeek")}`,
+            value: (overview?.totalOrders ?? 0).toLocaleString("en-US"),
+            change: formattedChange,
             icon: <ShoppingCart className="size-5 text-blue-500" />,
             variant: "white" as const,
         },
         {
             label: t("avgOrderValue"),
-            value: "Rp 62,280",
+            value: `Rp ${(overview?.averageOrderValue ?? 0).toLocaleString("en-US")}`,
             sub: t("acrossAllOrders"),
             icon: <Package className="size-5 text-yellow-500" />,
             variant: "white" as const,
         },
         {
             label: t("orderTypes"),
-            orderTypes: [
-                { name: t("dineIn"), count: 458 },
-                { name: t("takeaway"), count: 287 },
-            ],
+            orderTypes: orderTypeBreakdown && orderTypeBreakdown.length > 0
+                ? orderTypeBreakdown.map((ot) => ({
+                      name: getTypeName(ot.type),
+                      count: ot.count,
+                  }))
+                : [
+                      { name: t("dineIn"), count: 0 },
+                      { name: t("takeaway"), count: 0 },
+                  ],
             variant: "types" as const,
         },
     ];
@@ -54,7 +89,9 @@ const DashboardStats = () => {
                             </div>
                             <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
                             <p className="mt-1 flex items-center gap-1 text-xs text-blue-100">
-                                <span className="text-emerald-300">↑</span>
+                                <span className={isPositive ? "text-emerald-300" : "text-red-300"}>
+                                    {isPositive ? "↑" : "↓"}
+                                </span>
                                 {stat.change}
                             </p>
                             {/* decorative circle */}
@@ -77,7 +114,9 @@ const DashboardStats = () => {
                             <p className="text-2xl font-bold tracking-tight text-slate-900">{stat.value}</p>
                             {stat.change && (
                                 <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
-                                    <span className="text-emerald-500">↑</span>
+                                    <span className={isPositive ? "text-emerald-500" : "text-red-500"}>
+                                        {isPositive ? "↑" : "↓"}
+                                    </span>
                                     {stat.change}
                                 </p>
                             )}

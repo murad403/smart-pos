@@ -9,9 +9,9 @@ import resetIllustration from "@/assets/auth/resetpassword.png";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { ResetPasswordFormValues, resetPasswordSchema } from "@/validation/auth.validation";
 import { useRouter } from "next/navigation";
-import { useResetPasswordMutation } from "@/redux/features/auth.api";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useResetPasswordMutation } from "@/redux/features/auth/auth.api";
 
 
 

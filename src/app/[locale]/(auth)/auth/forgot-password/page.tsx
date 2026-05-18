@@ -9,8 +9,8 @@ import forgotIllustration from "@/assets/auth/forgotpassword.png";
 import { ForgotPasswordFormValues, forgotPasswordSchema } from "@/validation/auth.validation";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
-import { useForgotPasswordMutation } from "@/redux/features/auth.api";
 import { toast } from "sonner";
+import { useForgotPasswordMutation } from "@/redux/features/auth/auth.api";
 
 
 const Illustration = () => (

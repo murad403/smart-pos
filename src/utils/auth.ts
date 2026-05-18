@@ -1,6 +1,7 @@
-import { UserData } from "@/redux/features/auth.type";
+import { UserData } from "@/redux/features/auth/auth.type";
 
 const USER_COOKIE_KEY = "user_data";
+
 
 /**
  * Sets a cookie in the browser
@@ -18,6 +19,7 @@ export const setCookie = (name: string, value: string, days?: number) => {
     // Set cookie with security attributes (SameSite=Lax)
     document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax; Secure`;
 };
+
 
 /**
  * Gets a cookie by name
@@ -41,6 +43,7 @@ export const getCookie = (name: string): string | null => {
     return null;
 };
 
+
 /**
  * Deletes a cookie by name
  */
@@ -48,6 +51,7 @@ export const deleteCookie = (name: string) => {
     if (typeof window === "undefined") return;
     document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure`;
 };
+
 
 /**
  * Saves user data in a cookie
@@ -58,6 +62,7 @@ export const saveUserData = (userData: UserData, rememberMe: boolean = true) => 
     const days = rememberMe ? 7 : undefined;
     setCookie(USER_COOKIE_KEY, value, days);
 };
+
 
 /**
  * Retrieves user data from the cookie
@@ -72,6 +77,7 @@ export const getUserData = (): UserData | null => {
         return null;
     }
 };
+
 
 /**
  * Removes user data from the cookie

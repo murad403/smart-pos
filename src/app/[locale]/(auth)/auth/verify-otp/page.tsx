@@ -5,8 +5,8 @@ import { ArrowRight, Clock } from "lucide-react";
 import verifyIllustration from "@/assets/auth/verifyotp.png";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
-import { useVerifyOtpMutation, useForgotPasswordMutation } from "@/redux/features/auth.api";
 import { toast } from "sonner";
+import { useForgotPasswordMutation, useVerifyOtpMutation } from "@/redux/features/auth/auth.api";
 
 const OTP_LENGTH = 6;
 const TIMER_SECONDS = 10 * 60; // 10 minutes

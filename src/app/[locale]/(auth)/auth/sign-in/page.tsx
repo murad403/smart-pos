@@ -9,9 +9,9 @@ import authIllustration from "@/assets/auth/signin.png";
 import { SignInFormValues, signInSchema } from "@/validation/auth.validation";
 import AuthPageWrapper from "@/components/wrapper/AuthWrapper";
 import { useRouter } from "next/navigation";
-import { useSignInMutation } from "@/redux/features/auth.api";
 import { saveUserData } from "@/utils/auth";
 import { toast } from "sonner";
+import { useSignInMutation } from "@/redux/features/auth/auth.api";
 
 const Illustration = () => (
     <Image

@@ -1,12 +1,12 @@
-import baseApi from "../api/api";
-import { 
-    SignInResponse, 
-    ForgotPasswordRequest, 
-    ForgotPasswordResponse, 
-    VerifyOtpRequest, 
-    VerifyOtpResponse, 
-    ResetPasswordRequest, 
-    ResetPasswordResponse 
+import baseApi from "../../api/api";
+import {
+    SignInResponse,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    VerifyOtpRequest,
+    VerifyOtpResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse
 } from "./auth.type";
 import { SignInFormValues } from "@/validation/auth.validation";
 
