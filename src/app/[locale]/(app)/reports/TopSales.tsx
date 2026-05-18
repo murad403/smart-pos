@@ -1,15 +1,37 @@
+"use client";
 import { useTranslations } from "next-intl";
+import { SalesReportTopItem } from "@/redux/features/dashboard/dashboard.type";
 
-const items = [
-    { name: "Nasi Goreng Special", category: "Main Course", qty: 245, revenue: "Rp 3,675,000" },
-    { name: "Ayam Bakar",          category: "Main Course", qty: 198, revenue: "Rp 3,960,000" },
-    { name: "Es Teh Manis",        category: "Beverages",   qty: 342, revenue: "Rp 1,710,000" },
-    { name: "Soto Ayam",           category: "Main Course", qty: 167, revenue: "Rp 2,505,000" },
-    { name: "Sate Ayam",           category: "Main Course", qty: 156, revenue: "Rp 3,120,000" },
-];
+interface TopSalesProps {
+    items?: SalesReportTopItem[];
+    isLoading?: boolean;
+}
 
-const TopSales = () => {
+const TopSales = ({ items, isLoading }: TopSalesProps) => {
     const t = useTranslations("Reports");
+
+    if (isLoading) {
+        return (
+            <div className="rounded-xl border border-slate-100 bg-white shadow-sm h-[260px] animate-pulse flex flex-col">
+                <div className="px-6 pt-5 pb-2">
+                    <div className="h-6 w-32 bg-slate-100 rounded" />
+                </div>
+                <div className="flex-1 px-6 space-y-4 mt-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="flex justify-between border-b border-slate-50 pb-3">
+                            <div className="h-4 w-40 bg-slate-50 rounded" />
+                            <div className="h-4 w-24 bg-slate-50 rounded" />
+                            <div className="h-4 w-12 bg-slate-50 rounded" />
+                            <div className="h-4 w-20 bg-slate-50 rounded" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    const itemsToRender = items ?? [];
+
     return (
         <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
             <div className="px-6 pt-5 pb-2">
@@ -26,12 +48,14 @@ const TopSales = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {items.map((item, i) => (
+                        {itemsToRender.map((item, i) => (
                             <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60">
-                                <td className="px-6 py-3.5 text-slate-700">{item.name}</td>
+                                <td className="px-6 py-3.5 text-slate-700 font-medium">{item.item}</td>
                                 <td className="px-6 py-3.5 text-slate-500">{item.category}</td>
-                                <td className="px-6 py-3.5 text-right text-slate-700">{item.qty}</td>
-                                <td className="px-6 py-3.5 text-right font-medium text-slate-800">{item.revenue}</td>
+                                <td className="px-6 py-3.5 text-right text-slate-700">{item.quantity}</td>
+                                <td className="px-6 py-3.5 text-right font-semibold text-slate-800">
+                                    Rp {item.revenue.toLocaleString("en-US")}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

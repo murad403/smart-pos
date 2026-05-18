@@ -48,3 +48,57 @@ export interface AnalyticsQueryParams {
     startDate?: string;
     endDate?: string;
 }
+
+// Sales Report Interfaces
+export interface SalesReportPeriod {
+    startDate: string;
+    endDate: string;
+}
+
+export interface SalesReportSummary {
+    date: string;
+    revenue: number;
+    orders: number;
+}
+
+export interface MonthlyEarnings {
+    currentMonth: number;
+    previousMonth: number;
+    percentageChange: number;
+    comparisonText: string;
+}
+
+export interface SalesReportTopItem {
+    item: string;
+    category: string;
+    quantity: number;
+    revenue: number;
+}
+
+export interface SalesReportOrderBreakdown {
+    dineIn: number;
+    takeaway: number;
+    dineInPercentage: number;
+    takeawayPercentage: number;
+}
+
+export interface ProductionPerformance {
+    itemName: string;
+    avgPrepTime: number;
+}
+
+export interface SalesReportData {
+    period: SalesReportPeriod;
+    salesSummary: SalesReportSummary[];
+    monthlyEarnings: MonthlyEarnings;
+    topSellingItems: SalesReportTopItem[];
+    orderBreakdown: SalesReportOrderBreakdown;
+    productionPerformance: ProductionPerformance[];
+}
+
+export interface SalesReportResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: SalesReportData;
+}

@@ -1,23 +1,38 @@
 "use client";
 import { useState, use } from "react";
-import { FileText, FileSpreadsheet } from "lucide-react";
 import SalesSummary from "./SalesSummary";
 import TopSales from "./TopSales";
 import OrderBreakdown from "./OrderBreakdown";
 import ProductionPerformance from "./ProductionPerformance";
-import LongestPreTime from "./LongestPreTime";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
+import { useGetSalesReportsQuery } from "@/redux/features/dashboard/dashboard.api";
 
 const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
   const t = useTranslations("Reports");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [quickFilter, setQuickFilter] = useState<"0Days" | "7Days" | "30Days">("0Days");
+
+  // Helper to format Date object as YYYY-MM-DD in local timezone
+  const formatDateString = (date: Date | null) => {
+    if (!date) return undefined;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Fetch report data
+  const { data: salesReportRes, isLoading } = useGetSalesReportsQuery({
+    startDate: formatDateString(startDate),
+    endDate: formatDateString(endDate),
+  });
+
+  const reportData = salesReportRes?.data;
 
   return (
-    <div >
+    <div>
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
@@ -27,42 +42,31 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
           <DateRangePicker
             startDate={startDate}
             endDate={endDate}
-            onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
+            onChange={(s, e) => {
+              setStartDate(s);
+              setEndDate(e);
+            }}
           />
-
-          {/* Quick filter */}
-          {(["0Days", "7Days", "30Days"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setQuickFilter(f)}
-              className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${quickFilter === f
-                  ? "bg-slate-700 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                }`}
-            >
-              {f === "0Days" ? t("zeroDays") : f === "7Days" ? t("sevenDays") : t("thirtyDays")}
-            </button>
-          ))}
         </div>
       </div>
 
       {/* Sales Summary + Monthly Earning */}
-      <SalesSummary />
+      <SalesSummary
+        salesSummary={reportData?.salesSummary}
+        monthlyEarnings={reportData?.monthlyEarnings}
+        period={reportData?.period}
+        isLoading={isLoading}
+      />
 
       {/* Top Sales Table */}
       <div className="mt-5">
-        <TopSales />
+        <TopSales items={reportData?.topSellingItems} isLoading={isLoading} />
       </div>
 
       {/* Order Breakdown + Production Performance */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <OrderBreakdown />
-        <ProductionPerformance />
-      </div>
-
-      {/* Longest Prep Time */}
-      <div className="mt-5">
-        <LongestPreTime />
+        <OrderBreakdown breakdown={reportData?.orderBreakdown} isLoading={isLoading} />
+        <ProductionPerformance performance={reportData?.productionPerformance} isLoading={isLoading} />
       </div>
     </div>
   );
