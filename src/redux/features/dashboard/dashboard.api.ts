@@ -7,7 +7,11 @@ import {
     GetPaymentsQueryParams,
     GetPaymentDetailsResponse,
     GetInventoryReportResponse,
-    GetInventoryReportQueryParams
+    GetInventoryReportQueryParams,
+    GetItemsResponse,
+    GetItemsQueryParams,
+    StockAdjustBody,
+    StockAdjustResponse
 } from "./dashboard.type";
 
 const dashboardApi = baseApi.injectEndpoints({
@@ -79,6 +83,37 @@ const dashboardApi = baseApi.injectEndpoints({
                 };
             },
         }),
+        getItems: builder.query<GetItemsResponse, GetItemsQueryParams | void>({
+            query: (params) => {
+                const queryParams: Record<string, string> = {};
+                if (params?.limit) queryParams.limit = String(params.limit);
+                if (params?.search) queryParams.search = params.search;
+
+                return {
+                    url: `/items`,
+                    method: "GET",
+                    params: queryParams,
+                };
+            },
+        }),
+        stockIn: builder.mutation<StockAdjustResponse, StockAdjustBody>({
+            query: (data) => {
+                return {
+                    url: `/inventory/stock-in`,
+                    method: "POST",
+                    body: data
+                };
+            },
+        }),
+        stockOut: builder.mutation<StockAdjustResponse, StockAdjustBody>({
+            query: (data) => {
+                return {
+                    url: `/inventory/stock-out`,
+                    method: "POST",
+                    body: data
+                };
+            },
+        }),
     }),
 });
 
@@ -88,4 +123,7 @@ export const {
     useGetPaymentsQuery,
     useGetPaymentDetailsQuery,
     useGetInventoryReportQuery,
+    useGetItemsQuery,
+    useStockInMutation,
+    useStockOutMutation,
 } = dashboardApi;

@@ -145,7 +145,17 @@
     "lowStock": "Low Stock",
     "outOfStock": "Out of Stock",
     "lowStockAlert": "Low Stock Alert",
-    "left": "left"
+    "left": "left",
+    "stockIn": "Stock In",
+    "stockOut": "Stock Out",
+    "selectItem": "Select Item",
+    "searchItemPlaceholder": "Search item by name...",
+    "quantityPlaceholder": "Enter quantity",
+    "remarksPlaceholder": "Enter remarks (optional)",
+    "remarks": "Remarks",
+    "submit": "Submit",
+    "quantity": "Quantity",
+    "cancel": "Cancel"
   },
   "Payment": {
     "proof": "Payment Proof",

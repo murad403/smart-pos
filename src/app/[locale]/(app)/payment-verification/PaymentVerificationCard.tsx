@@ -25,7 +25,7 @@ const PaymentVerificationCard = ({ item, onViewDetails }: PaymentVerificationCar
   const t = useTranslations("Payment");
   
   const imgSrc = item.image;
-  console.log(item?.status)
+  // console.log(item?.status)
 
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">

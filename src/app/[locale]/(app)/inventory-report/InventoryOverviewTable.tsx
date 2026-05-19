@@ -12,6 +12,7 @@ interface InventoryOverviewTableProps {
 const InventoryOverviewTable = ({ items, isLoading }: InventoryOverviewTableProps) => {
   const t = useTranslations("Inventory");
   const locale = useLocale();
+  // console.log(items)
   
   const statusBadge: Record<StockStatus, { label: string; className: string }> = {
     in_stock:     { label: t("inStock") || "In Stock",     className: "bg-green-500 text-white" },
@@ -38,7 +39,7 @@ const InventoryOverviewTable = ({ items, isLoading }: InventoryOverviewTableProp
   }
 
   // Filter items that have managed stock quantity
-  const itemsToRender = (items ?? []).filter((item) => item.inventoryQty !== null);
+  const itemsToRender = items ?? [];
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">

@@ -145,7 +145,17 @@
     "lowStock": "Stok Rendah",
     "outOfStock": "Habis",
     "lowStockAlert": "Peringatan stok rendah",
-    "left": "tersisa"
+    "left": "tersisa",
+    "stockIn": "Stok Masuk",
+    "stockOut": "Stok Keluar",
+    "selectItem": "Pilih Item",
+    "searchItemPlaceholder": "Cari item berdasarkan nama...",
+    "quantityPlaceholder": "Masukkan jumlah",
+    "remarksPlaceholder": "Masukkan keterangan (opsional)",
+    "remarks": "Keterangan",
+    "submit": "Kirim",
+    "quantity": "Jumlah",
+    "cancel": "Batal"
   },
   "Payment": {
     "proof": "Bukti Pembayaran",

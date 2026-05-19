@@ -222,3 +222,56 @@ export interface GetInventoryReportQueryParams {
     limit?: number;
     search?: string;
 }
+
+export interface GetItemsItem {
+    id: number;
+    slug: string;
+    name: string;
+    itemType: string;
+    price: string;
+    productionStationId: number;
+    inventoryQty: number | null;
+    labels: string[];
+    imageUrl: string | null;
+    isVisible: boolean;
+    isOutOfStock: boolean;
+    hasPromo: boolean;
+    promoName: string | null;
+    promoPrice: string | null;
+    maxPacketItems: number;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface GetItemsResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+    data: GetItemsItem[];
+}
+
+export interface GetItemsQueryParams {
+    limit?: number;
+    search?: string;
+}
+
+export interface StockAdjustBody {
+    itemId: number;
+    qty: number;
+    remarks?: string;
+}
+
+export interface StockAdjustResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: null;
+}
+
