@@ -1,15 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import React from "react";
 import { X } from "lucide-react";
-
-export type SectionLayoutType =
-  | "3-image-row"
-  | "2-images-side-by-side"
-  | "1-image"
-  | "images-list"
-  | "no-image-list";
+import { useGetAllMenuQuery } from "@/redux/features/menu/menu.api";
+import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 
 export type SectionDraft = {
   sectionName: string;
@@ -29,75 +23,90 @@ const layouts: Array<{
   title: string;
   previewContent: React.ReactNode;
 }> = [
-    {
-      id: "1-image",
-      title: "1 Large Image",
-      previewContent: (
-        <div className="flex aspect-square w-20 items-center justify-center rounded-lg bg-[#E2E8F0]" />
-      ),
-    },
-    {
-      id: "2-images-side-by-side",
-      title: "2 Images Side-by-Side",
-      previewContent: (
-        <div className="flex h-16 w-full items-center justify-center gap-1.5 px-2">
-          <div className="h-full flex-1 rounded bg-[#E2E8F0]" />
-          <div className="h-full flex-1 rounded bg-[#E2E8F0]" />
-        </div>
-      ),
-    },
-    {
-      id: "3-image-row",
-      title: "3-Image Row",
-      previewContent: (
-        <div className="flex h-12 w-full items-center justify-center gap-1 px-1.5">
-          <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
-          <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
-          <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
-        </div>
-      ),
-    },
-    {
-      id: "images-list",
-      title: "Images List View",
-      previewContent: (
-        <div className="flex w-full flex-col gap-2 px-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              <div className="h-8 w-8 rounded bg-[#E2E8F0]" />
-              <div className="flex-1 space-y-1">
-                <div className="h-1.5 w-full rounded-full bg-[#E2E8F0]" />
-                <div className="h-1.5 w-2/3 rounded-full bg-[#E2E8F0]" />
-              </div>
+  {
+    id: "SINGLE",
+    title: "1 Large Image",
+    previewContent: (
+      <div className="flex aspect-square w-20 items-center justify-center rounded-lg bg-[#E2E8F0]" />
+    ),
+  },
+  {
+    id: "DOUBLE",
+    title: "2 Images Side-by-Side",
+    previewContent: (
+      <div className="flex h-16 w-full items-center justify-center gap-1.5 px-2">
+        <div className="h-full flex-1 rounded bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded bg-[#E2E8F0]" />
+      </div>
+    ),
+  },
+  {
+    id: "TRIPLE",
+    title: "3-Image Row",
+    previewContent: (
+      <div className="flex h-12 w-full items-center justify-center gap-1 px-1.5">
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+      </div>
+    ),
+  },
+  {
+    id: "QUADRUPLE",
+    title: "4-Image Row",
+    previewContent: (
+      <div className="flex h-12 w-full items-center justify-center gap-1 px-1">
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+        <div className="h-full flex-1 rounded-sm bg-[#E2E8F0]" />
+      </div>
+    ),
+  },
+  {
+    id: "LIST_WITH_IMAGE",
+    title: "Images List View",
+    previewContent: (
+      <div className="flex w-full flex-col gap-2 px-2">
+        {[1, 2].map((i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className="h-8 w-8 rounded bg-[#E2E8F0]" />
+            <div className="flex-1 space-y-1">
+              <div className="h-1.5 w-full rounded-full bg-[#E2E8F0]" />
+              <div className="h-1.5 w-2/3 rounded-full bg-[#E2E8F0]" />
             </div>
-          ))}
-        </div>
-      ),
-    },
-    {
-      id: "no-image-list",
-      title: "No-Image List View",
-      previewContent: (
-        <div className="flex w-full flex-col gap-2 px-2">
-          <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
-          <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
-          <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
-        </div>
-      ),
-    },
-  ];
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: "LIST_NO_IMAGE",
+    title: "No-Image List View",
+    previewContent: (
+      <div className="flex w-full flex-col gap-2 px-2">
+        <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
+        <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
+        <div className="h-2 w-full rounded-full bg-[#E2E8F0]" />
+      </div>
+    ),
+  },
+];
 
-const AddSectionModal: React.FC<Props> = ({ open, onClose, onSave, defaultCategory = "Main" }) => {
+const AddSectionModal: React.FC<Props> = ({ open, onClose, onSave, defaultCategory = "" }) => {
   const [sectionName, setSectionName] = React.useState("");
   const [menuTab, setMenuTab] = React.useState(defaultCategory);
-  const [layout, setLayout] = React.useState<SectionLayoutType>("1-image");
+  const [layout, setLayout] = React.useState<SectionLayoutType>("SINGLE");
+
+  const { data: menuRes } = useGetAllMenuQuery(undefined, { skip: !open });
+  const menus = menuRes?.data ?? [];
 
   React.useEffect(() => {
     if (!open) return;
     setSectionName("");
-    setMenuTab(defaultCategory);
-    setLayout("1-image");
-  }, [open, defaultCategory]);
+    setMenuTab(defaultCategory || (menus[0]?.name ?? ""));
+    setLayout("SINGLE");
+  }, [open, defaultCategory, menus]);
 
   if (!open) return null;
 
@@ -105,7 +114,7 @@ const AddSectionModal: React.FC<Props> = ({ open, onClose, onSave, defaultCatego
     onSave({
       sectionName: sectionName.trim() || "Untitled Section",
       layout,
-      menuTab,
+      menuTab: menuTab || (menus[0]?.name ?? ""),
     });
     onClose();
   };
@@ -148,8 +157,9 @@ const AddSectionModal: React.FC<Props> = ({ open, onClose, onSave, defaultCatego
                     key={item.id}
                     type="button"
                     onClick={() => setLayout(item.id)}
-                    className={`group relative flex flex-col items-center rounded-2xl border-2 p-2 transition-all ${isSelected ? "border-[#2563EB] bg-white shadow-sm" : "border-[#E2E8F0] bg-white hover:border-slate-300"
-                      }`}
+                    className={`group relative flex flex-col items-center rounded-2xl border-2 p-2 transition-all ${
+                      isSelected ? "border-[#2563EB] bg-white shadow-sm" : "border-[#E2E8F0] bg-white hover:border-slate-300"
+                    }`}
                   >
                     <div className="mb-3 flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-white">
                       {item.previewContent}
@@ -171,10 +181,11 @@ const AddSectionModal: React.FC<Props> = ({ open, onClose, onSave, defaultCatego
                 onChange={(e) => setMenuTab(e.target.value)}
                 className="w-full appearance-none rounded-[14px] bg-[#F1F5F9] px-4 py-3 text-[16px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="Main">Main</option>
-                <option value="Starter">Starter</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Drinks">Drinks</option>
+                {menus.map((m) => (
+                  <option key={m.id} value={m.name}>
+                    {m.name}
+                  </option>
+                ))}
               </select>
               <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">

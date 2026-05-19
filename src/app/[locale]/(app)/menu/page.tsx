@@ -3,134 +3,135 @@
 import React from "react";
 import { Plus, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import AddMenuModal from "@/components/modal/AddMenuModal";
 import EditMenuModal from "@/components/modal/EditMenuModal";
-import AddSectionModal, { SectionDraft, SectionLayoutType } from "@/components/modal/AddSectionModal";
+import AddSectionModal, { SectionDraft } from "@/components/modal/AddSectionModal";
 import EditSectionModal from "@/components/modal/EditSectionModal";
 import AddCategoryModal from "@/components/modal/AddCategoryModal";
+import DeleteSectionModal from "@/components/modal/DeleteSectionModal";
 import MenuCards, { MenuItemCardData } from "./MenuCards";
 import { useTranslations } from "next-intl";
-
-type SectionState = SectionDraft & {
-  id: string;
-  items: MenuItemCardData[];
-};
-
-const createItem = (sectionNumber: number, itemNumber: number, imageType: MenuItemCardData["imageType"], t: any): MenuItemCardData => ({
-  itemNumber: `Item # ${String(sectionNumber).padStart(2, "0")}-${String(itemNumber).padStart(2, "0")}`,
-  itemName: "Spicy Chicken Noodles",
-  price: 15000,
-  inventory: 15,
-  stock: 0,
-  statusLabel: t("onTheMenu"),
-  promoPrice: 13500,
-  imageType,
-  badges: ["Promo 10% OFF", "MUST TRY"],
-});
-
-const getSeedItems = (layout: SectionLayoutType, sectionNumber: number, t: any) => {
-  if (layout === "1-image") {
-    return [createItem(sectionNumber, 1, "menu1", t)];
-  }
-
-  if (layout === "2-images-side-by-side") {
-    return [createItem(sectionNumber, 1, "menu1", t), createItem(sectionNumber, 2, "menu2", t)];
-  }
-
-  if (layout === "images-list") {
-    return [createItem(sectionNumber, 1, "menu2", t), createItem(sectionNumber, 2, "menu2", t)];
-  }
-
-  if (layout === "no-image-list") {
-    return [
-      createItem(sectionNumber, 1, "menu1", t),
-      createItem(sectionNumber, 2, "menu2", t),
-      createItem(sectionNumber, 3, "menu1", t),
-    ];
-  }
-
-  return [
-    createItem(sectionNumber, 1, "menu1", t),
-    createItem(sectionNumber, 2, "menu1", t),
-    createItem(sectionNumber, 3, "menu1", t),
-  ];
-};
+import { toast } from "sonner";
+import {
+  useGetAllMenuQuery,
+  useAddSectionMutation,
+  useDeleteSectionMutation,
+  useGetAllSectionByMenuIdQuery,
+  useUpdateSectionMutation,
+} from "@/redux/features/menu/menu.api";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
   const t = useTranslations("Menu");
-  const [selectedCategory, setSelectedCategory] = React.useState("Starter");
-  const [sections, setSections] = React.useState<SectionState[]>([]);
+
+  // Fetch dynamic menus
+  const { data: menuRes, isLoading: isMenusLoading } = useGetAllMenuQuery();
+  const menus = menuRes?.data ?? [];
+
+  const [selectedCategory, setSelectedCategory] = React.useState("");
   const [isAddSectionOpen, setIsAddSectionOpen] = React.useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = React.useState(false);
   const [isEditMenuOpen, setIsEditMenuOpen] = React.useState(false);
   const [isEditSectionOpen, setIsEditSectionOpen] = React.useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = React.useState(false);
-  const [activeSectionId, setActiveSectionId] = React.useState<string | null>(null);
-  const [editingSectionId, setEditingSectionId] = React.useState<string | null>(null);
+  const [isDeleteSectionOpen, setIsDeleteSectionOpen] = React.useState(false);
+  const [deletingSection, setDeletingSection] = React.useState<{ id: number; name: string } | null>(null);
+  const [activeSectionId, setActiveSectionId] = React.useState<number | null>(null);
+  const [editingSectionId, setEditingSectionId] = React.useState<number | null>(null);
   const [editingItem, setEditingItem] = React.useState<MenuItemCardData | null>(null);
 
-  const activeSection = React.useMemo(
-    () => sections.find((section) => section.id === activeSectionId) ?? null,
-    [sections, activeSectionId],
+  // Find currently selected menu
+  const currentMenu = React.useMemo(
+    () => menus.find((m) => m.name === selectedCategory),
+    [menus, selectedCategory]
   );
+  const currentMenuId = currentMenu?.id;
 
-  const filteredSections = React.useMemo(
-    () => sections.filter((section) => section.menuTab === selectedCategory),
-    [sections, selectedCategory],
+  // Fetch sections by menuId
+  const { data: sectionsRes, isLoading: isSectionsLoading } = useGetAllSectionByMenuIdQuery(
+    currentMenuId as number,
+    { skip: !currentMenuId }
   );
+  const sections = sectionsRes?.data ?? [];
 
-  const editingSection = React.useMemo(
-    () => sections.find((s) => s.id === editingSectionId) ?? null,
-    [sections, editingSectionId],
-  );
+  // Mutation for adding a section
+  const [addSection] = useAddSectionMutation();
+  const [deleteSection, { isLoading: isDeleting }] = useDeleteSectionMutation();
+  const [updateSection] = useUpdateSectionMutation();
 
-  const handleSaveSection = (draft: SectionDraft) => {
-    const sectionNumber = sections.length + 1;
-    setSections((current) => [
-      ...current,
-      {
-        ...draft,
-        id: `section-${sectionNumber}`,
-        items: getSeedItems(draft.layout, sectionNumber, t),
-      },
-    ]);
-    setSelectedCategory(draft.menuTab);
+  const handleConfirmDeleteSection = async () => {
+    if (!deletingSection) return;
+    try {
+      await deleteSection(deletingSection.id).unwrap();
+      toast.success("Section deleted successfully");
+      setIsDeleteSectionOpen(false);
+      setDeletingSection(null);
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "Failed to delete section");
+    }
   };
 
-  const handleUpdateSection = (draft: SectionDraft) => {
-    setSections((current) => current.map((s) => (s.id === editingSectionId ? { ...s, ...draft } : s)));
-    setSelectedCategory(draft.menuTab);
+  const handleUpdateSection = async (sectionId: number, draft: SectionDraft) => {
+    const targetMenu = menus.find((m) => m.name === draft.menuTab);
+    const targetMenuId = targetMenu?.id;
+
+    if (!targetMenuId) {
+      toast.error("Invalid menu selected");
+      return;
+    }
+    try {
+      await updateSection({
+        sectionId,
+        data: {
+          name: draft.sectionName,
+          layout: draft.layout,
+          menuId: targetMenuId,
+        },
+      }).unwrap();
+      toast.success("Section updated successfully");
+      setIsEditSectionOpen(false);
+      setSelectedCategory(draft.menuTab);
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "Failed to update section");
+    }
   };
 
-  const handleOpenAddItem = (sectionId: string) => {
+  // Set default category name when menus load
+  React.useEffect(() => {
+    if (menus.length > 0 && !selectedCategory) {
+      setSelectedCategory(menus[0].name);
+    }
+  }, [menus, selectedCategory]);
+
+  const handleSaveSection = async (draft: SectionDraft) => {
+    const targetMenu = menus.find((m) => m.name === draft.menuTab);
+    const targetMenuId = targetMenu?.id;
+
+    if (!targetMenuId) {
+      toast.error("Invalid menu selected");
+      return;
+    }
+    try {
+      await addSection({
+        name: draft.sectionName,
+        layout: draft.layout,
+        menuId: targetMenuId,
+      }).unwrap();
+      toast.success("Section added successfully");
+      setSelectedCategory(draft.menuTab);
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "Failed to add section");
+    }
+  };
+
+  const handleOpenAddItem = (sectionId: number) => {
     setActiveSectionId(sectionId);
     setIsAddMenuOpen(true);
   };
 
   const handleSaveItem = () => {
-    if (!activeSection) {
-      setIsAddMenuOpen(false);
-      return;
-    }
-
-    setSections((current) =>
-      current.map((section) => {
-        if (section.id !== activeSection.id) {
-          return section;
-        }
-
-        const nextIndex = section.items.length + 1;
-        return {
-          ...section,
-          items: [
-            ...section.items,
-            createItem(sections.indexOf(section) + 1, nextIndex, nextIndex % 2 === 0 ? "menu2" : "menu1", t),
-          ],
-        };
-      }),
-    );
-
+    toast.success("Item added successfully");
     setIsAddMenuOpen(false);
   };
 
@@ -138,13 +139,6 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     setEditingItem(item);
     setIsEditMenuOpen(true);
   };
-
-  const categories = [
-    { id: "Starter", label: t("starter") },
-    { id: "Main", label: t("main") },
-    { id: "Dessert", label: t("dessert") },
-    { id: "Drinks", label: t("drinks") },
-  ];
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -157,19 +151,29 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
       {/* Control Bar */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`rounded-[14px] px-6 py-2.5 text-[15px] font-medium transition-all ${
-                selectedCategory === cat.id
-                  ? "border-2 border-blue-500 bg-white text-blue-600 shadow-sm"
-                  : "bg-[#F1F5F9] text-slate-500 hover:bg-slate-200"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {isMenusLoading ? (
+            <div className="flex items-center gap-2 py-1">
+              <Skeleton className="h-11 w-24 rounded-[14px]" />
+              <Skeleton className="h-11 w-24 rounded-[14px]" />
+              <Skeleton className="h-11 w-24 rounded-[14px]" />
+            </div>
+          ) : menus.length === 0 ? (
+            <div className="text-sm text-slate-400 py-2">No menus found. Please add a menu.</div>
+          ) : (
+            menus.map((menu) => (
+              <button
+                key={menu.id}
+                onClick={() => setSelectedCategory(menu.name)}
+                className={`rounded-[14px] px-6 py-2.5 text-[15px] font-medium transition-all ${
+                  selectedCategory === menu.name
+                    ? "border-2 border-blue-500 bg-white text-blue-600 shadow-sm"
+                    : "bg-[#F1F5F9] text-slate-500 hover:bg-slate-200"
+                }`}
+              >
+                {menu.name}
+              </button>
+            ))
+          )}
         </div>
 
         <div className="flex items-center flex-wrap gap-3">
@@ -198,32 +202,61 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         </div>
       </div>
 
-      {filteredSections.length === 0 ? (
+      {isSectionsLoading ? (
+        <div className="space-y-6">
+          {[1, 2].map((i) => (
+            <div key={i} className="overflow-hidden rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="space-y-2">
+                  <Skeleton className="h-7 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 w-28 rounded-xl" />
+                  <Skeleton className="h-10 w-28 rounded-xl" />
+                  <Skeleton className="h-10 w-28 rounded-xl" />
+                </div>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-3">
+                {[1, 2, 3].map((j) => (
+                  <div key={j} className="flex flex-col gap-4 rounded-[22px] border border-blue-100 bg-white p-4 shadow-sm">
+                    <Skeleton className="h-72 w-full rounded-[18px]" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : sections.length === 0 ? (
         <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-[0_20px_60px_rgba(15,23,42,0.04)]">
           <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[#F3F7FF] text-[#1A56DB]">
             <SquarePen className="size-8" />
           </div>
           <h2 className="mt-5 text-2xl font-semibold tracking-tight text-slate-950">
-            {t("noSectionsIn", { category: categories.find((c: any) => c.id === selectedCategory)?.label || selectedCategory })}
+            {t("noSectionsIn", { category: selectedCategory })}
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
-            {t("clickAddSection", { category: categories.find((c: any) => c.id === selectedCategory)?.label || selectedCategory })}
+            {t("clickAddSection", { category: selectedCategory })}
           </p>
         </div>
       ) : (
         <div className="space-y-5">
-          {filteredSections.map((section) => (
+          {sections.map((section, index) => (
             <MenuCards
               key={section.id}
-              sectionNumber={sections.indexOf(section) + 1}
-              sectionName={section.sectionName}
+              sectionNumber={index + 1}
+              sectionName={section.name}
               layout={section.layout}
-              items={section.items}
+              items={[]} // Always render blank section initially as requested
               onAddItem={() => handleOpenAddItem(section.id)}
               onEditItem={handleEditItem}
               onEditSection={() => {
                 setEditingSectionId(section.id);
                 setIsEditSectionOpen(true);
+              }}
+              onDeleteSection={() => {
+                setDeletingSection({ id: section.id, name: section.name });
+                setIsDeleteSectionOpen(true);
               }}
             />
           ))}
@@ -254,11 +287,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         open={isEditSectionOpen}
         onClose={() => setIsEditSectionOpen(false)}
         onSave={handleUpdateSection}
-        initialData={editingSection ? {
-          sectionName: editingSection.sectionName,
-          layout: editingSection.layout,
-          menuTab: editingSection.menuTab
-        } : undefined}
+        sectionId={editingSectionId}
       />
 
       <AddCategoryModal
@@ -268,6 +297,17 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
           console.log("Saving categories:", categories);
           setIsAddCategoryOpen(false);
         }}
+      />
+
+      <DeleteSectionModal
+        open={isDeleteSectionOpen}
+        onClose={() => {
+          setIsDeleteSectionOpen(false);
+          setDeletingSection(null);
+        }}
+        onConfirm={handleConfirmDeleteSection}
+        sectionName={deletingSection?.name || ""}
+        isLoading={isDeleting}
       />
     </div>
   );

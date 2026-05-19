@@ -3,9 +3,9 @@
 import Image from "next/image";
 import item1 from "@/assets/images/menu1.jpg";
 import item2 from "@/assets/images/menu2.png";
-import { SquarePen } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SectionLayoutType } from "@/components/modal/AddSectionModal";
+import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
 
 export type MenuItemCardData = {
@@ -28,6 +28,7 @@ type Props = {
   onAddItem: () => void;
   onEditItem: (item: MenuItemCardData) => void;
   onEditSection: () => void;
+  onDeleteSection: () => void;
 };
 
 const imageMap = {
@@ -35,29 +36,37 @@ const imageMap = {
   menu2: item2,
 };
 
-const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEditItem, onEditSection }: Props) => {
+const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEditItem, onEditSection, onDeleteSection }: Props) => {
   const t = useTranslations("Menu");
-  const tc = useTranslations("Common");
   
   const layoutLabel: Record<SectionLayoutType, string> = {
-    "3-image-row": t("3-image-row"),
-    "2-images-side-by-side": t("2-image"),
-    "1-image": t("1-image"),
-    "images-list": t("images-list"),
-    "no-image-list": t("no-image-list"),
+    SINGLE: t("1-image") || "1 Large Image",
+    DOUBLE: t("2-image") || "2 Images Side-by-Side",
+    TRIPLE: t("3-image-row") || "3-Image Row",
+    QUADRUPLE: "4-Image Row",
+    LIST_WITH_IMAGE: t("images-list") || "Images List View",
+    LIST_NO_IMAGE: t("no-image-list") || "No-Image List View",
   };
 
-  const isNoImageLayout = layout === "no-image-list";
-  const isImageListLayout = layout === "images-list";
+  const isNoImageLayout = layout === "LIST_NO_IMAGE";
+  const isImageListLayout = layout === "LIST_WITH_IMAGE";
+
+  const gridColsClass = {
+    SINGLE: "grid gap-4 lg:grid-cols-1",
+    DOUBLE: "grid gap-4 lg:grid-cols-2",
+    TRIPLE: "grid gap-4 lg:grid-cols-3",
+    QUADRUPLE: "grid gap-4 lg:grid-cols-4",
+    LIST_WITH_IMAGE: "space-y-4",
+    LIST_NO_IMAGE: "space-y-4",
+  }[layout] || "grid gap-4 lg:grid-cols-3";
 
   return (
     <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
       <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div>
           <h2 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
-            {t("section")} {sectionNumber} | {t("layoutType")}: {layoutLabel[layout]}
+            {sectionName || t("untitledSection")} | {t("layoutType")}: {layoutLabel[layout]}
           </h2>
-          <p className="mt-1 text-sm text-slate-500">{sectionName || t("untitledSection")}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -69,16 +78,54 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
             type="button"
             variant="outline"
             onClick={onEditSection}
-            className="h-10 rounded-xl border-red-100 bg-red-50 px-4 text-sm font-semibold text-red-500 hover:bg-red-100 hover:text-red-600"
+            className="h-10 rounded-xl border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-700"
           >
             <SquarePen className="mr-2 size-4" />
             {t("editLayout")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onDeleteSection}
+            className="h-10 rounded-xl border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-500 hover:bg-red-100 hover:text-red-600"
+          >
+            <Trash2 className="mr-2 size-4" />
+            Delete Section
           </Button>
         </div>
       </div>
 
       <div className="p-5 sm:p-6">
-        {isNoImageLayout ? (
+        {items.length === 0 ? (
+          layout === "LIST_NO_IMAGE" ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-center rounded-[18px] border border-blue-500 bg-white p-3">
+                  <div className="h-16 w-full rounded-xl bg-[#E2E8F0]" />
+                </div>
+              ))}
+            </div>
+          ) : layout === "LIST_WITH_IMAGE" ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="grid gap-4 rounded-[18px] border border-blue-500 bg-white p-3 grid-cols-[160px_1fr] items-center">
+                  <div className="h-24 w-full rounded-xl bg-[#E2E8F0]" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={gridColsClass}>
+              {Array.from({ length: ({ SINGLE: 1, DOUBLE: 2, TRIPLE: 3, QUADRUPLE: 4 }[layout] || 1) }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-4 rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm">
+                  <div className="relative h-72 w-full overflow-hidden rounded-[18px] bg-[#E2E8F0]" />
+                  {/* <div className="text-center text-sm font-semibold text-slate-500 pb-1">
+                    1 Large Image
+                  </div> */}
+                </div>
+              ))}
+            </div>
+          )
+        ) : isNoImageLayout ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -124,7 +171,7 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
             </table>
           </div>
         ) : (
-          <div className={isImageListLayout ? "space-y-3" : "grid gap-3 lg:grid-cols-3"}>
+          <div className={isImageListLayout ? "space-y-3" : gridColsClass}>
             {items.map((item, index) => (
               <article
                 key={item.itemNumber}
