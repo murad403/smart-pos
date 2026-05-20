@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NextIntlClientProvider } from "next-intl";
@@ -9,9 +9,10 @@ import { routing } from "@/i18n/routing";
 import ReduxWrapper from "@/components/wrapper/ReduxWrapper";
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700", "900"],
   subsets: ["latin"],
+  variable: "--font-roboto",
 });
 
 const geistMono = Geist_Mono({
@@ -46,9 +47,9 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${roboto.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-background text-foreground">
+      <body className={`${roboto.className} min-h-screen flex flex-col bg-background text-foreground`}>
         <ReduxWrapper>
           <NextIntlClientProvider messages={messages}>
             <TooltipProvider>

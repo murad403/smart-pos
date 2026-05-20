@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+    --font-sans: var(--font-roboto);
     --surface-bg: #ebebeb;
     --surface-subtle: #dce3f5;
     --accent-main: #3f7fe8;

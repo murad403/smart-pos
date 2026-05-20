@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
 
+import { useGetAllSectionDetailsByMenuIdQuery } from "@/redux/features/menu/menu.api";
+
 export type MenuItemCardData = {
   id?: number;
   itemNumber: string;
@@ -23,12 +25,11 @@ export type MenuItemCardData = {
 };
 
 type Props = {
+  sectionId: number;
   sectionNumber: number;
   sectionName: string;
   layout: SectionLayoutType;
-  items: MenuItemCardData[];
   onAddItem: () => void;
-  onEditItem: (item: MenuItemCardData) => void;
   onEditSection: () => void;
   onDeleteSection: () => void;
 };
@@ -38,8 +39,29 @@ const imageMap = {
   menu2: item2,
 };
 
-const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEditItem, onEditSection, onDeleteSection }: Props) => {
+const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, onEditSection, onDeleteSection }: Props) => {
   const t = useTranslations("Menu");
+
+  const { data: sectionDetailsRes, isLoading } = useGetAllSectionDetailsByMenuIdQuery(sectionId);
+  const sectionDetails = sectionDetailsRes?.data;
+  const sectionItems = sectionDetails?.sectionItems || [];
+
+  const items: MenuItemCardData[] = (sectionItems || []).map((sectionItem: any) => {
+    const item = sectionItem.item || sectionItem;
+    return {
+      id: item.id,
+      itemNumber: item.slug || `i-${item.id}`,
+      itemName: item.name,
+      price: Number(item.price || 0),
+      inventory: item.inventoryQty || 0,
+      stock: item.inventoryQty || 0,
+      statusLabel: item.isOutOfStock ? "Out of Stock" : "In Stock",
+      promoPrice: item.promoPrice ? Number(item.promoPrice) : 0,
+      imageType: "menu1",
+      imageUrl: item.imageUrl || null,
+      badges: [item.labels?.[0] || "", item.labels?.[1] || ""],
+    };
+  });
   
   const layoutLabel: Record<SectionLayoutType, string> = {
     SINGLE: t("1-image") || "1 Large Image",
@@ -98,7 +120,7 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
       </div>
 
       <div className="p-5 sm:p-6">
-        {items.length === 0 ? (
+        {isLoading || items.length === 0 ? (
           layout === "LIST_NO_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -136,8 +158,7 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
                   <th className="pb-4 font-medium">{t("itemName")}</th>
                   <th className="pb-4 font-medium text-center">{t("stock")}</th>
                   <th className="pb-4 font-medium">{t("price")}</th>
-                  <th className="pb-4 font-medium">{t("promoPrice")}</th>
-                  <th className="pb-4 pr-2 font-medium text-right">{t("action")}</th>
+                  <th className="pb-4 pr-2 font-medium">{t("promoPrice")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -155,17 +176,8 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
                     <td className="py-4 text-[15px] text-slate-600">
                       Rp{item.price.toLocaleString("en-US")}
                     </td>
-                    <td className="py-4 text-[15px] text-slate-600">
+                    <td className="py-4 pr-2 text-[15px] text-slate-600">
                       {item.promoPrice ? `Rp${item.promoPrice.toLocaleString("en-US")}` : "-"}
-                    </td>
-                    <td className="py-4 pr-2 text-right">
-                      <Button
-                        type="button"
-                        onClick={() => onEditItem(item)}
-                        className="h-9 rounded-xl bg-[#3B82F6] px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-600"
-                      >
-                        + {t("edit")}
-                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -218,9 +230,6 @@ const MenuCards = ({ sectionNumber, sectionName, layout, items, onAddItem, onEdi
                       <p className="text-slate-500">{t("promoPrice")}</p>
                       <p className="font-semibold text-slate-900">Rp{item.promoPrice.toLocaleString("en-US")}</p>
                     </div>
-                    <Button type="button" onClick={() => onEditItem(item)} className="h-10 rounded-2xl bg-[#3B82F6] px-4 text-sm font-semibold text-white hover:bg-[#2f6fd3]">
-                      + {t("edit")}
-                    </Button>
                   </div>
                 </div>
               </article>

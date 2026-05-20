@@ -8,7 +8,6 @@ import { Plus, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import AddMenuModal from "@/components/modal/AddMenuModal";
-import EditMenuModal from "@/components/modal/EditMenuModal";
 import AddSectionModal, { SectionDraft } from "@/components/modal/AddSectionModal";
 import EditSectionModal from "@/components/modal/EditSectionModal";
 import AddCategoryModal from "@/components/modal/AddCategoryModal";
@@ -35,14 +34,12 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const [selectedCategory, setSelectedCategory] = React.useState("");
   const [isAddSectionOpen, setIsAddSectionOpen] = React.useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = React.useState(false);
-  const [isEditMenuOpen, setIsEditMenuOpen] = React.useState(false);
   const [isEditSectionOpen, setIsEditSectionOpen] = React.useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = React.useState(false);
   const [isDeleteSectionOpen, setIsDeleteSectionOpen] = React.useState(false);
   const [deletingSection, setDeletingSection] = React.useState<{ id: number; name: string } | null>(null);
   const [activeSectionId, setActiveSectionId] = React.useState<number | null>(null);
   const [editingSectionId, setEditingSectionId] = React.useState<number | null>(null);
-  const [editingItem, setEditingItem] = React.useState<MenuItemCardData | null>(null);
 
   // Find currently selected menu
   const currentMenu = React.useMemo(
@@ -136,11 +133,6 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const handleSaveItem = () => {
     refetchSections();
     setIsAddMenuOpen(false);
-  };
-
-  const handleEditItem = (item: MenuItemCardData) => {
-    setEditingItem(item);
-    setIsEditMenuOpen(true);
   };
 
   return (
@@ -247,27 +239,11 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
           {sections.map((section, index) => (
             <MenuCards
               key={section.id}
+              sectionId={section.id}
               sectionNumber={index + 1}
               sectionName={section.name}
               layout={section.layout}
-              items={((section as any).items || []).map((sectionItem: any) => {
-                const item = sectionItem.item || sectionItem;
-                return {
-                  id: item.id,
-                  itemNumber: item.slug || `i-${item.id}`,
-                  itemName: item.name,
-                  price: Number(item.price || 0),
-                  inventory: item.inventoryQty || 0,
-                  stock: item.inventoryQty || 0,
-                  statusLabel: item.isOutOfStock ? "Out of Stock" : "In Stock",
-                  promoPrice: item.promoPrice ? Number(item.promoPrice) : 0,
-                  imageType: "menu1",
-                  imageUrl: item.imageUrl || null,
-                  badges: [item.labels?.[0] || "", item.labels?.[1] || ""],
-                };
-              })}
               onAddItem={() => handleOpenAddItem(section.id)}
-              onEditItem={handleEditItem}
               onEditSection={() => {
                 setEditingSectionId(section.id);
                 setIsEditSectionOpen(true);
@@ -293,13 +269,6 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         onClose={() => setIsAddMenuOpen(false)}
         onSave={handleSaveItem}
         sectionId={activeSectionId}
-      />
-
-      <EditMenuModal
-        open={isEditMenuOpen}
-        onClose={() => setIsEditMenuOpen(false)}
-        onSave={() => setIsEditMenuOpen(false)}
-        initialData={editingItem ? { itemName: editingItem.itemName, price: editingItem.price } : undefined}
       />
 
       <EditSectionModal
