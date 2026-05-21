@@ -1,5 +1,5 @@
 import baseApi from "../../api/api";
-import { ChangeUserPasswordBody, ChangeUserPasswordResponse, AddUserBody, AddUserResponse, AnalyticsQueryParams, AnalyticsResponse, DeleteUserResponse, GetAllUsersQueryParams, GetAllUsersResponse, GetInventoryReportQueryParams, GetInventoryReportResponse, GetItemsQueryParams, GetItemsResponse, GetPaymentDetailsResponse, GetPaymentsQueryParams, GetPaymentsResponse, GetUserByIdResponse, GetOperatingHoursResponse, SalesReportResponse, StockAdjustBody, StockAdjustResponse, UpdateOperatingHoursBody, UpdateOperatingHoursResponse } from "./dashboard.type";
+import { ChangeUserPasswordBody, ChangeUserPasswordResponse, AddUserBody, AddUserResponse, AnalyticsQueryParams, AnalyticsResponse, DeleteUserResponse, GetAllUsersQueryParams, GetAllUsersResponse, GetInventoryReportQueryParams, GetInventoryReportResponse, GetItemsQueryParams, GetItemsResponse, GetPaymentDetailsResponse, GetPaymentsQueryParams, GetPaymentsResponse, GetUserByIdResponse, GetOperatingHoursResponse, SalesReportResponse, StockAdjustBody, StockAdjustResponse, UpdateOperatingHoursBody, UpdateOperatingHoursResponse, GetInventoryLogsResponse, GetInventoryLogsQueryParams } from "./dashboard.type";
 
 
 
@@ -68,6 +68,21 @@ const dashboardApi = baseApi.injectEndpoints({
                     url: `/inventory`,
                     method: "GET",
                     params: queryParams
+                };
+            },
+        }),
+        getInventoryLogs: builder.query<GetInventoryLogsResponse, GetInventoryLogsQueryParams | void>({
+            query: (params) => {
+                const queryParams: Record<string, string> = {};
+                if (params?.page) queryParams.page = String(params.page);
+                if (params?.limit) queryParams.limit = String(params.limit);
+                if (params?.startDate) queryParams.startDate = params.startDate;
+                if (params?.endDate) queryParams.endDate = params.endDate;
+
+                return {
+                    url: `/inventory/logs`,
+                    method: "GET",
+                    params: queryParams,
                 };
             },
         }),
@@ -196,6 +211,7 @@ export const {
     useGetPaymentsQuery,
     useGetPaymentDetailsQuery,
     useGetInventoryReportQuery,
+    useGetInventoryLogsQuery,
     useGetItemsQuery,
     useStockInMutation,
     useStockOutMutation,

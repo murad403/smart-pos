@@ -158,7 +158,13 @@
     "remarks": "Remarks",
     "submit": "Submit",
     "quantity": "Quantity",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "history": "History",
+    "inventoryHistory": "Inventory History",
+    "noLogsFound": "No logs found.",
+    "stockSold": "Stock Sold",
+    "date": "Date",
+    "itemName": "Item Name"
   },
   "Payment": {
     "proof": "Payment Proof",

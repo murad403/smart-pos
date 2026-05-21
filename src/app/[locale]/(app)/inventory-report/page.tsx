@@ -4,14 +4,16 @@ import InventoryReportStats from "./InventoryReportStats";
 import InventoryOverviewTable from "./InventoryOverviewTable";
 import { useTranslations } from "next-intl";
 import { useGetInventoryReportQuery } from "@/redux/features/dashboard/dashboard.api";
-import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, History } from "lucide-react";
 import StockAdjustModal from "@/components/modal/StockAdjustModal";
+import InventoryLogsModal from "@/components/modal/InventoryLogsModal";
 
 const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
   const t = useTranslations("Inventory");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"in" | "out">("in");
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Fetch live inventory data from API
   const { data: inventoryReportRes, isLoading, refetch } = useGetInventoryReportQuery();
@@ -43,6 +45,14 @@ const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> 
           >
             <ArrowDownLeft size={16} /> {t("stockOut")}
           </button>
+          <button
+            onClick={() => {
+              setIsHistoryOpen(true);
+            }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+          >
+            <History size={16} /> {t("history") || "History"}
+          </button>
         </div>
       </div>
       
@@ -55,6 +65,11 @@ const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> 
         onClose={() => setIsModalOpen(false)}
         mode={modalMode}
         onSuccess={() => refetch()}
+      />
+
+      <InventoryLogsModal
+        open={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );

@@ -403,3 +403,40 @@ export interface GetAllUsersResponse {
     data: UserListItem[];
 }
 
+export interface InventoryLogItem {
+    id: number;
+    slug: string | null;
+    itemId: number;
+    itemName: string;
+    date: string;
+    openingStock: number;
+    stockSold: number;
+    stockIn: number;
+    stockOut: number;
+    closingStock: number;
+    remarks: string | null;
+    createdBy: any;
+    createdAt: string;
+}
+
+export interface GetInventoryLogsResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
+    data: InventoryLogItem[];
+}
+
+export interface GetInventoryLogsQueryParams {
+    page?: number;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+}
+
+

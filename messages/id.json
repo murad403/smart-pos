@@ -158,7 +158,13 @@
     "remarks": "Keterangan",
     "submit": "Kirim",
     "quantity": "Jumlah",
-    "cancel": "Batal"
+    "cancel": "Batal",
+    "history": "Riwayat",
+    "inventoryHistory": "Riwayat Inventaris",
+    "noLogsFound": "Tidak ada riwayat ditemukan.",
+    "stockSold": "Stok Terjual",
+    "date": "Tanggal",
+    "itemName": "Nama Item"
   },
   "Payment": {
     "proof": "Bukti Pembayaran",

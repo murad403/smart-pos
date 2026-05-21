@@ -257,9 +257,6 @@ const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
                               <p className="font-semibold text-slate-800 truncate">
                                 {item.name}
                               </p>
-                              <p className="text-[10px] text-slate-400">
-                                Stock: {item.inventoryQty !== null ? item.inventoryQty : "-"}
-                              </p>
                             </div>
                           </div>
                           {isSelected && (
