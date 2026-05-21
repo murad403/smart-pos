@@ -12,16 +12,10 @@ import AddSectionModal, { SectionDraft } from "@/components/modal/AddSectionModa
 import EditSectionModal from "@/components/modal/EditSectionModal";
 import AddCategoryModal from "@/components/modal/AddCategoryModal";
 import DeleteSectionModal from "@/components/modal/DeleteSectionModal";
-import MenuCards, { MenuItemCardData } from "./MenuCards";
+import MenuCards from "./MenuCards";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import {
-  useGetAllMenuQuery,
-  useAddSectionMutation,
-  useDeleteSectionMutation,
-  useGetAllSectionByMenuIdQuery,
-  useUpdateSectionMutation,
-} from "@/redux/features/menu/menu.api";
+import { useGetAllMenuQuery, useAddSectionMutation, useDeleteSectionMutation, useGetAllSectionByMenuIdQuery, useUpdateSectionMutation} from "@/redux/features/menu/menu.api";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
@@ -54,6 +48,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     { skip: !currentMenuId }
   );
   const sections = sectionsRes?.data ?? [];
+  const isLoadingSectionsData = isMenusLoading || isSectionsLoading || (menus.length > 0 && !currentMenuId);
 
   // Mutation for adding a section
   const [addSection] = useAddSectionMutation();
@@ -197,7 +192,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         </div>
       </div>
 
-      {isSectionsLoading ? (
+      {isLoadingSectionsData ? (
         <div className="space-y-6">
           {[1, 2].map((i) => (
             <div key={i} className="overflow-hidden rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm space-y-6">

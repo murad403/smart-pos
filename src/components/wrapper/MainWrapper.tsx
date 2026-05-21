@@ -2,7 +2,7 @@
 "use client"
 import React from "react"
 import Image from "next/image"
-import { Armchair, ChevronDown, CreditCard, Fuel, Grid2x2, LayoutDashboard, LogOut, Package, ReceiptText, User, Utensils } from "lucide-react"
+import { Armchair, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, LayoutDashboard, LogOut, Package, ReceiptText, User, Utensils } from "lucide-react"
 import brandLogo from "@/assets/logo/logo.png"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -51,6 +51,7 @@ function AppSidebar() {
     { label: t("item"), icon: Utensils, href: "/item" },
     { label: t("productionStation"), icon: Fuel, href: "/production-station" },
     { label: t("manageTable"), icon: Armchair, href: "/manage-table" },
+    { label: t("shiftWorkflow"), icon: CalendarRange, href: "/shift-workflow" },
   ]
 
   const profileSubItems = [

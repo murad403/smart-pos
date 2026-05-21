@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useGetInventoryLogsQuery } from "@/redux/features/dashboard/dashboard.api";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import CustomPagination from "@/components/shared/CustomPagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface InventoryLogsModalProps {
   open: boolean;
@@ -74,6 +75,49 @@ const InventoryLogsModal: React.FC<InventoryLogsModalProps> = ({ open, onClose }
     }
   };
 
+  const renderSkeleton = () => {
+    return (
+      <div className="overflow-x-auto border border-slate-100 rounded-xl">
+        <table className="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
+              <th className="px-4 py-3">{t("date") || "Date"}</th>
+              <th className="px-4 py-3">{t("itemName") || "Item Name"}</th>
+              <th className="px-4 py-3 text-center">{t("openingStock") || "Opening Stock"}</th>
+              <th className="px-4 py-3 text-center">Change</th>
+              <th className="px-4 py-3 text-center">{t("closingStock") || "Closing Stock"}</th>
+              <th className="px-4 py-3">{t("remarks") || "Remarks"}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {[...Array(5)].map((_, idx) => (
+              <tr key={idx}>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-28" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-36" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-12 mx-auto" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-6 w-16 rounded-full mx-auto" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-12 mx-auto" />
+                </td>
+                <td className="px-4 py-4">
+                  <Skeleton className="h-4 w-24" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   if (!open) return null;
 
   return (
@@ -120,15 +164,8 @@ const InventoryLogsModal: React.FC<InventoryLogsModalProps> = ({ open, onClose }
         {/* Table/List Area */}
         <div className="flex-1 overflow-y-auto min-h-[300px] relative">
           {isLoading || isFetching ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
-              <div className="flex flex-col items-center gap-2.5">
-                <Loader2 size={32} className="animate-spin text-blue-600" />
-                <span className="text-sm font-medium text-slate-500">Loading history logs...</span>
-              </div>
-            </div>
-          ) : null}
-
-          {!isLoading && logs.length === 0 ? (
+            renderSkeleton()
+          ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="mb-4 p-3 rounded-full bg-slate-50 text-slate-400">
                 <History size={36} />
@@ -206,7 +243,7 @@ const InventoryLogsModal: React.FC<InventoryLogsModalProps> = ({ open, onClose }
         </div>
 
         {/* Footer Area - Pagination */}
-        {!isLoading && logs.length > 0 && (
+        {!isLoading && !isFetching && logs.length > 0 && (
           <div className="border-t border-slate-100 pt-3 mt-4">
             <CustomPagination
               currentPage={page}

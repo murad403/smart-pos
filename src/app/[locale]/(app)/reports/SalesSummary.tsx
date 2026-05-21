@@ -91,7 +91,7 @@ const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: Sale
                 )}
                 <div className="mt-5">
                     <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                        <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }} style={{ outline: "none" }}>
                             <CartesianGrid stroke="#f1f5f9" />
                             <XAxis
                                 dataKey="date"

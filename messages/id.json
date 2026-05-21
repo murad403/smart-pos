@@ -89,7 +89,8 @@
     "owner": "Pemilik",
     "register": "Daftar",
     "saveChanges": "Simpan Perubahan",
-    "manageTable": "Kelola Meja"
+    "manageTable": "Kelola Meja",
+    "shiftWorkflow": "Alur Kerja Shift"
   },
   "Dashboard": {
     "title": "Dasbor",

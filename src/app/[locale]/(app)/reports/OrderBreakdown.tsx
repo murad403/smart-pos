@@ -60,7 +60,7 @@ const OrderBreakdown = ({ breakdown, isLoading }: OrderBreakdownProps) => {
             <div className="flex justify-center">
                 {hasData ? (
                     <ResponsiveContainer width={260} height={220}>
-                        <PieChart>
+                        <PieChart style={{ outline: "none" }}>
                             <Pie
                                 data={data}
                                 cx="50%"

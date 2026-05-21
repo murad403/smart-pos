@@ -51,7 +51,7 @@ const OrdersPerHour = ({ ordersPerHour, isLoading }: OrdersPerHourProps) => {
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <h3 className="mb-5 text-base font-semibold text-slate-800">{t("ordersPerHour")}</h3>
             <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }} style={{ outline: "none" }}>
                     <CartesianGrid stroke="#f1f5f9" />
                     <XAxis
                         dataKey="hour"

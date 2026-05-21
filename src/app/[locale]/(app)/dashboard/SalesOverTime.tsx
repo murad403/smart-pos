@@ -61,7 +61,7 @@ const SalesOverTime = ({ sales, isLoading }: SalesOverTimeProps) => {
         <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <h3 className="mb-5 text-base font-semibold text-slate-800">{t("salesOverTime")}</h3>
             <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={formattedData} barSize={40} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <BarChart data={formattedData} barSize={40} margin={{ top: 5, right: 10, left: 0, bottom: 0 }} style={{ outline: "none" }}>
                     <CartesianGrid vertical={false} stroke="#f1f5f9" />
                     <XAxis
                         dataKey="day"

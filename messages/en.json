@@ -89,7 +89,8 @@
     "owner": "Owner",
     "register": "Register",
     "saveChanges": "Save Changes",
-    "manageTable": "Manage Tables"
+    "manageTable": "Manage Tables",
+    "shiftWorkflow": "Shift Workflow"
   },
   "Dashboard": {
     "title": "Dashboard",
