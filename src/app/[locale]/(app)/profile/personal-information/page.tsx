@@ -111,6 +111,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
 
       // Update cookie
       const currentCookie = getUserData();
+      // console.log(currentCookie);
       if (currentCookie && result.data) {
         saveUserData({
           ...currentCookie,

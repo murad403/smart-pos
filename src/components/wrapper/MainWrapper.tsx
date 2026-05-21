@@ -9,7 +9,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter, Link } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
-import { clearUserData } from "@/utils/auth"
+import { clearUserData, getUserData } from "@/utils/auth"
 import { toast } from "sonner"
 
 function SidebarBrand() {
@@ -152,6 +152,11 @@ function Topbar() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [user, setUser] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    setUser(getUserData());
+  }, [pathname]);
 
   const handleLocaleChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale });
@@ -198,12 +203,16 @@ function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-3 text-left outline-none">
-                <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11">
-                  <User className="size-5" />
+                <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden">
+                  {user?.photoUrl ? (
+                    <img src={user.photoUrl} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="size-5" />
+                  )}
                 </div>
                 <div className="min-w-0 leading-tight">
-                  <div className="text-sm font-medium text-slate-950 sm:text-base">{t("restaurantOwner")}</div>
-                  <div className="text-xs text-slate-500 sm:text-sm">{t("owner")}</div>
+                  <div className="text-sm font-medium text-slate-950 sm:text-base">{user?.name || t("restaurantOwner")}</div>
+                  <div className="text-xs text-slate-500 sm:text-sm">{user?.role || t("owner")}</div>
                 </div>
                 <ChevronDown className="size-4 text-slate-400" />
               </button>
@@ -211,8 +220,8 @@ function Topbar() {
 
             <DropdownMenuContent align="end" sideOffset={12} className="w-68 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
               <DropdownMenuLabel className="px-2 py-1.5">
-                <div className="text-base font-medium text-slate-950">{t("restaurantOwner")}</div>
-                <div className="text-sm font-normal text-slate-400">owner@smartpos.com</div>
+                <div className="text-base font-medium text-slate-950">{user?.name || t("restaurantOwner")}</div>
+                <div className="text-sm font-normal text-slate-400">{user?.email || "owner@smartpos.com"}</div>
               </DropdownMenuLabel>
 
               <DropdownMenuSeparator className="my-1 bg-slate-200" />

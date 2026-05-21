@@ -1,29 +1,5 @@
 import baseApi from "../../api/api";
-import {
-    ChangeUserPasswordBody,
-    ChangeUserPasswordResponse,
-    AddUserBody,
-    AddUserResponse,
-    AnalyticsQueryParams,
-    AnalyticsResponse,
-    DeleteUserResponse,
-    GetAllUsersQueryParams,
-    GetAllUsersResponse,
-    GetInventoryReportQueryParams,
-    GetInventoryReportResponse,
-    GetItemsQueryParams,
-    GetItemsResponse,
-    GetPaymentDetailsResponse,
-    GetPaymentsQueryParams,
-    GetPaymentsResponse,
-    GetUserByIdResponse,
-    GetOperatingHoursResponse,
-    SalesReportResponse,
-    StockAdjustBody,
-    StockAdjustResponse,
-    UpdateOperatingHoursBody,
-    UpdateOperatingHoursResponse,
-} from "./dashboard.type";
+import { ChangeUserPasswordBody, ChangeUserPasswordResponse, AddUserBody, AddUserResponse, AnalyticsQueryParams, AnalyticsResponse, DeleteUserResponse, GetAllUsersQueryParams, GetAllUsersResponse, GetInventoryReportQueryParams, GetInventoryReportResponse, GetItemsQueryParams, GetItemsResponse, GetPaymentDetailsResponse, GetPaymentsQueryParams, GetPaymentsResponse, GetUserByIdResponse, GetOperatingHoursResponse, SalesReportResponse, StockAdjustBody, StockAdjustResponse, UpdateOperatingHoursBody, UpdateOperatingHoursResponse } from "./dashboard.type";
 
 
 
