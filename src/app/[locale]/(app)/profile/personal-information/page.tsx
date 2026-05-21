@@ -5,8 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import CustomSwitch from "@/components/shared/CustomeSwitch";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { useGetUserByIdQuery, useUpdateUserMutation } from "@/redux/features/dashboard/dashboard.api";
+import { getUserData, saveUserData } from "@/utils/auth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const profileSchema = (t: any) => z.object({
   businessName: z.string().min(1, t("businessNameRequired")),
@@ -26,36 +29,109 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
   const t = useTranslations("Profile");
   const tv = useTranslations("Validation");
 
+  const [userId, setUserId] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const userData = getUserData();
+    if (userData?.id) {
+      setUserId(userData.id);
+    }
+  }, []);
+
+  const { data: userRes, isLoading: isUserLoading } = useGetUserByIdQuery(userId as number, {
+    skip: !userId,
+  });
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+  const user = userRes?.data;
+
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema(tv)),
     defaultValues: {
-      businessName: "Best Way Special",
-      address: "Jl. Sudirman No. 123, Jakarta Selatan",
-      contactNumber: "+62 812-3456-7890",
-      email: "info@bestwayspecial.com",
-      facebook: "facebook.com/bestway.special",
-      instagram: "@bestway.special",
+      businessName: "",
+      address: "",
+      contactNumber: "",
+      email: "",
+      facebook: "",
+      instagram: "",
       enableInventoryReport: true,
       adminOnlyPaymentProof: false,
     },
   });
 
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const onSubmit = (data: ProfileFormValues) => {
-    console.log("Form submitted:", data);
+  React.useEffect(() => {
+    if (user) {
+      setValue("businessName", user.name || "");
+      setValue("address", user.address || "");
+      setValue("contactNumber", user.phone || "");
+      setValue("email", user.email || "");
+      setValue("facebook", user.facebookUrl || "");
+      setValue("instagram", user.instagramUrl || "");
+      if (user.photoUrl) {
+        setImagePreview(user.photoUrl);
+      }
+    }
+  }, [user, setValue]);
+
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!userId) return;
+
+    try {
+      const payload: any = {
+        name: data.businessName,
+        phone: data.contactNumber,
+        address: data.address,
+        facebookUrl: data.facebook || undefined,
+        instagramUrl: data.instagram || undefined,
+      };
+
+      if (!imagePreview) {
+        payload.photoUrl = null;
+      }
+
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(payload));
+      if (photoFile) {
+        formData.append("photo", photoFile);
+      }
+
+      toast.loading("Updating profile...", { id: "profile-update-toast" });
+
+      const result = await updateUser({ userId, data: formData }).unwrap();
+      
+      toast.success(result.message || "Profile updated successfully", { id: "profile-update-toast" });
+
+      // Update cookie
+      const currentCookie = getUserData();
+      if (currentCookie && result.data) {
+        saveUserData({
+          ...currentCookie,
+          name: result.data.name,
+          phone: result.data.phone,
+          address: result.data.address,
+          facebookUrl: result.data.facebookUrl,
+          instagramUrl: result.data.instagramUrl,
+          photoUrl: result.data.photoUrl,
+        });
+      }
+    } catch (error: any) {
+      const message = error?.data?.message || error?.message || "Failed to update profile";
+      toast.error(message, { id: "profile-update-toast" });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -64,12 +140,52 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
     }
   };
 
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setPhotoFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
-  const enableInventoryReport = watch("enableInventoryReport");
-  const adminOnlyPaymentProof = watch("adminOnlyPaymentProof");
+  if (isUserLoading || !userId) {
+    return (
+      <div className="space-y-6 pb-10">
+        {/* Header Skeleton */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-8 w-28 rounded-lg" />
+        </div>
+
+        {/* Form Skeletons */}
+        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <Skeleton className="size-36 rounded-[28px]" />
+            <div className="flex-1 space-y-6 pt-4">
+              <Skeleton className="h-4 w-32" />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-10">
@@ -121,7 +237,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
               {imagePreview && (
                 <button
                   type="button"
-                  onClick={() => setImagePreview(null)}
+                  onClick={handleRemoveImage}
                   className="text-xs font-bold uppercase tracking-wider text-red-500 hover:text-red-600"
                 >
                   {t("remove")}
@@ -180,7 +296,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
         </div>
 
         {/* Social Media Section */}
-        {/* <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
+        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
           <p className="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("socialMedia")}</p>
           <div className="space-y-6">
             <div className="space-y-1.5">
@@ -199,31 +315,15 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
               />
             </div>
           </div>
-        </div> */}
-
-        {/* Feature Controls */}
-        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
-          <p className="mb-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("featureControls")}</p>
-          <div className="divide-y divide-slate-50">
-            <CustomSwitch
-              label={t("enableInventoryReport")}
-              checked={enableInventoryReport}
-              onChange={(v) => setValue("enableInventoryReport", v)}
-            />
-            <CustomSwitch
-              label={t("adminOnlyPaymentProof")}
-              checked={adminOnlyPaymentProof}
-              onChange={(v) => setValue("adminOnlyPaymentProof", v)}
-            />
-          </div>
         </div>
 
         {/* Submit Button */}
         <Button
           type="submit"
-          className="h-14 w-full rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600"
+          disabled={isUpdating}
+          className="h-14 w-full rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t("saveChanges")}
+          {isUpdating ? t("saving") || "Saving..." : t("saveChanges")}
         </Button>
       </form>
     </div>

@@ -201,6 +201,16 @@ const dashboardApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["operating-hours"]
         }),
+        updateUser: builder.mutation({
+            query: ({ userId, data }) => {
+                return {
+                    url: `/users/${userId}`,
+                    method: "PATCH",
+                    body: data
+                };
+            },
+            invalidatesTags: ["users"]
+        }),
     }),
 });
 
@@ -220,4 +230,5 @@ export const {
     useDeleteUserMutation,
     useGetOperatingHoursQuery,
     useUpdateOperatingHoursMutation,
+    useUpdateUserMutation,
 } = dashboardApi;
