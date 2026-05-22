@@ -5,10 +5,11 @@ import baseApi from "../../api/api";
 const orderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getAllOrders: builder.query({
-            query: () => {
+            query: (params) => {
                 return {
                     url: "/orders",
-                    method: "GET"
+                    method: "GET",
+                    params
                 };
             },
             providesTags: ["orders"]
@@ -30,16 +31,7 @@ const orderApi = baseApi.injectEndpoints({
                 };
             },
             providesTags: ["orders"]
-        }),
-        markOrderReady: builder.mutation({
-            query: (orderId: string) => {
-                return {
-                    url: `/orders/${orderId}/ready`,
-                    method: "PATCH"
-                };
-            },
-            invalidatesTags: ["orders"]
-        }),
+        })
     }),
 });
 
@@ -47,5 +39,4 @@ export const {
     useGetAllOrdersQuery,
     useGetOrderDetailsQuery,
     useGetPendingPaymentOrdersQuery,
-    useMarkOrderReadyMutation,
 } = orderApi;
