@@ -1,9 +1,138 @@
-import React from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import React from "react";
+import { Plus, SquarePen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
+import { useGetAllMenuQuery, useGetAllSectionByMenuIdQuery } from "@/redux/features/menu/menu.api";
+import CustomerMenuCards from "@/components/shared/CustomerMenuCards";
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
+    if (params) React.use(params);
+    const t = useTranslations("Menu");
 
-export default page
+    // Fetch dynamic menus
+    const { data: menuRes, isLoading: isMenusLoading } = useGetAllMenuQuery();
+    const menus = menuRes?.data ?? [];
+
+    const [selectedCategory, setSelectedCategory] = React.useState("");
+    // Find currently selected menu
+    const currentMenu = React.useMemo(
+        () => menus.find((m) => m.name === selectedCategory),
+        [menus, selectedCategory]
+    );
+    const currentMenuId = currentMenu?.id;
+
+    // Fetch sections by menuId
+    const { data: sectionsRes, isLoading: isSectionsLoading, refetch: refetchSections } = useGetAllSectionByMenuIdQuery(
+        currentMenuId as number,
+        { skip: !currentMenuId }
+    );
+    const sections = sectionsRes?.data ?? [];
+    const isLoadingSectionsData = isMenusLoading || isSectionsLoading || (menus.length > 0 && !currentMenuId);
+
+
+    // Set default category name when menus load
+    React.useEffect(() => {
+        if (menus.length > 0 && !selectedCategory) {
+            setSelectedCategory(menus[0].name);
+        }
+    }, [menus, selectedCategory]);
+
+
+
+    return (
+        <div className="space-y-4 md:space-y-6">
+            {/* Page Header */}
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t("menuTab")}</h1>
+                <p className="mt-1 text-slate-500">Track stock levels and identify shortages</p>
+            </div>
+
+            {/* Control Bar */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-wrap items-center gap-3">
+                    {isMenusLoading ? (
+                        <div className="flex items-center gap-2 py-1">
+                            <Skeleton className="h-11 w-24 rounded-[14px]" />
+                            <Skeleton className="h-11 w-24 rounded-[14px]" />
+                            <Skeleton className="h-11 w-24 rounded-[14px]" />
+                        </div>
+                    ) : menus.length === 0 ? (
+                        <div className="text-sm text-slate-400 py-2">No menus found. Please add a menu.</div>
+                    ) : (
+                        menus.map((menu) => (
+                            <button
+                                key={menu.id}
+                                onClick={() => setSelectedCategory(menu.name)}
+                                className={`rounded-[14px] px-6 py-2.5 text-[15px] font-medium transition-all ${selectedCategory === menu.name
+                                        ? "border-2 border-blue-500 bg-white text-blue-600 shadow-sm"
+                                        : "bg-[#F1F5F9] text-slate-500 hover:bg-slate-200"
+                                    }`}
+                            >
+                                {menu.name}
+                            </button>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {isLoadingSectionsData ? (
+                <div className="space-y-6">
+                    {[1, 2].map((i) => (
+                        <div key={i} className="overflow-hidden rounded-[26px] border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+                            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                                <div className="space-y-2">
+                                    <Skeleton className="h-7 w-48" />
+                                    <Skeleton className="h-4 w-32" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="h-10 w-28 rounded-xl" />
+                                    <Skeleton className="h-10 w-28 rounded-xl" />
+                                    <Skeleton className="h-10 w-28 rounded-xl" />
+                                </div>
+                            </div>
+                            <div className="grid gap-4 lg:grid-cols-3">
+                                {[1, 2, 3].map((j) => (
+                                    <div key={j} className="flex flex-col gap-4 rounded-[22px] border border-blue-100 bg-white p-4 shadow-sm">
+                                        <Skeleton className="h-72 w-full rounded-[18px]" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : sections.length === 0 ? (
+                <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-[0_20px_60px_rgba(15,23,42,0.04)]">
+                    <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[#F3F7FF] text-[#1A56DB]">
+                        <SquarePen className="size-8" />
+                    </div>
+                    <h2 className="mt-5 text-2xl font-semibold tracking-tight text-slate-950">
+                        {t("noSectionsIn", { category: selectedCategory })}
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
+                        {t("clickAddSection", { category: selectedCategory })}
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    {sections.map((section, index) => (
+                        <CustomerMenuCards
+                            key={section.id}
+                            sectionId={section.id}
+                            sectionNumber={index + 1}
+                            sectionName={section.name}
+                            layout={section.layout}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Page;
