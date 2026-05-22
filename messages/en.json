@@ -119,7 +119,29 @@
     "shiftWorkflow": "Shift Workflow",
     "order": "Order",
     "menuManagement": "Menu Management",
-    "pendingPayments": "Pending Payments"
+    "pendingPayments": "Pending Payments",
+    "orderLifeCycle": "Order Life Cycle"
+  },
+  "OrderLifeCycle": {
+    "orderLifeCycle": "Order Life Cycle",
+    "activeOrders": "Monitor order states and notifications in real time.",
+    "inComing": "In-coming",
+    "redFlashingAlert": "Red flashing + Alert sound",
+    "redFlashingDesc": "Wait for Cashier or Admin to press OK",
+    "okPressed": "OK Pressed",
+    "processing": "Processing",
+    "processingDesc": "Items sent to production (Kitchen/Bar)",
+    "ready": "Ready",
+    "collectionAlertSent": "Collection alert sent to customer",
+    "collectionDesc": "Customer can pick up their order",
+    "pickUp": "Pick Up",
+    "clearFromScreen": "Clear from screen",
+    "clearDesc": "Orders cleared after customer picks up",
+    "orderNotificationPanel": "Order Notification Panel",
+    "alarmControls": "ALARM CONTROLS",
+    "cardFlashingAlert": "Card flashing alert and sound will play on new orders.",
+    "unmute": "Unmute Sound",
+    "mute": "Mute Sound"
   },
   "Dashboard": {
     "title": "Dashboard",

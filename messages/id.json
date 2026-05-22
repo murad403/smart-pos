@@ -119,7 +119,29 @@
     "shiftWorkflow": "Alur Kerja Shift",
     "order": "Pesanan",
     "menuManagement": "Manajemen Menu",
-    "pendingPayments": "Menunggu Pembayaran"
+    "pendingPayments": "Menunggu Pembayaran",
+    "orderLifeCycle": "Siklus Hidup Pesanan"
+  },
+  "OrderLifeCycle": {
+    "orderLifeCycle": "Siklus Hidup Pesanan",
+    "activeOrders": "Pantau status pesanan dan notifikasi secara real-time.",
+    "inComing": "Masuk",
+    "redFlashingAlert": "Berkedip merah + Suara alarm",
+    "redFlashingDesc": "Menunggu Kasir atau Admin menekan OK",
+    "okPressed": "OK Ditekan",
+    "processing": "Diproses",
+    "processingDesc": "Item dikirim ke tempat produksi (Dapur/Bar)",
+    "ready": "Siap",
+    "collectionAlertSent": "Notifikasi pengambilan dikirim ke pelanggan",
+    "collectionDesc": "Pelanggan dapat mengambil pesanan mereka",
+    "pickUp": "Ambil",
+    "clearFromScreen": "Hapus dari layar",
+    "clearDesc": "Pesanan dihapus setelah pelanggan mengambil",
+    "orderNotificationPanel": "Panel Notifikasi Pesanan",
+    "alarmControls": "KONTROL ALARM",
+    "cardFlashingAlert": "Kartu berkedip dan suara akan berbunyi pada pesanan baru.",
+    "unmute": "Aktifkan Suara",
+    "mute": "Senyapkan Suara"
   },
   "Dashboard": {
     "title": "Dasbor",

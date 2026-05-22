@@ -1,11 +1,5 @@
 import baseApi from "../../api/api";
-import {
-    ShiftSession,
-    OpenShiftBody,
-    CloseShiftBody,
-    CashProof,
-    ShiftResponse
-} from "./workflow.type";
+import { ShiftSession, OpenShiftBody, CloseShiftBody, CashProof, ShiftResponse } from "./workflow.type";
 
 const workflowApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
