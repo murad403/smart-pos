@@ -117,7 +117,8 @@
     "saveChanges": "Save Changes",
     "manageTable": "Manage Tables",
     "shiftWorkflow": "Shift Workflow",
-    "order": "Order"
+    "order": "Order",
+    "pendingPayments": "Pending Payments"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -523,5 +524,11 @@
     "notes": "Notes",
     "productionStation": "Station",
     "packetChoices": "Packet Choices"
+  },
+  "PendingPayments": {
+    "title": "Pending Payment Orders",
+    "subtitle": "Review and process orders awaiting payment completion.",
+    "noOrdersFound": "No pending payment orders found.",
+    "image": "Image"
   }
 }

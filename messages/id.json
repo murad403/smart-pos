@@ -117,7 +117,8 @@
     "saveChanges": "Simpan Perubahan",
     "manageTable": "Kelola Meja",
     "shiftWorkflow": "Alur Kerja Shift",
-    "order": "Pesanan"
+    "order": "Pesanan",
+    "pendingPayments": "Menunggu Pembayaran"
   },
   "Dashboard": {
     "title": "Dasbor",
@@ -525,5 +526,11 @@
     "notes": "Catatan",
     "productionStation": "Stasiun",
     "packetChoices": "Pilihan Paket"
+  },
+  "PendingPayments": {
+    "title": "Pesanan Menunggu Pembayaran",
+    "subtitle": "Tinjau dan proses pesanan yang menunggu penyelesaian pembayaran.",
+    "noOrdersFound": "Tidak ada pesanan menunggu pembayaran ditemukan.",
+    "image": "Gambar"
   }
 }

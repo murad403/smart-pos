@@ -1,20 +1,19 @@
 import baseApi from "../../api/api";
-
-
+import { GetAllOrdersResponse, GetOrderDetailsResponse } from "./order.type";
 
 const orderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllOrders: builder.query({
+        getAllOrders: builder.query<GetAllOrdersResponse, { page?: number; limit?: number; status?: string; source?: string; date?: string; search?: string } | void>({
             query: (params) => {
                 return {
                     url: "/orders",
                     method: "GET",
-                    params
+                    params: params || undefined
                 };
             },
             providesTags: ["orders"]
         }),
-        getOrderDetails: builder.query({
+        getOrderDetails: builder.query<GetOrderDetailsResponse, number>({
             query: (id) => {
                 return {
                     url: `/orders/${id}`,
@@ -23,11 +22,12 @@ const orderApi = baseApi.injectEndpoints({
             },
             providesTags: ["orders"]
         }),
-        getPendingPaymentOrders: builder.query({
-            query: () => {
+        getPendingPaymentOrders: builder.query<GetAllOrdersResponse, { page?: number; limit?: number } | void>({
+            query: (params) => {
                 return {
                     url: `/orders/pending-payment`,
-                    method: "GET"
+                    method: "GET",
+                    params: params || undefined
                 };
             },
             providesTags: ["orders"]
