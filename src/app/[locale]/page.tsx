@@ -25,7 +25,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
       if (userData) {
         router.push(`/${p.locale}/dashboard`);
       } else {
-        router.push(`/${p.locale}/auth/sign-in`);
+        router.push(`/${p.locale}/auth/welcome`);
       }
     }
   }, [showSplash, router, p.locale]);

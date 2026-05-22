@@ -530,5 +530,25 @@
     "subtitle": "Review and process orders awaiting payment completion.",
     "noOrdersFound": "No pending payment orders found.",
     "image": "Image"
+  },
+  "welcome": {
+    "title": "Smart POS",
+    "subtitle": "Smart POS System",
+    "selectRole": "Select Your Role",
+    "admin": "Admin",
+    "adminAria": "Navigate to Admin login",
+    "staff": "Staff",
+    "staffAria": "Navigate to Staff login",
+    "customer": "Customer",
+    "customerAria": "Navigate to Customer welcome page",
+    "owner": "Owner",
+    "ownerAria": "Navigate to Owner login"
+  },
+  "customerWelcome": {
+    "welcome": "Welcome",
+    "startOrder": "Start Order",
+    "selectOrderType": "Select Order Type",
+    "dineIn": "Dine In",
+    "takeaway": "Takeaway"
   }
 }

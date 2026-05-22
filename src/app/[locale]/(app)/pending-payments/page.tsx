@@ -14,7 +14,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
   const tPending = useTranslations("PendingPayments");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10;
+  const limit = 15;
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
   const { data: ordersRes, isLoading, isFetching } = useGetPendingPaymentOrdersQuery({

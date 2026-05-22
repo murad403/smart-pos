@@ -532,5 +532,25 @@
     "subtitle": "Tinjau dan proses pesanan yang menunggu penyelesaian pembayaran.",
     "noOrdersFound": "Tidak ada pesanan menunggu pembayaran ditemukan.",
     "image": "Gambar"
+  },
+  "welcome": {
+    "title": "Smart POS",
+    "subtitle": "Sistem POS Pintar",
+    "selectRole": "Pilih Peran Anda",
+    "admin": "Admin",
+    "adminAria": "Navigasi ke login Admin",
+    "staff": "Staf",
+    "staffAria": "Navigasi ke login Staf",
+    "customer": "Pelanggan",
+    "customerAria": "Navigasi ke halaman selamat datang Pelanggan",
+    "owner": "Pemilik",
+    "ownerAria": "Navigasi ke login Pemilik"
+  },
+  "customerWelcome": {
+    "welcome": "Selamat Datang",
+    "startOrder": "Mulai Pesan",
+    "selectOrderType": "Pilih Jenis Pesanan",
+    "dineIn": "Makan di Tempat",
+    "takeaway": "Bawa Pulang"
   }
 }
