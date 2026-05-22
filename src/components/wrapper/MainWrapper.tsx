@@ -48,6 +48,7 @@ function AppSidebar() {
     { label: t("salesReports"), icon: ReceiptText, href: "/reports" },
     { label: t("paymentVerification"), icon: CreditCard, href: "/payment-verification" },
     { label: t("inventoryReport"), icon: Package, href: "/inventory-report" },
+    { label: t("menuManagement"), icon: Grid2x2, href: "/menu-management" },
     { label: t("menu"), icon: Grid2x2, href: "/menu" },
     { label: t("item"), icon: Utensils, href: "/item" },
     { label: t("productionStation"), icon: Fuel, href: "/production-station" },
