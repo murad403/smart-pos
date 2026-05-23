@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { X, ShoppingBag, Minus, Plus, Check } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Choice = {
   id: number;
@@ -30,6 +31,7 @@ type Props = {
 };
 
 const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConfirm }) => {
+  const t = useTranslations("Menu");
   // Format: { [sectionName]: { [choiceName]: quantity } }
   const [selections, setSelections] = useState<Record<string, Record<string, number>>>({});
 
@@ -207,7 +209,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
               )}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 leading-tight">Customize Packet</h3>
+              <h3 className="text-lg font-bold text-slate-900 leading-tight">{t("customizePacket")}</h3>
               <p className="text-xs text-slate-500 mt-0.5">{item.itemName}</p>
             </div>
           </div>
@@ -235,12 +237,12 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                         {section.name}
                       </h4>
                       <span className="text-[11px] font-medium text-slate-400">
-                        (Choose 1-{section.maxQty})
+                        ({t("chooseRange", { max: section.maxQty })})
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[11px] font-semibold text-slate-500">
-                        Selected: {distinctSelected}/{section.maxQty}
+                        {t("selected")}: {distinctSelected}/{section.maxQty}
                       </span>
                       {isValid ? (
                         <div className="flex size-4.5 items-center justify-center rounded-full bg-green-100 text-green-600">
@@ -248,7 +250,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                         </div>
                       ) : (
                         <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                          Required
+                          {t("required")}
                         </span>
                       )}
                     </div>
@@ -364,7 +366,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
           {/* Footer Actions */}
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between shrink-0">
             <div className="leading-tight">
-              <span className="text-xs text-slate-400 font-medium">Item Base Price</span>
+              <span className="text-xs text-slate-400 font-medium">{t("itemBasePrice")}</span>
               <p className="text-lg font-extrabold text-blue-600">
                 Rp{item.price.toLocaleString("en-US")}
               </p>
@@ -375,7 +377,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                 onClick={onClose}
                 className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
@@ -383,7 +385,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                 className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-blue-500/10"
               >
                 <ShoppingBag size={15} />
-                Add to Order
+                {t("addToOrder")}
               </button>
             </div>
           </div>
