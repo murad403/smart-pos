@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { Search, Eye, Filter, Calendar } from "lucide-react";
+import { Search, Eye, Filter, Calendar, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useGetAllOrdersQuery } from "@/redux/features/order/order.api";
+import { useGetAllOrdersQuery, useSendOrderToProductionMutation } from "@/redux/features/order/order.api";
 import CustomPagination from "@/components/shared/CustomPagination";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
 import { Order } from "@/redux/features/order/order.type";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const OrdersPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
@@ -18,6 +19,7 @@ const OrdersPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [sendingOrderId, setSendingOrderId] = useState<number | null>(null);
 
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
@@ -40,12 +42,25 @@ const OrdersPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
     date: dateFilter || undefined,
     search: debouncedSearchValue.trim() || undefined,
   });
-  // const isPaid = ordersRes?.data?.[0]?.payment?.some((s) => s.status === "PAID");
-  // console.log(ordersRes?.data?.[0])
+  const [sendOrderToProduction] = useSendOrderToProductionMutation();
 
   const orders = ordersRes?.data ?? [];
+  
   const pagination = ordersRes?.pagination;
   const totalPages = pagination?.totalPages ?? 1;
+
+  const handleSendToProduction = async (orderId: number) => {
+    try {
+      setSendingOrderId(orderId);
+      await sendOrderToProduction(orderId).unwrap();
+      toast.success("Order sent to production successfully");
+    } catch (error: unknown) {
+      const apiError = error as { data?: { message?: string }; message?: string };
+      toast.error(apiError?.data?.message || apiError?.message || "Failed to send order to production");
+    } finally {
+      setSendingOrderId(null);
+    }
+  };
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -213,6 +228,7 @@ const OrdersPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
                 // Orders Rows
                 orders.map((order: Order) => {
                   const isPaid = order.payment?.some((payment) => payment.status === "PAID");
+                  const shouldShowSendToProduction = order.status === "PENDING" || order.status === "PENDING_PROCESSING";
 
                   return (
                     <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
@@ -239,6 +255,16 @@ const OrdersPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
                         {new Date(order.createdAt).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-center">
+                        {shouldShowSendToProduction && (
+                          <button
+                            onClick={() => handleSendToProduction(order.id)}
+                            disabled={sendingOrderId === order.id}
+                            className="rounded-full p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition disabled:cursor-not-allowed disabled:opacity-40"
+                            title={t("sendToProduction") || "Send to Production"}
+                          >
+                            <Send size={16} />
+                          </button>
+                        )}
                         <button
                           onClick={() => setSelectedOrderId(order.id)}
                           className="rounded-full p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition"

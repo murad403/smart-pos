@@ -4,7 +4,7 @@
 import React from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
-import { Armchair, Boxes, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, HandCoins, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, User, Utensils } from "lucide-react"
+import { Armchair, Boxes, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, HandCoins, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, Utensils } from "lucide-react"
 import brandLogo from "@/assets/logo/logo.png"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -57,7 +57,7 @@ function AppSidebar() {
     { label: t("item"), icon: Utensils, href: "/item" },
     { label: t("productionStation"), icon: Fuel, href: "/production-station" },
     { label: t("collection"), icon: Boxes, href: "/collection" },
-    { label: t("production"), icon: Boxes, href: "/production" },
+    { label: t("production"), icon: Speaker, href: "/production" },
     { label: t("manageTable"), icon: Armchair, href: "/manage-table" },
     { label: t("shiftWorkflow"), icon: CalendarRange, href: "/shift-workflow" },
     { label: t("order"), icon: ShoppingBag, href: "/order" },

@@ -43,6 +43,15 @@ const orderApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["orders"]
         }),
+        sendOrderToProduction: builder.mutation({
+            query: (orderId) => {
+                return {
+                    url: `/orders/${orderId}/send-to-production`,
+                    method: "POST"
+                };
+            },
+            invalidatesTags: ["orders"]
+        }),
         submitOrderPayment: builder.mutation<SubmitOrderPaymentResponse, SubmitOrderPaymentRequest>({
             query: ({ orderId, method, proofImages }) => {
                 const formData = new FormData();
@@ -69,5 +78,6 @@ export const {
     useGetOrderDetailsQuery,
     useGetPendingPaymentOrdersQuery,
     useCreateOrderMutation,
+    useSendOrderToProductionMutation,
     useSubmitOrderPaymentMutation
 } = orderApi;

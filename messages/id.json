@@ -562,6 +562,7 @@
     "createdAt": "Dibuat Pada",
     "actions": "Aksi",
     "viewDetails": "Lihat Detail",
+    "sendToProduction": "Kirim ke Produksi",
     "orderDetails": "Detail Pesanan",
     "items": "Daftar Item",
     "payment": "Detail Pembayaran",
