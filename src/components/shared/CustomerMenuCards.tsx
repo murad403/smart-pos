@@ -6,7 +6,7 @@ import item1 from "@/assets/images/menu1.jpg";
 import item2 from "@/assets/images/menu2.png";
 import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 
 import { useGetAllSectionDetailsByMenuIdQuery } from "@/redux/features/menu/menu.api";
 
@@ -33,6 +33,7 @@ type Props = {
   layout: SectionLayoutType;
   onAddItem: (item: MenuItemCardData) => void;
   cartItems: any[];
+  onUpdateCartItemQuantity?: (itemId: number, packetChoices: any[] | undefined, delta: number) => void;
 };
 
 const imageMap = {
@@ -126,8 +127,34 @@ const PacketSlider = ({ packetSections }: { packetSections: any[] }) => {
   );
 };
 
-const CustomerMenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, cartItems }: Props) => {
+const CustomerMenuCards = ({
+  sectionId,
+  sectionNumber,
+  sectionName,
+  layout,
+  onAddItem,
+  cartItems,
+  onUpdateCartItemQuantity
+}: Props) => {
   const t = useTranslations("Menu");
+
+  const handleDecrement = (item: MenuItemCardData) => {
+    const matchingItems = cartItems.filter(ci => ci.itemId === item.id);
+    if (matchingItems.length === 0) return;
+    const targetItem = matchingItems[matchingItems.length - 1];
+    if (onUpdateCartItemQuantity) {
+      onUpdateCartItemQuantity(targetItem.itemId, targetItem.packetChoices, -1);
+    }
+  };
+
+  const handleIncrement = (item: MenuItemCardData) => {
+    const matchingItems = cartItems.filter(ci => ci.itemId === item.id);
+    if (matchingItems.length === 0) return;
+    const targetItem = matchingItems[matchingItems.length - 1];
+    if (onUpdateCartItemQuantity) {
+      onUpdateCartItemQuantity(targetItem.itemId, targetItem.packetChoices, 1);
+    }
+  };
 
   const { data: sectionDetailsRes, isLoading } = useGetAllSectionDetailsByMenuIdQuery(sectionId);
   const sectionDetails = sectionDetailsRes?.data;
@@ -297,12 +324,14 @@ const CustomerMenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAd
                         {item.badges[1]}
                       </span>
                     </div>
+
+
                   </div>
 
                   <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex flex-col justify-between p-4"}>
                     <div className="space-y-3">
-                      <p className="text-lg font-bold tracking-tight text-red-500">{item.itemNumber}</p>
-                      <h3 className="text-[1.35rem] font-bold tracking-tight text-red-500">{item.itemName}</h3>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
+                      <h3 className="text-xl font-bold text-slate-900">{item.itemName}</h3>
                       <div className="grid grid-cols-3 gap-3 text-sm text-slate-700">
                         <p className="text-slate-600">{t("inventory")}: {item.inventory}</p>
                         <p className="text-slate-600">{t("stock")}: {item.stock}</p>
@@ -318,6 +347,31 @@ const CustomerMenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAd
                         <p className="text-slate-550 text-xs">{item.promoPrice ? t("promoPrice") : t("price")}</p>
                         <p className="font-bold text-slate-900 text-lg">Rp{(item.promoPrice || item.price).toLocaleString("en-US")}</p>
                       </div>
+
+                      {isSelected && (
+                        <div 
+                          className="flex items-center gap-2.5 bg-white border border-slate-150 rounded-xl p-1 shadow-sm shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleDecrement(item)}
+                            className="size-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 text-slate-650 transition-colors cursor-pointer"
+                          >
+                            <Minus size={13} />
+                          </button>
+                          <span className="text-sm font-bold text-slate-800 w-4 text-center select-none">
+                            {totalQty}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleIncrement(item)}
+                            className="size-7 rounded-lg bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white transition-colors cursor-pointer"
+                          >
+                            <Plus size={13} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </article>

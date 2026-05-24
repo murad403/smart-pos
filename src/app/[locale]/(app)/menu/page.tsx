@@ -242,6 +242,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                             layout={section.layout}
                             onAddItem={handleAddItem}
                             cartItems={cartItems}
+                            onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
                         />
                     ))}
                 </div>
