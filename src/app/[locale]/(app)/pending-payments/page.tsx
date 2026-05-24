@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { BadgeDollarSign, Eye } from "lucide-react";
+import { BadgeDollarSign, Eye, SquarePen } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api";
 import CustomPagination from "@/components/shared/CustomPagination";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
@@ -14,6 +15,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
   if (params) React.use(params);
   const tOrder = useTranslations("Order");
   const tPending = useTranslations("PendingPayments");
+  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 15;
@@ -156,10 +158,17 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                         </button>
                         <button
                           type="button"
+                          onClick={() => router.push(`/menu?editOrderId=${order.id}`)}
+                          className="rounded-full p-2 text-slate-400 cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition"
+                          title={tOrder("editOrder") || "Edit Order"}
+                        >
+                          <SquarePen size={16} />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setSelectedPaymentOrder(order)}
                           className="rounded-full p-2 text-slate-400 cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition"
                           title={tPending("submitPayment") || "Submit Payment"}
-                          
                         >
                           <BadgeDollarSign size={16} />
                         </button>

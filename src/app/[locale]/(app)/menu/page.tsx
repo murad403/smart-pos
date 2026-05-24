@@ -7,14 +7,22 @@ import React, { useState } from "react";
 import { SquarePen, ArrowRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useGetAllMenuQuery, useGetAllSectionByMenuIdQuery } from "@/redux/features/menu/menu.api";
+import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
 import CustomerMenuCards from "@/components/shared/CustomerMenuCards";
 import SelectPacketChoicesModal from "@/components/modal/SelectPacketChoicesModal";
 import CreateOrderModal from "@/components/modal/CreateOrderModal";
+import EditOrderModal from "@/components/modal/EditOrderModal";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     if (params) React.use(params);
     const t = useTranslations("Menu");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const editOrderIdStr = searchParams.get("editOrderId");
+    const editOrderId = editOrderIdStr ? parseInt(editOrderIdStr, 10) : null;
 
     // Fetch dynamic menus
     const { data: menuRes, isLoading: isMenusLoading } = useGetAllMenuQuery();
@@ -27,6 +35,26 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
     const [isPacketChoicesModalOpen, setIsPacketChoicesModalOpen] = useState(false);
     const [selectedPacketItem, setSelectedPacketItem] = useState<any>(null);
+
+    // Fetch order details if we are editing an order
+    const { data: orderDetailsRes } = useGetOrderDetailsQuery(editOrderId, {
+        skip: !editOrderId,
+    });
+
+    // Pre-populate cart items when editing order details are fetched
+    React.useEffect(() => {
+        if (orderDetailsRes?.data) {
+            const mapped = orderDetailsRes.data.orderItems.map((oi: any) => ({
+                itemId: oi.itemId,
+                itemName: oi.itemName,
+                price: parseFloat(oi.promoPrice || oi.unitPrice || "0"),
+                quantity: oi.quantity,
+                imageUrl: oi.item?.imageUrl || null,
+                packetChoices: oi.packetChoices || null,
+            }));
+            setCartItems(mapped);
+        }
+    }, [orderDetailsRes]);
 
     const handleAddItem = (item: any) => {
         if (item.packetSections && item.packetSections.length > 0) {
@@ -55,12 +83,13 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     const handleConfirmPacketChoices = (choices: any[]) => {
         if (!selectedPacketItem) return;
         setCartItems((prev) => {
-            const choiceKey = JSON.stringify(choices.sort((a, b) => a.section.localeCompare(b.section)));
+            const sortedChoices = [...choices].sort((a, b) => a.section.localeCompare(b.section));
+            const choiceKey = JSON.stringify(sortedChoices);
             const existing = prev.find(
                 (ci) =>
                     ci.itemId === selectedPacketItem.id &&
                     ci.packetChoices &&
-                    JSON.stringify(ci.packetChoices.sort((a: any, b: any) => a.section.localeCompare(b.section))) === choiceKey
+                    JSON.stringify([...ci.packetChoices].sort((a: any, b: any) => a.section.localeCompare(b.section))) === choiceKey
             );
 
             if (existing) {
@@ -75,7 +104,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                     price: selectedPacketItem.promoPrice || selectedPacketItem.price,
                     quantity: 1,
                     imageUrl: selectedPacketItem.imageUrl,
-                    packetChoices: choices,
+                    packetChoices: sortedChoices,
                 },
             ];
         });
@@ -86,13 +115,13 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     const handleUpdateCartItemQuantity = (itemId: number, packetChoices: any[] | undefined, delta: number) => {
         setCartItems((prev) => {
             const targetChoicesKey = packetChoices
-                ? JSON.stringify(packetChoices.sort((a, b) => a.section.localeCompare(b.section)))
+                ? JSON.stringify([...packetChoices].sort((a, b) => a.section.localeCompare(b.section)))
                 : undefined;
 
             return prev
                 .map((ci) => {
                     const ciChoicesKey = ci.packetChoices
-                        ? JSON.stringify(ci.packetChoices.sort((a: any, b: any) => a.section.localeCompare(b.section)))
+                        ? JSON.stringify([...ci.packetChoices].sort((a: any, b: any) => a.section.localeCompare(b.section)))
                         : undefined;
 
                     if (ci.itemId === itemId && ciChoicesKey === targetChoicesKey) {
@@ -106,6 +135,9 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
     const handleClearCart = () => {
         setCartItems([]);
+        if (editOrderId) {
+            router.push("/pending-payments");
+        }
     };
     // Find currently selected menu
     const currentMenu = React.useMemo(
@@ -257,13 +289,25 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                 onConfirm={handleConfirmPacketChoices}
             />
 
-            <CreateOrderModal
-                open={isCreateOrderModalOpen}
-                onClose={() => setIsCreateOrderModalOpen(false)}
-                cartItems={cartItems}
-                onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
-                onClearCart={handleClearCart}
-            />
+            {editOrderId ? (
+                <EditOrderModal
+                    open={isCreateOrderModalOpen}
+                    onClose={() => setIsCreateOrderModalOpen(false)}
+                    cartItems={cartItems}
+                    onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
+                    onClearCart={handleClearCart}
+                    orderId={editOrderId}
+                    orderDetail={orderDetailsRes?.data}
+                />
+            ) : (
+                <CreateOrderModal
+                    open={isCreateOrderModalOpen}
+                    onClose={() => setIsCreateOrderModalOpen(false)}
+                    cartItems={cartItems}
+                    onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
+                    onClearCart={handleClearCart}
+                />
+            )}
         </div>
     );
 };

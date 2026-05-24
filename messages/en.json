@@ -560,6 +560,7 @@
     "createdAt": "Created At",
     "actions": "Actions",
     "viewDetails": "View Details",
+    "editOrder": "Edit Order",
     "sendToProduction": "Send To Production",
     "orderDetails": "Order Details",
     "items": "Items",

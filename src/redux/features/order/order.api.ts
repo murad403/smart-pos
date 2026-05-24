@@ -99,6 +99,7 @@ export const {
     useGetOrderDetailsQuery,
     useGetPendingPaymentOrdersQuery,
     useCreateOrderMutation,
+    useEditOrderMutation,
     useSendOrderToProductionMutation,
     useSubmitOrderPaymentMutation,
     useGetCurrentCustomerOrdersQuery
