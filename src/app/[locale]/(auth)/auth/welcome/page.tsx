@@ -1,7 +1,6 @@
 "use client";
-
 import { Link, useRouter } from "@/i18n/routing";
-import { Lock, User, Users } from "lucide-react";
+import { BriefcaseBusiness, Lock, ShieldCheck, ShoppingCart, UserCog } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { saveUserData } from "@/utils/auth";
@@ -59,7 +58,7 @@ const Welcome = () => {
                             className="flex w-full items-center gap-2.5 rounded-xl bg-[#f5a623] px-3.5 py-4 text-[13px] font-semibold text-white transition-all duration-150 hover:-translate-y-0.5 hover:saturate-[1.1] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-                                <Users size={13} strokeWidth={2.2} />
+                                <ShoppingCart size={17} strokeWidth={2} />
                             </span>
                             {t("customer")}
                         </button>
@@ -71,7 +70,7 @@ const Welcome = () => {
                             className="flex w-full items-center gap-2.5 rounded-xl bg-[#1db974] px-3.5 py-4 text-[13px] font-semibold text-white no-underline transition-all duration-150 hover:-translate-y-0.5 hover:saturate-[1.1] active:scale-[0.98]"
                         >
                             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-                                <User size={13} strokeWidth={2.2} />
+                                <UserCog size={17} strokeWidth={2} />
                             </span>
                             {t("staff")}
                         </Link>
@@ -83,7 +82,7 @@ const Welcome = () => {
                             className="flex w-full items-center gap-2.5 rounded-xl bg-[#3b6ef6] px-3.5 py-4 text-[13px] font-semibold text-white no-underline transition-all duration-150 hover:-translate-y-0.5 hover:saturate-[1.1] active:scale-[0.98]"
                         >
                             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-                                <Lock size={13} strokeWidth={2.2} />
+                                <ShieldCheck size={17} strokeWidth={2} />
                             </span>
                             {t("admin")}
                         </Link>
@@ -98,7 +97,7 @@ const Welcome = () => {
                             className="flex w-full items-center gap-2.5 rounded-xl bg-orange-500 px-3.5 py-4 text-[13px] font-semibold text-white transition-all duration-150 hover:-translate-y-0.5 hover:saturate-[1.1] active:scale-[0.98]"
                         >
                             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-                                <Users size={13} strokeWidth={2.2} />
+                                <BriefcaseBusiness size={17} strokeWidth={2} />
                             </span>
                             {t("owner")}
                         </Link>
