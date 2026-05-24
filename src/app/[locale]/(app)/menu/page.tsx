@@ -30,6 +30,27 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
     const [selectedCategory, setSelectedCategory] = React.useState("");
 
+    const [selectedDevice, setSelectedDevice] = useState<string>("qrcode");
+
+    React.useEffect(() => {
+        const updateDevice = () => {
+            const stored = localStorage.getItem("selectedDevice");
+            if (stored) {
+                setSelectedDevice(stored);
+            }
+        };
+
+        updateDevice();
+
+        window.addEventListener("storage", updateDevice);
+        window.addEventListener("selectedDeviceChanged", updateDevice);
+
+        return () => {
+            window.removeEventListener("storage", updateDevice);
+            window.removeEventListener("selectedDeviceChanged", updateDevice);
+        };
+    }, []);
+
     // Cart and Order States
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
@@ -152,6 +173,26 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         { skip: !currentMenuId }
     );
     const sections = sectionsRes?.data ?? [];
+
+    const filteredSections = React.useMemo(() => {
+        return sections.filter((section: any) => {
+            if (section.isVisible === false) return false;
+            if (!selectedDevice) return true;
+
+            switch (selectedDevice) {
+                case "qrcode":
+                    return section.visibleOnQrTable !== false;
+                case "touchscreen":
+                    return section.visibleOnTouchscreen !== false;
+                case "admin":
+                    return section.visibleOnAdmin !== false;
+                case "service":
+                    return section.visibleOnService !== false;
+                default:
+                    return true;
+            }
+        });
+    }, [sections, selectedDevice]);
     const isLoadingSectionsData = isMenusLoading || isSectionsLoading || (menus.length > 0 && !currentMenuId);
 
 
@@ -219,7 +260,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                         </div>
                     ))}
                 </div>
-            ) : sections.length === 0 ? (
+            ) : filteredSections.length === 0 ? (
                 <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-[0_20px_60px_rgba(15,23,42,0.04)]">
                     <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[#F3F7FF] text-[#1A56DB]">
                         <SquarePen className="size-8" />
@@ -233,7 +274,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                 </div>
             ) : (
                 <div className="space-y-5">
-                    {sections.map((section, index) => (
+                    {filteredSections.map((section, index) => (
                         <CustomerMenuCards
                             key={section.id}
                             sectionId={section.id}

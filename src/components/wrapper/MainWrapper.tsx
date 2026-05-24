@@ -183,6 +183,7 @@ function Topbar() {
   const handleDeviceChange = (device: string) => {
     setSelectedDevice(device);
     localStorage.setItem("selectedDevice", device);
+    window.dispatchEvent(new Event("selectedDeviceChanged"));
     // toast.success(`Selected device: ${device.toUpperCase()}`);
   };
 
