@@ -6,12 +6,13 @@ import React from "react"
 import Image from "next/image"
 import { Armchair, Boxes, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, HandCoins, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, Utensils, QrCode, Monitor, Shield, Smartphone } from "lucide-react"
 import brandLogo from "@/assets/logo/logo.png"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter, Link } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
 import { clearUserData, getUserData } from "@/utils/auth"
+import { isRouteAllowed, DEFAULT_ROLE_ROUTE } from "@/utils/rbac"
 import { toast } from "sonner"
 
 
@@ -24,7 +25,7 @@ function SidebarBrand() {
       </div>
       <div className="min-w-0 group-data-[collapsible=icon]:hidden">
         <p className="text-lg font-semibold tracking-tight text-slate-950">SmartPOS</p>
-        <p className="text-xs text-slate-500">Admin panel</p>
+        {/* <p className="text-xs text-slate-500">Admin panel</p> */}
       </div>
     </Link>
   )
@@ -35,9 +36,14 @@ function AppSidebar() {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const t = useTranslations("Common");
+  const [user, setUser] = React.useState<any>(null);
 
   React.useEffect(() => {
     setProfileOpen(pathName.startsWith("/profile"));
+  }, [pathName]);
+
+  React.useEffect(() => {
+    setUser(getUserData());
   }, [pathName]);
 
   const handleLogout = () => {
@@ -80,64 +86,68 @@ function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.label}
-                    className={cn(
-                      "h-11 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
-                      item.href === pathName
-                        ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
-                        : "hover:bg-slate-100 hover:text-slate-950"
-                    )}
-                  >
-                    <Link href={item.href} className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0">
-                      <item.icon className="size-4" />
-                      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems
+                .filter((item) => user && isRouteAllowed(user.role, item.href))
+                .map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.label}
+                      className={cn(
+                        "h-11 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
+                        item.href === pathName
+                          ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
+                          : "hover:bg-slate-100 hover:text-slate-950"
+                      )}
+                    >
+                      <Link href={item.href} className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0">
+                        <item.icon className="size-4" />
+                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
 
               {/* Profile Dropdown */}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  tooltip={t("profile")}
-                  className={cn(
-                    "h-11 rounded-lg px-3 text-sm font-medium transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
-                    profileOpen || pathName.startsWith("/profile")
-                      ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-                  )}
-                >
-                  <div className="flex w-full items-center gap-3">
-                    <User className="size-4" />
-                    <span className="flex-1 group-data-[collapsible=icon]:hidden">{t("profile")}</span>
-                    <ChevronDown className={cn("size-4 transition-transform group-data-[collapsible=icon]:hidden", profileOpen && "rotate-180")} />
-                  </div>
-                </SidebarMenuButton>
+              {user && isRouteAllowed(user.role, "/profile") && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    tooltip={t("profile")}
+                    className={cn(
+                      "h-11 rounded-lg px-3 text-sm font-medium transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
+                      profileOpen || pathName.startsWith("/profile")
+                        ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                    )}
+                  >
+                    <div className="flex w-full items-center gap-3">
+                      <User className="size-4" />
+                      <span className="flex-1 group-data-[collapsible=icon]:hidden">{t("profile")}</span>
+                      <ChevronDown className={cn("size-4 transition-transform group-data-[collapsible=icon]:hidden", profileOpen && "rotate-180")} />
+                    </div>
+                  </SidebarMenuButton>
 
-                {profileOpen && (
-                  <div className="mt-1 space-y-1 group-data-[collapsible=icon]:hidden">
-                    {profileSubItems.map((sub) => (
-                      <Link
-                        key={sub.label}
-                        href={sub.href}
-                        className={cn(
-                          "flex h-10 items-center rounded-lg px-10 text-sm font-medium transition-colors",
-                          pathName === sub.href
-                            ? "text-[#1A56DB] bg-blue-50/50"
-                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
-                        )}
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </SidebarMenuItem>
+                  {profileOpen && (
+                    <div className="mt-1 space-y-1 group-data-[collapsible=icon]:hidden">
+                      {profileSubItems.map((sub) => (
+                        <Link
+                          key={sub.label}
+                          href={sub.href}
+                          className={cn(
+                            "flex h-10 items-center rounded-lg px-10 text-sm font-medium transition-colors",
+                            pathName === sub.href
+                              ? "text-[#1A56DB] bg-blue-50/50"
+                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
+                          )}
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -236,11 +246,10 @@ function Topbar() {
                   <DropdownMenuItem
                     key={key}
                     onClick={() => handleDeviceChange(key)}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer outline-none ${
-                      selectedDevice === key
-                        ? "bg-blue-50 text-[#1A56DB]"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    }`}
+                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer outline-none ${selectedDevice === key
+                      ? "bg-blue-50 text-[#1A56DB]"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      }`}
                   >
                     <IconComponent className={`size-4 ${selectedDevice === key ? "text-[#1A56DB]" : "text-slate-400"}`} />
                     <span>{value.label}</span>
@@ -295,18 +304,21 @@ function Topbar() {
                 <div className="text-sm font-normal text-slate-400">{user?.email || "owner@smartpos.com"}</div>
               </DropdownMenuLabel>
 
+              {user && isRouteAllowed(user.role, "/profile") && (
+                <>
+                  <DropdownMenuSeparator className="my-1 bg-slate-200" />
+                  <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-base text-slate-800 focus:bg-slate-50 focus:text-slate-950">
+                    <Link href="/profile" className="flex items-center gap-3">
+                      <User className="size-4 text-slate-500" />
+                      <span>{t("profile")}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
+
               <DropdownMenuSeparator className="my-1 bg-slate-200" />
 
-              <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2 text-base text-slate-800 focus:bg-slate-50 focus:text-slate-950">
-                <Link href="/profile" className="flex items-center gap-3">
-                  <User className="size-4 text-slate-500" />
-                  <span>{t("profile")}</span>
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator className="my-1 bg-slate-200" />
-
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleLogout}
                 className="cursor-pointer rounded-lg px-3 py-2 text-base text-red-500 focus:bg-red-50 focus:text-red-600"
               >
@@ -324,6 +336,37 @@ function Topbar() {
 }
 
 const MainWrapper = ({ children }: { children: React.ReactNode }) => {
+  const pathName = usePathname();
+  const router = useRouter();
+  const [isChecking, setIsChecking] = React.useState(true);
+  const [isAuthorized, setIsAuthorized] = React.useState(false);
+
+  React.useEffect(() => {
+    const currentUser = getUserData();
+    if (currentUser) {
+      const role = currentUser.role || "";
+      if (isRouteAllowed(role, pathName)) {
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
+        const defaultRoute = DEFAULT_ROLE_ROUTE[role.toUpperCase()] || "/auth/welcome";
+        router.push(defaultRoute);
+      }
+    } else {
+      setIsAuthorized(false);
+      router.push("/auth/welcome");
+    }
+    setIsChecking(false);
+  }, [pathName, router]);
+
+  if (isChecking || !isAuthorized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F7F7F7]">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#1A56DB]"></div>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider defaultOpen>
       <div className="flex min-h-screen w-full bg-[#F7F7F7] text-slate-900">

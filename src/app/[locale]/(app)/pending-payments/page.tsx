@@ -162,7 +162,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                           className="rounded-full p-2 text-slate-400 cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition"
                           title={tOrder("editOrder") || "Edit Order"}
                         >
-                          <SquarePen size={16} />
+                          <SquarePen size={14} />
                         </button>
                         <button
                           type="button"
