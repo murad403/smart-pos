@@ -9,6 +9,7 @@ import { AdminFormValues, adminSchema } from "@/validation/auth.validation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useAddUserMutation } from "@/redux/features/dashboard/dashboard.api";
+import { useGetAllProductionStationQuery } from "@/redux/features/menu/menu.api";
 
 type Props = {
   open: boolean;
@@ -21,6 +22,9 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
   const [addUser, { isLoading: isSubmitting }] = useAddUserMutation();
   const [showPass, setShowPass] = React.useState(false);
 
+  const { data: stationsRes } = useGetAllProductionStationQuery({ limit: 100 });
+  const stations = stationsRes?.data ?? [];
+
   const defaultValues = React.useMemo<AdminFormValues>(() => ({
     name: "",
     email: "",
@@ -28,6 +32,7 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
     password: "",
     role: "ADMIN",
     address: "",
+    productionStationId: "",
     facebookUrl: "",
     instagramUrl: "",
   }), []);
@@ -36,11 +41,14 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<AdminFormValues>({
     resolver: zodResolver(adminSchema(tv)),
     defaultValues,
   });
+
+  const selectedRole = watch("role");
 
   React.useEffect(() => {
     if (!open) {
@@ -52,11 +60,16 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
 
   const onSubmit = async (data: AdminFormValues) => {
     try {
-      const payload = {
+      const payload: any = {
         ...data,
         facebookUrl: data.facebookUrl?.trim() || undefined,
         instagramUrl: data.instagramUrl?.trim() || undefined,
       };
+      if (data.role === "SERVICE" && data.productionStationId) {
+        payload.productionStationId = parseInt(data.productionStationId, 10);
+      } else {
+        delete payload.productionStationId;
+      }
       const response = await addUser(payload).unwrap();
       toast.success(response.message || "User added successfully");
       reset(defaultValues);
@@ -155,6 +168,27 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
                 <ChevronDown className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
+
+            {selectedRole === "SERVICE" && (
+              <div className="space-y-1">
+                <label className="text-[13px] font-bold text-slate-700">Production Station <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <select
+                    {...register("productionStationId")}
+                    className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 text-[15px] outline-none transition-all focus:border-blue-500/50"
+                  >
+                    <option value="">Select Production Station</option>
+                    {stations.map((station: any) => (
+                      <option key={station.id} value={station.id}>
+                        {station.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                </div>
+                {errors.productionStationId && <p className="text-xs text-red-500">{errors.productionStationId.message}</p>}
+              </div>
+            )}
 
             <div className="space-y-1 md:col-span-2">
               <label className="text-[13px] font-bold text-slate-700">{t("password") || "Password"} <span className="text-red-500">*</span></label>

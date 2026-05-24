@@ -49,16 +49,58 @@ export const adminSchema = (t: Translator) => z.object({
     password: z.string().min(8, t("passwordMin") || "Password must be at least 8 characters"),
     role: z.enum(["OWNER", "ADMIN", "SERVICE", "USER"]),
     address: z.string().min(1, t("addressRequired") || "Address is required"),
-        facebookUrl: z.union([
-            z.string().url(t("invalidUrl") || "Please enter a valid URL"),
-            z.literal(""),
-        ]).optional(),
-        instagramUrl: z.union([
-            z.string().url(t("invalidUrl") || "Please enter a valid URL"),
-            z.literal(""),
-        ]).optional(),
-});
+    productionStationId: z.string().optional(),
+    facebookUrl: z.union([
+        z.string().url(t("invalidUrl") || "Please enter a valid URL"),
+        z.literal(""),
+    ]).optional(),
+    instagramUrl: z.union([
+        z.string().url(t("invalidUrl") || "Please enter a valid URL"),
+        z.literal(""),
+    ]).optional(),
+}).refine(
+    (data) => {
+        if (data.role === "SERVICE" && !data.productionStationId) {
+            return false;
+        }
+        return true;
+    },
+    {
+        message: "Production station is required for SERVICE role",
+        path: ["productionStationId"],
+    }
+);
 
 export type AdminFormValues = z.infer<ReturnType<typeof adminSchema>>;
 export const staffSchema = adminSchema;
 export type StaffFormValues = z.infer<ReturnType<typeof staffSchema>>;
+
+export const editAdminSchema = (t: Translator) => z.object({
+    name: z.string().min(1, t("nameRequired") || "Name is required"),
+    email: z.string().email(t("invalidEmail") || "Invalid email address"),
+    phone: z.string().min(1, t("phoneRequired") || "Phone number is required"),
+    role: z.enum(["OWNER", "ADMIN", "SERVICE", "USER"]),
+    address: z.string().min(1, t("addressRequired") || "Address is required"),
+    productionStationId: z.string().optional(),
+    facebookUrl: z.union([
+        z.string().url(t("invalidUrl") || "Please enter a valid URL"),
+        z.literal(""),
+    ]).optional(),
+    instagramUrl: z.union([
+        z.string().url(t("invalidUrl") || "Please enter a valid URL"),
+        z.literal(""),
+    ]).optional(),
+}).refine(
+    (data) => {
+        if (data.role === "SERVICE" && !data.productionStationId) {
+            return false;
+        }
+        return true;
+    },
+    {
+        message: "Production station is required for SERVICE role",
+        path: ["productionStationId"],
+    }
+);
+
+export type EditAdminFormValues = z.infer<ReturnType<typeof editAdminSchema>>;

@@ -284,6 +284,8 @@
     "registerNewProfileFor": "Daftarkan Profil baru untuk",
     "adminStaff": "Admin/Staf",
     "addUser": "Tambah Pengguna",
+    "editUser": "Ubah Pengguna",
+    "updateUserProfile": "Perbarui peran akses pengguna, detail profil, dan stasiun tertaut.",
     "userDetails": "Detail Pengguna",
     "createNewAccount": "Isi bidang body pengguna sesuai dengan yang diminta API.",
     "saving": "Menyimpan...",

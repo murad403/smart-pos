@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import AddAdminModal from "@/components/modal/AddAdminModal";
+import EditAdminModal from "@/components/modal/EditAdminModal";
 import UserResetPasswordModal from "@/components/modal/UserResetPasswordModal";
 import { useTranslations } from "next-intl";
 import CustomPagination from "@/components/shared/CustomPagination";
@@ -10,7 +11,7 @@ import DeleteUserModal from "@/components/modal/DeleteUserModal";
 import { toast } from "sonner";
 import { useDeleteUserMutation, useGetAllUsersQuery } from "@/redux/features/dashboard/dashboard.api";
 import type { UserListItem } from "@/redux/features/dashboard/dashboard.type";
-import { Trash2, KeyRound } from "lucide-react";
+import { Trash2, KeyRound, Edit3 } from "lucide-react";
 
 type SelectedUser = {
     id: number;
@@ -22,6 +23,8 @@ const UserManagementPage = ({ params }: { params?: Promise<{ locale: string }> }
     if (params) React.use(params);
     const t = useTranslations("Profile");
     const [isAddAdminOpen, setIsAddAdminOpen] = React.useState(false);
+    const [isEditOpen, setIsEditOpen] = React.useState(false);
+    const [editUserId, setEditUserId] = React.useState<number | null>(null);
     const [isResetPassOpen, setIsResetPassOpen] = React.useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
     const [selectedUser, setSelectedUser] = React.useState<SelectedUser | null>(null);
@@ -197,14 +200,27 @@ const UserManagementPage = ({ params }: { params?: Promise<{ locale: string }> }
                                                     <p className="text-[12px] text-slate-500 truncate">{displayEmail}</p>
                                                 </div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteUser({ id: user.id, name: displayName, email: displayEmail })}
-                                                className="rounded-full p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600 shrink-0"
-                                                aria-label={`Delete ${displayName}`}
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </button>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditUserId(user.id);
+                                                        setIsEditOpen(true);
+                                                    }}
+                                                    className="rounded-full p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                                    aria-label={`Edit ${displayName}`}
+                                                >
+                                                    <Edit3 className="size-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteUser({ id: user.id, name: displayName, email: displayEmail })}
+                                                    className="rounded-full p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                                                    aria-label={`Delete ${displayName}`}
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div className="mb-4 space-y-1 border-t border-slate-50 pt-4">
@@ -238,6 +254,14 @@ const UserManagementPage = ({ params }: { params?: Promise<{ locale: string }> }
 
             {/* Modals */}
             <AddAdminModal open={isAddAdminOpen} onClose={() => setIsAddAdminOpen(false)} />
+            <EditAdminModal
+                open={isEditOpen}
+                onClose={() => {
+                    setIsEditOpen(false);
+                    setEditUserId(null);
+                }}
+                userId={editUserId}
+            />
             <UserResetPasswordModal
                 open={isResetPassOpen}
                 onClose={() => setIsResetPassOpen(false)}

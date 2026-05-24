@@ -155,6 +155,16 @@ const dashboardApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["users"],
         }),
+        editUser: builder.mutation({
+            query: ({ userId, data }) => {
+                return {
+                    url: `/users/${userId}`,
+                    method: "PATCH",
+                    body: data
+                };
+            },
+            invalidatesTags: ["users"],
+        }),
         changeUserPassword: builder.mutation<ChangeUserPasswordResponse, { userId: number; data: ChangeUserPasswordBody }>({
             query: ({ userId, data }) => {
                 return {
@@ -219,6 +229,7 @@ export const {
     useGetAllUsersQuery,
     useGetUserByIdQuery,
     useAddUserMutation,
+    useEditUserMutation,
     useChangeUserPasswordMutation,
     useDeleteUserMutation,
     useGetOperatingHoursQuery,

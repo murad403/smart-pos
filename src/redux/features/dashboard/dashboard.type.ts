@@ -306,6 +306,7 @@ export interface AddUserBody {
     password: string;
     role: "OWNER" | "ADMIN" | "SERVICE" | "USER";
     address: string;
+    productionStationId?: number;
     facebookUrl?: string;
     instagramUrl?: string;
 }

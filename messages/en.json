@@ -284,6 +284,8 @@
     "registerNewProfileFor": "Register new Profile for",
     "adminStaff": "Admin/Staff",
     "addUser": "Add User",
+    "editUser": "Edit User",
+    "updateUserProfile": "Update user access role, profile details, and linked stations.",
     "userDetails": "User Details",
     "createNewAccount": "Fill in the user body fields exactly as the API expects.",
     "saving": "Saving...",
