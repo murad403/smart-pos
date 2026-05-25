@@ -10,11 +10,13 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useGetAllMenuQuery, useGetAllSectionByMenuIdQuery } from "@/redux/features/menu/menu.api";
+import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
 import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
 import CustomerMenuCards from "@/components/shared/CustomerMenuCards";
 import SelectPacketChoicesModal from "@/components/modal/SelectPacketChoicesModal";
 import CreateOrderModal from "@/components/modal/CreateOrderModal";
 import EditOrderModal from "@/components/modal/EditOrderModal";
+import OrderReceiptModal from "@/components/modal/OrderReceiptModal";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     if (params) React.use(params);
@@ -56,6 +58,11 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
     const [isPacketChoicesModalOpen, setIsPacketChoicesModalOpen] = useState(false);
     const [selectedPacketItem, setSelectedPacketItem] = useState<any>(null);
+    const [receiptOrderId, setReceiptOrderId] = useState<number | null>(null);
+
+    // Fetch pricing adjustments
+    const { data: priceAdjRes } = useGetAllPriceAdjustmentsQuery({ limit: 100 });
+    const priceAdjustments = priceAdjRes?.data ?? [];
 
     // Fetch order details if we are editing an order
     const { data: orderDetailsRes } = useGetOrderDetailsQuery(editOrderId, {
@@ -203,7 +210,15 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         }
     }, [menus, selectedCategory]);
 
-
+    const subtotal = cartItems.reduce((acc, ci) => acc + ci.price * ci.quantity, 0);
+    let total = subtotal;
+    priceAdjustments.forEach((adjustment) => {
+        if (adjustment.type === "PERCENTAGE" && adjustment.percentage) {
+            total += (subtotal * Number(adjustment.percentage)) / 100;
+        } else if (adjustment.type === "FIXED_AMOUNT" && adjustment.fixedAmount) {
+            total += Number(adjustment.fixedAmount);
+        }
+    });
 
     return (
         <div className="space-y-4 md:space-y-6">
@@ -300,7 +315,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                             items selected
                         </span>
                         <span className="text-slate-400 font-medium text-xs md:text-sm shrink-0">
-                            • Total: Rp{cartItems.reduce((acc, ci) => acc + ci.price * ci.quantity, 0).toLocaleString("en-US")}
+                            • Total: Rp{total.toLocaleString("en-US")}
                         </span>
                     </div>
                     <div className="flex gap-3">
@@ -340,6 +355,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                     onClearCart={handleClearCart}
                     orderId={editOrderId}
                     orderDetail={orderDetailsRes?.data}
+                    onShowReceipt={(id) => setReceiptOrderId(id)}
                 />
             ) : (
                 <CreateOrderModal
@@ -348,8 +364,14 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                     cartItems={cartItems}
                     onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
                     onClearCart={handleClearCart}
+                    onSuccess={(id) => setReceiptOrderId(id)}
                 />
             )}
+
+            <OrderReceiptModal
+                orderId={receiptOrderId}
+                onClose={() => setReceiptOrderId(null)}
+            />
         </div>
     );
 };

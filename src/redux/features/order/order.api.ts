@@ -23,6 +23,14 @@ const orderApi = baseApi.injectEndpoints({
             },
             providesTags: ["orders"]
         }),
+        getOwnerDetailsForReceipt: builder.query({
+            query: () => {
+                return {
+                    url: `/users/owner`,
+                    method: "GET"
+                };
+            }
+        }),
         getPendingPaymentOrders: builder.query<GetAllOrdersResponse, { page?: number; limit?: number } | void>({
             query: (params) => {
                 return {
@@ -99,6 +107,7 @@ const orderApi = baseApi.injectEndpoints({
 export const {
     useGetAllOrdersQuery,
     useGetOrderDetailsQuery,
+    useGetOwnerDetailsForReceiptQuery,
     useGetPendingPaymentOrdersQuery,
     useCreateOrderMutation,
     useEditOrderMutation,

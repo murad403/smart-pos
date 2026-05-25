@@ -2,9 +2,10 @@
 "use client";
 
 import React from "react";
-import { X, Minus, Plus, ShoppingBag, Save } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, Save, Receipt } from "lucide-react";
 import Image from "next/image";
 import { useEditOrderMutation } from "@/redux/features/order/order.api";
+import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -29,6 +30,7 @@ type Props = {
     onClearCart: () => void;
     orderId: number;
     orderDetail: any;
+    onShowReceipt?: (orderId: number) => void;
 };
 
 const EditOrderModal: React.FC<Props> = ({
@@ -39,17 +41,28 @@ const EditOrderModal: React.FC<Props> = ({
     onClearCart,
     orderId,
     orderDetail,
+    onShowReceipt,
 }) => {
     const t = useTranslations("Menu");
 
     // RTK Query hooks
     const [editOrder, { isLoading: isSubmitting }] = useEditOrderMutation();
+    const { data: priceAdjRes } = useGetAllPriceAdjustmentsQuery({ limit: 100 }, { skip: !open });
+    const priceAdjustments = priceAdjRes?.data ?? [];
 
     if (!open) return null;
 
     // Calculate Subtotal and Total
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const total = subtotal;
+
+    let total = subtotal;
+    priceAdjustments.forEach((adjustment) => {
+        if (adjustment.type === "PERCENTAGE" && adjustment.percentage) {
+            total += (subtotal * Number(adjustment.percentage)) / 100;
+        } else if (adjustment.type === "FIXED_AMOUNT" && adjustment.fixedAmount) {
+            total += Number(adjustment.fixedAmount);
+        }
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,13 +118,23 @@ const EditOrderModal: React.FC<Props> = ({
                             )}
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-100 text-slate-400 hover:text-slate-600"
-                    >
-                        <X size={18} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => onShowReceipt?.(orderId)}
+                            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-100 text-slate-500 hover:text-blue-600 cursor-pointer"
+                            title="Download Receipt"
+                        >
+                            <Receipt size={18} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-100 text-slate-400 hover:text-slate-600"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Form Wrap */}
@@ -196,9 +219,29 @@ const EditOrderModal: React.FC<Props> = ({
                         <div className="space-y-2 border-t border-slate-100 py-3 text-slate-600 text-sm font-medium">
                             <div className="flex justify-between">
                                 <span>{t("subtotal")}</span>
-                                <span className="text-slate-850">Rp{subtotal.toLocaleString("en-US")}</span>
+                                <span className="text-slate-850 font-semibold">Rp{subtotal.toLocaleString("en-US")}</span>
                             </div>
-                            <div className="flex justify-between items-end pt-1">
+
+                            {/* Dynamic Price Adjustments */}
+                            {priceAdjustments.map((adj) => {
+                                let adjAmount = 0;
+                                let displayLabel = adj.level;
+                                if (adj.type === "PERCENTAGE" && adj.percentage) {
+                                    const pct = Number(adj.percentage);
+                                    adjAmount = (subtotal * pct) / 100;
+                                    displayLabel = `${adj.level} (${pct}%)`;
+                                } else if (adj.type === "FIXED_AMOUNT" && adj.fixedAmount) {
+                                    adjAmount = Number(adj.fixedAmount);
+                                }
+                                return (
+                                    <div key={adj.id} className="flex justify-between text-slate-500 text-xs">
+                                        <span>{displayLabel}</span>
+                                        <span>Rp{adjAmount.toLocaleString("en-US")}</span>
+                                    </div>
+                                );
+                            })}
+
+                            <div className="flex justify-between items-end pt-1 border-t border-slate-100/50">
                                 <span className="text-base font-bold text-slate-850">{t("total")}</span>
                                 <span className="text-xl font-extrabold text-blue-600">
                                     Rp{total.toLocaleString("en-US")}

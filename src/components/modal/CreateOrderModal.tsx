@@ -6,6 +6,7 @@ import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCreateOrderMutation } from "@/redux/features/order/order.api";
+import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -31,6 +32,7 @@ type Props = {
     cartItems: CartItem[];
     onUpdateCartItemQuantity: (itemId: number, packetChoices: any[] | undefined, delta: number) => void;
     onClearCart: () => void;
+    onSuccess?: (orderId: number) => void;
 };
 
 const CreateOrderModal: React.FC<Props> = ({
@@ -39,6 +41,7 @@ const CreateOrderModal: React.FC<Props> = ({
     cartItems,
     onUpdateCartItemQuantity,
     onClearCart,
+    onSuccess,
 }) => {
     const t = useTranslations("Menu");
     const searchParams = useSearchParams();
@@ -50,6 +53,8 @@ const CreateOrderModal: React.FC<Props> = ({
 
     // RTK Query hooks
     const [createOrder, { isLoading: isSubmitting }] = useCreateOrderMutation();
+    const { data: priceAdjRes } = useGetAllPriceAdjustmentsQuery({ limit: 100 }, { skip: !open });
+    const priceAdjustments = priceAdjRes?.data ?? [];
 
     // Reset form on open
     useEffect(() => {
@@ -63,7 +68,15 @@ const CreateOrderModal: React.FC<Props> = ({
 
     // Calculate Subtotal and Total
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const total = subtotal; // If there are additional charges, add them here.
+
+    let total = subtotal;
+    priceAdjustments.forEach((adjustment) => {
+        if (adjustment.type === "PERCENTAGE" && adjustment.percentage) {
+            total += (subtotal * Number(adjustment.percentage)) / 100;
+        } else if (adjustment.type === "FIXED_AMOUNT" && adjustment.fixedAmount) {
+            total += Number(adjustment.fixedAmount);
+        }
+    });
 
     // Determine Source and Table ID
     const currentUser = getUserData();
@@ -112,10 +125,13 @@ const CreateOrderModal: React.FC<Props> = ({
 
         try {
             toast.loading(t("submittingOrder"), { id: "create-order-toast" });
-            await createOrder(payload).unwrap();
+            const res = await createOrder(payload).unwrap();
             toast.success(t("orderCreatedSuccess"), { id: "create-order-toast" });
             onClearCart();
             onClose();
+            if (res?.data?.id && onSuccess) {
+                onSuccess(res.data.id);
+            }
         } catch (err: any) {
             toast.error(err?.data?.message || err?.message || t("orderCreateFailed"), {
                 id: "create-order-toast",
@@ -232,9 +248,29 @@ const CreateOrderModal: React.FC<Props> = ({
                         <div className="space-y-2 border-t border-b border-slate-100 py-3 text-slate-600 text-sm font-medium">
                             <div className="flex justify-between">
                                 <span>{t("subtotal")}</span>
-                                <span className="text-slate-850">Rp{subtotal.toLocaleString("en-US")}</span>
+                                <span className="text-slate-850 font-semibold">Rp{subtotal.toLocaleString("en-US")}</span>
                             </div>
-                            <div className="flex justify-between items-end pt-1">
+
+                            {/* Dynamic Price Adjustments */}
+                            {priceAdjustments.map((adj) => {
+                                let adjAmount = 0;
+                                let displayLabel = adj.level;
+                                if (adj.type === "PERCENTAGE" && adj.percentage) {
+                                    const pct = Number(adj.percentage);
+                                    adjAmount = (subtotal * pct) / 100;
+                                    displayLabel = `${adj.level} (${pct}%)`;
+                                } else if (adj.type === "FIXED_AMOUNT" && adj.fixedAmount) {
+                                    adjAmount = Number(adj.fixedAmount);
+                                }
+                                return (
+                                    <div key={adj.id} className="flex justify-between text-slate-500 text-xs">
+                                        <span>{displayLabel}</span>
+                                        <span>Rp{adjAmount.toLocaleString("en-US")}</span>
+                                    </div>
+                                );
+                            })}
+
+                            <div className="flex justify-between items-end pt-1 border-t border-slate-100/50">
                                 <span className="text-base font-bold text-slate-850">{t("total")}</span>
                                 <span className="text-xl font-extrabold text-blue-600">
                                     Rp{total.toLocaleString("en-US")}
