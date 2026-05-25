@@ -64,7 +64,12 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
     ...(user?.role?.toUpperCase() === "ADMIN" && isMobileView ? [
       { label: t("dashboard"), icon: LayoutDashboard, href: "/mobile-admin-layout" }
     ] : []),
-    { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard" },
+    ...(user?.role?.toUpperCase() === "OWNER" && isMobileView ? [
+      { label: t("dashboard"), icon: LayoutDashboard, href: "/mobile-owner-layout" }
+    ] : []),
+    ...(!isMobileView ? [
+      { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard" }
+    ] : []),
     { label: t("salesReports"), icon: ReceiptText, href: "/reports" },
     { label: t("orderLifeCycle"), icon: Repeat, href: "/order-life-cycle" },
     // { label: t("item"), icon: Utensils, href: "/item" },
@@ -94,7 +99,7 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
               {navigationItems
                 .filter((item) => user && isRouteAllowed(user.role, item.href))
                 .map((item) => (
-                  <SidebarMenuItem key={item.label}>
+                  <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
                       tooltip={item.label}
@@ -248,17 +253,25 @@ function Topbar({
   const displayUser = getRoleBasedDisplay();
   const isMobile = windowWidth < 768;
   const isMobileAdmin = user?.role?.toUpperCase() === "ADMIN" && isMobile;
+  const isMobileOwner = user?.role?.toUpperCase() === "OWNER" && isMobile;
 
   return (
     <header className={cn(
       "sticky top-0 z-20 border-b border-slate-200/80 bg-white",
-      pathname === "/mobile-admin-layout" && "hidden md:block"
+      (pathname === "/mobile-admin-layout" || pathname === "/mobile-owner-layout") && "hidden md:block"
     )}>
       <div className="flex py-3.5 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           {isMobileAdmin ? (
             <Link
               href="/mobile-admin-layout"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
+            >
+              <ArrowLeft className="size-5" />
+            </Link>
+          ) : isMobileOwner ? (
+            <Link
+              href="/mobile-owner-layout"
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
             >
               <ArrowLeft className="size-5" />
@@ -397,7 +410,7 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const [selectedDevice, setSelectedDevice] = React.useState<string>("qrcode");
   const [windowWidth, setWindowWidth] = React.useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
-  const prevWidthRef = React.useRef<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
+  const prevWidthRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     const saved = localStorage.getItem("selectedDevice");
@@ -414,26 +427,37 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
     };
     if (typeof window !== "undefined") {
       setWindowWidth(window.innerWidth);
-      prevWidthRef.current = window.innerWidth;
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
     }
   }, []);
 
   React.useEffect(() => {
+    if (prevWidthRef.current === null) {
+      prevWidthRef.current = windowWidth;
+      return;
+    }
+
     const wasMobile = prevWidthRef.current < 768;
     const isNowMobile = windowWidth < 768;
     prevWidthRef.current = windowWidth;
 
     if (wasMobile !== isNowMobile) {
       const currentUser = getUserData();
-      if (currentUser && currentUser.role?.toUpperCase() === "ADMIN") {
-        if (isNowMobile) {
-          // Transitioned from desktop to mobile
-          router.push("/mobile-admin-layout");
-        } else if (pathName === "/mobile-admin-layout") {
-          // Transitioned from mobile to desktop
-          router.push("/menu");
+      if (currentUser) {
+        const role = (currentUser.role || "").toUpperCase();
+        if (role === "ADMIN") {
+          if (isNowMobile) {
+            router.push("/mobile-admin-layout");
+          } else if (pathName === "/mobile-admin-layout") {
+            router.push("/menu");
+          }
+        } else if (role === "OWNER") {
+          if (isNowMobile) {
+            router.push("/mobile-owner-layout");
+          } else if (pathName === "/mobile-owner-layout") {
+            router.push("/menu-management");
+          }
         }
       }
     }
@@ -453,8 +477,13 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
 
       let allowed = isRouteAllowed(role, pathName);
 
+      const upperRole = role.toUpperCase();
       // Prevent desktop ADMINs from accessing mobile-admin-layout
-      if (role.toUpperCase() === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
+      if (upperRole === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
+        allowed = false;
+      }
+      // Prevent desktop OWNERs from accessing mobile-owner-layout
+      if (upperRole === "OWNER" && !isMobile && pathName === "/mobile-owner-layout") {
         allowed = false;
       }
 
@@ -462,9 +491,11 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
         setIsAuthorized(true);
       } else {
         setIsAuthorized(false);
-        let defaultRoute = DEFAULT_ROLE_ROUTE[role.toUpperCase()] || "/auth/welcome";
-        if (role.toUpperCase() === "ADMIN" && isMobile) {
+        let defaultRoute = DEFAULT_ROLE_ROUTE[upperRole] || "/auth/welcome";
+        if (upperRole === "ADMIN" && isMobile) {
           defaultRoute = "/mobile-admin-layout";
+        } else if (upperRole === "OWNER" && isMobile) {
+          defaultRoute = "/mobile-owner-layout";
         }
         router.push(defaultRoute);
       }
@@ -492,7 +523,7 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
           <Topbar selectedDevice={selectedDevice} onDeviceChange={handleDeviceChange} windowWidth={windowWidth} />
           <main className={cn(
             "flex flex-1 flex-col p-4 md:p-6 lg:p-8",
-            pathName === "/mobile-admin-layout" && "max-md:p-0"
+            (pathName === "/mobile-admin-layout" || pathName === "/mobile-owner-layout") && "max-md:p-0"
           )}>{children}</main>
         </SidebarInset>
       </div>

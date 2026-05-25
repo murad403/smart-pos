@@ -73,13 +73,13 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="px-6 py-4">{tPending("image") || "Image"}</th>
-                <th className="px-6 py-4">{tOrder("slug") || "Order #"}</th>
+                <th className="px-6 py-4 whitespace-nowrap">{tOrder("slug") || "Order #"}</th>
                 <th className="px-6 py-4">{tOrder("customer") || "Customer"}</th>
                 <th className="px-6 py-4">{tOrder("table") || "Table"}</th>
                 <th className="px-6 py-4">{tOrder("source") || "Source"}</th>
                 <th className="px-6 py-4">{tOrder("items") || "Items"}</th>
-                <th className="px-6 py-4">{tOrder("total") || "Total Amount"}</th>
-                <th className="px-6 py-4">{tOrder("createdAt") || "Created At"}</th>
+                <th className="px-6 py-4 whitespace-nowrap">{tOrder("total") || "Total Amount"}</th>
+                <th className="px-6 py-4 whitespace-nowrap">{tOrder("createdAt") || "Created At"}</th>
                 <th className="px-6 py-4 text-center">{tOrder("actions") || "Actions"}</th>
               </tr>
             </thead>

@@ -32,7 +32,7 @@ const InventoryOverviewTable = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden h-[340px] animate-pulse p-4">
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden h-85 animate-pulse p-4">
         <div className="h-6 w-48 bg-slate-100 rounded mb-4" />
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
@@ -79,7 +79,7 @@ const InventoryOverviewTable = ({
                       <img
                         src={item.imageUrl}
                         alt={item.name}
-                        className="w-10 h-10 rounded-xl object-cover border border-slate-100 flex-shrink-0"
+                        className="w-10 h-10 rounded-xl object-cover border border-slate-100 shrink-0"
                       />
                     )}
                     <div className="min-w-0">
@@ -136,7 +136,7 @@ const InventoryOverviewTable = ({
                         <img
                           src={item.imageUrl}
                           alt={item.name}
-                          className="w-8 h-8 rounded-lg object-cover border border-slate-100 flex-shrink-0"
+                          className="w-8 h-8 rounded-lg object-cover border border-slate-100 shrink-0"
                         />
                       )}
                       <span className="truncate">{item.name}</span>

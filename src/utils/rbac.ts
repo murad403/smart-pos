@@ -11,6 +11,7 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
   ],
   SERVICE: ["/production", "/collection"],
   OWNER: [
+    "/mobile-owner-layout",
     "/menu-management",
     "/payment-verification",
     "/inventory-report",
@@ -21,6 +22,7 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
     // "/item",
     "/production-station",
     "/order",
+    "/view-all",
   ]
 };
 

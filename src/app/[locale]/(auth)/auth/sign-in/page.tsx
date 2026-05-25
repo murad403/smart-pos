@@ -59,6 +59,8 @@ export default function SignInPage({ params }: { params?: Promise<{ locale: stri
                     let defaultRoute = DEFAULT_ROLE_ROUTE[userRole];
                     if (userRole === "ADMIN" && typeof window !== "undefined" && window.innerWidth < 768) {
                         defaultRoute = "/mobile-admin-layout";
+                    } else if (userRole === "OWNER" && typeof window !== "undefined" && window.innerWidth < 768) {
+                        defaultRoute = "/mobile-owner-layout";
                     }
                     router.push(defaultRoute);
                 } else {

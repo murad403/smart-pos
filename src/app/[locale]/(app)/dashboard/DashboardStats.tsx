@@ -73,7 +73,7 @@ const DashboardStats = ({ overview, orderTypeBreakdown, isLoading }: DashboardSt
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat, i) => {
                 if (stat.variant === "blue") {
                     return (

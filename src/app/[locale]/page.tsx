@@ -27,8 +27,9 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
         const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
         route = isMobile ? "/mobile-admin-layout" : "/menu";
       }
-      else if(userData?.role === "OWNER"){
-        route = "/menu-management";
+      else if (userData?.role === "OWNER") {
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+        route = isMobile ? "/mobile-owner-layout" : "/menu-management";
       }
       else if(userData?.role === "SERVICE"){
         route = "/collection";

@@ -12,11 +12,11 @@ const ProductionPerformance = ({ performance, isLoading }: ProductionPerformance
 
     if (isLoading) {
         return (
-            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm h-[380px] animate-pulse flex flex-col justify-between">
+            <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm h-95 animate-pulse flex flex-col justify-between">
                 <div>
                     <div className="h-6 w-48 bg-slate-100 rounded mb-5" />
                     {/* Avg prep time skeleton */}
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 h-[72px] mb-5" />
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 h-18 mb-5" />
                     {/* Slowest items skeleton */}
                     <div className="h-4 w-32 bg-slate-100 rounded mb-3" />
                     <div className="space-y-3">

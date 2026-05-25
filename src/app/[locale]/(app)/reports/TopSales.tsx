@@ -12,7 +12,7 @@ const TopSales = ({ items, isLoading }: TopSalesProps) => {
 
     if (isLoading) {
         return (
-            <div className="rounded-xl border border-slate-100 bg-white shadow-sm h-[260px] animate-pulse flex flex-col">
+            <div className="rounded-xl border border-slate-100 bg-white shadow-sm h-65 animate-pulse flex flex-col">
                 <div className="px-6 pt-5 pb-2">
                     <div className="h-6 w-32 bg-slate-100 rounded" />
                 </div>
@@ -50,7 +50,7 @@ const TopSales = ({ items, isLoading }: TopSalesProps) => {
                     <tbody>
                         {itemsToRender.map((item, i) => (
                             <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60">
-                                <td className="px-6 py-3.5 text-slate-700 font-medium">{item.item}</td>
+                                <td className="px-6 py-3.5 text-slate-700 font-medium whitespace-nowrap">{item.item}</td>
                                 <td className="px-6 py-3.5 text-slate-500">{item.category}</td>
                                 <td className="px-6 py-3.5 text-right text-slate-700">{item.quantity}</td>
                                 <td className="px-6 py-3.5 text-right font-semibold text-slate-800">
