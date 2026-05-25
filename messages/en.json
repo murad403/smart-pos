@@ -278,7 +278,12 @@
     "mismatchesDetected": "Mismatches Detected",
     "totalTransactions": "Total Transactions",
     "cashTransactions": "Cash Transactions",
-    "paymentVerificationDetails": "Payment verification details for order"
+    "paymentVerificationDetails": "Payment verification details for order",
+    "verify": "Verify",
+    "verifyPayment": "Verify Payment",
+    "verifySuccess": "Payment verified successfully",
+    "cancel": "Cancel",
+    "submitting": "Submitting..."
   },
   "Profile": {
     "ownerProfile": "Owner Profile",

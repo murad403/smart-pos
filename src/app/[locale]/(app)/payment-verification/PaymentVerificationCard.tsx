@@ -12,23 +12,28 @@ export interface PaymentVerificationItem {
   dateTime: string;
   status: string;
   image?: string;
+  cashierName?: string;
+  markAsMissMatch?: boolean;
+  isVerified?: boolean;
 }
 
 interface PaymentVerificationCardProps {
   item: PaymentVerificationItem;
   onViewDetails: (item: PaymentVerificationItem) => void;
+  onVerify: (item: PaymentVerificationItem) => void;
 }
 
 const formatCurrency = (value: number) => `Rp ${value.toLocaleString("en-US")}`;
 
-const PaymentVerificationCard = ({ item, onViewDetails }: PaymentVerificationCardProps) => {
+const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerificationCardProps) => {
   const t = useTranslations("Payment");
 
   const imgSrc = item.image;
-  // console.log(item?.status)
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <article className={`rounded-xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+      item.markAsMissMatch ? "border-red-500" : "border-blue-500"
+    }`}>
       <div className="relative mb-3 overflow-hidden rounded-lg">
         {imgSrc ? (
           <img
@@ -41,6 +46,11 @@ const PaymentVerificationCard = ({ item, onViewDetails }: PaymentVerificationCar
             <ImageOff size={32} className="text-slate-300" />
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">No Image Proof</span>
           </div>
+        )}
+        {item.markAsMissMatch && (
+          <span className="absolute left-2 top-2 rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-semibold text-white uppercase tracking-wider">
+            {t("mismatch")}
+          </span>
         )}
         <span
           className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-semibold ${item.status === "paid" ? "bg-red-500 text-white" : "bg-emerald-500 text-white"
@@ -67,6 +77,10 @@ const PaymentVerificationCard = ({ item, onViewDetails }: PaymentVerificationCar
           <span>{item.personLabel}</span>
           <span className="font-medium text-slate-700">{item.personName}</span>
         </div>
+        <div className="flex items-center justify-between gap-2 text-slate-500">
+          <span>{t("cashier")}</span>
+          <span className="font-medium text-slate-700">{item.cashierName || "-"}</span>
+        </div>
       </div>
 
       <div className="mt-2 space-y-2">
@@ -78,12 +92,15 @@ const PaymentVerificationCard = ({ item, onViewDetails }: PaymentVerificationCar
         >
           {t("viewDetails")}
         </button>
-        <button
-          type="button"
-          className="w-full rounded-md border border-slate-200 bg-blue-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-blue-600"
-        >
-          {t("verify")}
-        </button>
+        {!item.isVerified && (
+          <button
+            type="button"
+            onClick={() => onVerify(item)}
+            className="w-full rounded-md border border-slate-200 bg-blue-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-blue-600"
+          >
+            {t("verify")}
+          </button>
+        )}
       </div>
     </article>
   );

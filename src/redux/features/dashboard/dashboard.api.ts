@@ -69,9 +69,9 @@ const dashboardApi = baseApi.injectEndpoints({
             },
         }),
         paymentVerify: builder.mutation({
-            query: ({ id, data }) => {
+            query: ({ cashierId, data }) => {
                 return {
-                    url: `/payments/${id}/verify`,
+                    url: `/payments/${cashierId}/verify`,
                     method: "POST",
                     body: data
                 };
@@ -258,4 +258,5 @@ export const {
     useUpdateOperatingHoursMutation,
     useUpdateUserMutation,
     useGetEfficiencyReportsQuery,
+    usePaymentVerifyMutation,
 } = dashboardApi;

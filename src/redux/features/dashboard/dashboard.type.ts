@@ -128,6 +128,12 @@ export interface PaymentItem {
     createdAt: string;
     updatedAt: string;
     order: PaymentOrder;
+    markAsMissMatch: boolean;
+    isVerified: boolean;
+    cashier: {
+        id: number;
+        name: string;
+    };
 }
 
 export interface Pagination {
@@ -185,6 +191,10 @@ export interface PaymentDetails {
     createdAt: string;
     updatedAt: string;
     order: PaymentDetailsOrder;
+    cashier: {
+        id: number;
+        name: string;
+    };
 }
 
 export interface GetPaymentDetailsResponse {

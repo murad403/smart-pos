@@ -5,6 +5,7 @@ import React, { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import PaymentVerificationCard, { PaymentVerificationItem } from "./PaymentVerificationCard";
 import PaymentVerificationModal from "@/components/modal/PaymentVerificationModal";
+import PaymentVerifyModal from "@/components/modal/PaymentVerifyModal";
 import CustomPagination from "@/components/shared/CustomPagination";
 import { useTranslations, useLocale } from "next-intl";
 import { useGetPaymentsQuery } from "@/redux/features/dashboard/dashboard.api";
@@ -18,9 +19,10 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
   const [statusFilter, setStatusFilter] = useState<"PENDING" | "PAID" | "CANCELLED" | "">("");
   const [methodFilter, setMethodFilter] = useState<"CASH" | "TRANSFER" | "OTHER" | "">("");
   const [selectedItem, setSelectedItem] = useState<PaymentVerificationItem | null>(null);
+  const [verifyingItem, setVerifyingItem] = useState<PaymentVerificationItem | null>(null);
 
   // Fetch payments list from API with page, limit, status, method, and search criteria
-  const { data: paymentsRes, isLoading } = useGetPaymentsQuery({
+  const { data: paymentsRes, isLoading, refetch } = useGetPaymentsQuery({
     page: currentPage,
     limit: 6,
     status: statusFilter || undefined,
@@ -58,6 +60,9 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
         }) : "-",
         status: item.status,
         image: displayImage,
+        cashierName: item.cashier?.name,
+        markAsMissMatch: item.markAsMissMatch,
+        isVerified: item.isVerified,
       };
     });
   }, [payments, t]);
@@ -143,7 +148,12 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
       ) : (
         <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 xl:grid-cols-3">
           {mappedRows.map((item) => (
-            <PaymentVerificationCard key={item.id} item={item} onViewDetails={setSelectedItem} />
+            <PaymentVerificationCard
+              key={item.id}
+              item={item}
+              onViewDetails={setSelectedItem}
+              onVerify={setVerifyingItem}
+            />
           ))}
         </div>
       )}
@@ -173,6 +183,16 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
 
       {/* Details Verification Modal */}
       <PaymentVerificationModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+
+      {/* Verify Input Modal */}
+      <PaymentVerifyModal
+        open={verifyingItem !== null}
+        onClose={() => setVerifyingItem(null)}
+        item={verifyingItem}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 };

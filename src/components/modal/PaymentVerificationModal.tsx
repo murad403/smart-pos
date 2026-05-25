@@ -208,6 +208,9 @@ const PaymentVerificationModal = ({ item, onClose }: PaymentVerificationModalPro
             {item.personLabel}: <span className="font-semibold text-slate-800">{customerName}</span>
           </p>
           <p>
+            {t("cashier")}: <span className="font-semibold text-slate-800">{details?.cashier?.name ?? item.cashierName ?? "-"}</span>
+          </p>
+          <p>
             {t("dateTime")}: <span className="font-semibold text-slate-800">{dateTime}</span>
           </p>
         </div>

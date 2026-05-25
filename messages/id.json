@@ -278,7 +278,12 @@
     "mismatchesDetected": "Ketidaksesuaian Terdeteksi",
     "totalTransactions": "Total Transaksi",
     "cashTransactions": "Transaksi Tunai",
-    "paymentVerificationDetails": "Detail verifikasi pembayaran untuk pesanan"
+    "paymentVerificationDetails": "Detail verifikasi pembayaran untuk pesanan",
+    "verify": "Verifikasi",
+    "verifyPayment": "Verifikasi Pembayaran",
+    "verifySuccess": "Pembayaran berhasil diverifikasi",
+    "cancel": "Batal",
+    "submitting": "Mengirimkan..."
   },
   "Profile": {
     "ownerProfile": "Profil Pemilik",
