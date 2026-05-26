@@ -120,7 +120,7 @@ const PacketSlider = ({ packetSections }: { packetSections: any[] }) => {
                 e.stopPropagation();
                 setCurrentIndex(index);
               }}
-              className={`h-1 rounded-full transition-all duration-200 ${index === currentIndex ? "w-2.5 bg-blue-500" : "w-1 bg-slate-200"
+              className={`h-1 rounded-full transition-all duration-200 ${index === currentIndex ? "w-2.5 bg-blue-500" : "w-1 bg-[#E2E8F0]"
                 }`}
             />
           ))}
@@ -183,13 +183,13 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
   const isImageListLayout = layout === "LIST_WITH_IMAGE";
 
   const gridColsClass = {
-    SINGLE: "grid gap-4 lg:grid-cols-1",
-    DOUBLE: "grid gap-4 lg:grid-cols-2",
-    TRIPLE: "grid gap-4 lg:grid-cols-3",
-    QUADRUPLE: "grid gap-4 lg:grid-cols-4",
+    SINGLE: "grid grid-cols-1 gap-4 lg:grid-cols-1",
+    DOUBLE: "grid grid-cols-2 gap-4 lg:grid-cols-2",
+    TRIPLE: "grid grid-cols-2 gap-4 lg:grid-cols-3",
+    QUADRUPLE: "grid grid-cols-2 gap-4 lg:grid-cols-4",
     LIST_WITH_IMAGE: "space-y-4",
     LIST_NO_IMAGE: "space-y-4",
-  }[layout] || "grid gap-4 lg:grid-cols-3";
+  }[layout] || "grid grid-cols-2 gap-4 lg:grid-cols-3";
 
   return (
     <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
@@ -227,25 +227,53 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
           layout === "LIST_NO_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-center rounded-[18px] border border-blue-500 bg-white p-3">
-                  <div className="h-16 w-full rounded-xl bg-[#E2E8F0]" />
+                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-150 bg-[#E2E8F0] p-4 animate-pulse">
+                  <div className="h-5 bg-[#E2E8F0] rounded w-12" />
+                  <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
+                  <div className="h-5 bg-[#E2E8F0] rounded w-16" />
+                  <div className="h-5 bg-[#E2E8F0] rounded w-20" />
                 </div>
               ))}
             </div>
           ) : layout === "LIST_WITH_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="grid gap-4 rounded-[18px] border border-blue-500 bg-white p-3 grid-cols-[280px_1fr] items-center">
-                  <div className="h-24 w-full rounded-xl bg-[#E2E8F0]" />
+                <div key={i} className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center animate-pulse">
+                  <div className="h-40 w-full rounded-2xl bg-[#E2E8F0]" />
+                  <div className="space-y-3 w-full py-1">
+                    <div className="h-4 bg-[#E2E8F0] rounded w-1/5" />
+                    <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
+                    <div className="h-4 bg-[#E2E8F0] rounded w-2/3" />
+                    <div className="mt-6 flex justify-between items-center">
+                      <div className="h-5 bg-[#E2E8F0] rounded w-1/6" />
+                      <div className="h-9 bg-[#E2E8F0] rounded w-1/6" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className={gridColsClass}>
-              {Array.from({ length: (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : 1) }).map((_, i) => (
-                <div key={i} className="flex flex-col gap-4 rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm">
-                  <div className={`relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] ${layout === "SINGLE" ? "h-96 md:h-120" : "h-72"
-                    }`} />
+              {Array.from({ length: (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : layout === "QUADRUPLE" ? 4 : 1) }).map((_, i) => (
+                <div key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-[#E2E8F0] shadow-sm animate-pulse">
+                  <div className={`relative bg-[#E2E8F0] w-full ${
+                    layout === "SINGLE"
+                      ? "h-64 md:h-96 lg:h-120"
+                      : layout === "DOUBLE"
+                        ? "h-44 sm:h-64 lg:h-96"
+                        : layout === "TRIPLE"
+                          ? "h-44 sm:h-52 lg:h-72"
+                          : "h-44 sm:h-48 lg:h-60"
+                  }`} />
+                  <div className="flex-1 p-4 space-y-3">
+                    <div className="h-4 bg-[#E2E8F0] rounded w-1/4" />
+                    <div className="h-6 bg-[#E2E8F0] rounded w-1/2" />
+                    <div className="h-4 bg-[#E2E8F0] rounded w-full" />
+                    <div className="mt-6 flex justify-between items-center">
+                      <div className="h-6 bg-[#E2E8F0] rounded w-1/4" />
+                      <div className="h-9 bg-[#E2E8F0] rounded w-1/4" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -322,15 +350,19 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                 className={
                   isImageListLayout
                     ? "grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr]"
-                    : "overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                    : "flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white hover:shadow-sm transition-all duration-200"
                 }
               >
                 <div className={
                   isImageListLayout
                     ? "relative h-40 overflow-hidden rounded-2xl sm:h-full w-full"
                     : layout === "SINGLE"
-                      ? "relative h-96 md:h-120 overflow-hidden w-full"
-                      : "relative h-72 overflow-hidden w-full"
+                      ? "relative h-64 md:h-96 lg:h-120 overflow-hidden w-full"
+                      : layout === "DOUBLE"
+                        ? "relative h-44 sm:h-64 lg:h-96 w-full"
+                        : layout === "TRIPLE"
+                          ? "relative h-44 sm:h-52 lg:h-72 w-full"
+                          : "relative h-44 sm:h-48 lg:h-60 w-full"
                 }>
                   <Image
                     src={item.imageUrl || imageMap[item.imageType]}
@@ -349,7 +381,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                   </div>
 
                   {item.promoPrice > 0 && (
-                    <div className="absolute right-3 top-3">
+                    <div className="absolute right-3 bottom-3 sm:top-3 sm:bottom-auto">
                       <span className="rounded-lg bg-green-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm">
                         Promo: Rp{item.promoPrice.toLocaleString("en-US")}
                       </span>
@@ -357,14 +389,14 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                   )}
                 </div>
 
-                <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex flex-col justify-between p-4"}>
+                <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-4"}>
                   <div className="space-y-3">
                     <p className="text-lg font-bold tracking-tight text-red-500">{item.itemNumber}</p>
                     <h3 className="text-[1.35rem] font-bold tracking-tight text-red-500">{item.itemName}</h3>
-                    <div className="grid grid-cols-3 gap-3 text-sm text-slate-700">
+                    <div className="flex flex-col gap-0.5 text-xs text-slate-700 sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm">
                       <p className="text-slate-600">{t("inventory")}: {item.inventory}</p>
                       <p className="text-slate-600">{t("stock")}: {item.stock}</p>
-                      <p className="text-right font-medium text-slate-900">{item.statusLabel}</p>
+                      <p className="font-medium text-slate-900 sm:text-right">{item.statusLabel}</p>
                     </div>
                     {item.packetSections && item.packetSections.length > 0 && (
                       <PacketSlider packetSections={item.packetSections} />
@@ -399,20 +431,28 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
               </article>
             ))}
 
-            {/* Clickable placeholders for empty slots in grid layouts (SINGLE, DOUBLE, TRIPLE) */}
-            {["SINGLE", "DOUBLE", "TRIPLE"].includes(layout) &&
+            {/* Clickable placeholders for empty slots in grid layouts (SINGLE, DOUBLE, TRIPLE, QUADRUPLE) */}
+            {["SINGLE", "DOUBLE", "TRIPLE", "QUADRUPLE"].includes(layout) &&
               Array.from({
-                length: Math.max(0, (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : 0) - items.length),
+                length: Math.max(0, (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : layout === "QUADRUPLE" ? 4 : 0) - items.length),
               }).map((_, i) => (
                 <div
                   key={`placeholder-${i}`}
-                  className="flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full"
+                  className={`flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full ${
+                    layout === "SINGLE" ? "min-h-105 md:min-h-140 lg:min-h-170" :
+                    layout === "DOUBLE" ? "min-h-85 sm:min-h-110 lg:min-h-142.5" :
+                    layout === "TRIPLE" ? "min-h-85 sm:min-h-97.5 lg:min-h-117.5" :
+                    "min-h-85 sm:min-h-92.5 lg:min-h-110"
+                  }`}
                 >
                   <button
                     type="button"
                     onClick={onAddItem}
-                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 min-h-72 ${layout === "SINGLE" ? "min-h-96 md:min-h-120" : ""
-                      }`}
+                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 ${
+                      layout === "SINGLE" ? "min-h-64 md:min-h-96 lg:min-h-120" :
+                      layout === "DOUBLE" ? "min-h-44 sm:min-h-64 lg:min-h-96" :
+                      layout === "TRIPLE" ? "min-h-44 sm:min-h-52 lg:min-h-72" : "min-h-44 sm:min-h-48 lg:min-h-60"
+                    }`}
                   >
                     <Plus size={36} className="text-white opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                   </button>
