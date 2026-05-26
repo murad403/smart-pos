@@ -262,6 +262,27 @@ const dashboardApi = baseApi.injectEndpoints({
         }),
 
 
+        getTodayPaymentsSummary: builder.query({
+            query: () => {
+                return {
+                    url: `/payments/today/summary`,
+                    method: "GET"
+                };
+            },
+            providesTags: ["payments"]
+        }),
+        todayPaymentsVerify: builder.mutation({
+            query: (data) => {
+                return {
+                    url: `/payments/today/verify`,
+                    method: "POST",
+                    body: data
+                };
+            },
+            invalidatesTags: ["payments"]
+        }),
+
+
         
     }),
 });
@@ -289,4 +310,6 @@ export const {
     usePaymentVerifyMutation,
     useGetBusinessInformationQuery,
     useUpdateBusinessInformationMutation,
+    useGetTodayPaymentsSummaryQuery,
+    useTodayPaymentsVerifyMutation,
 } = dashboardApi;

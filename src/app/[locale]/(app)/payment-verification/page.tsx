@@ -9,6 +9,7 @@ import PaymentVerifyModal from "@/components/modal/PaymentVerifyModal";
 import CustomPagination from "@/components/shared/CustomPagination";
 import { useTranslations } from "next-intl";
 import { useGetPaymentsQuery } from "@/redux/features/dashboard/dashboard.api";
+import TodayPaymentVerification from "./TodayPaymentVerification";
 
 const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
@@ -147,6 +148,8 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
           />
         </div>
       )}
+
+      <TodayPaymentVerification/>
 
       {/* Details Verification Modal */}
       <PaymentVerificationModal item={selectedItem} onClose={() => setSelectedItem(null)} />
