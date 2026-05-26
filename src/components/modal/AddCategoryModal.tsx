@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, Plus, Check, Edit3, Loader2 } from "lucide-react";
+import { X, Plus, Check, Edit3, Loader2, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useGetAllMenuQuery, useAddMenuMutation, useDeleteMenuMutation, useUpdateMenuMutation, useGetAllSectionByMenuIdQuery, useUpdateSectionVisibilityBulkMutation } from "@/redux/features/menu/menu.api";
 
@@ -271,7 +271,7 @@ const AddCategoryModal: React.FC<Props> = ({ open, onClose }) => {
                         setEditingMenuName(item.name);
                       }}
                     />
-                    <X
+                    <Trash
                       size={14}
                       className={`${isActive ? "text-white/80 hover:text-white" : "text-gray-400 hover:text-gray-600"
                         } cursor-pointer transition`}
