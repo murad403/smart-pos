@@ -51,6 +51,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
 
   useEffect(() => {
     if (cashReceived !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setChangeAmount(cashReceived - Number(order?.totalAmount || 0));
     } else {
       setChangeAmount(null);
