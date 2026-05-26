@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import Image from "next/image";
 import {
   useGetOrderDetailsQuery,
-  useGetOwnerDetailsForReceiptQuery,
 } from "@/redux/features/order/order.api";
+import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
 
 interface OrderReceiptModalProps {
   orderId: number | null;
@@ -26,32 +26,32 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     orderId,
     { skip: !orderId }
   );
-  const { data: ownerRes, isLoading: isOwnerLoading } =
-    useGetOwnerDetailsForReceiptQuery({});
+  const { data: businessRes, isLoading: isBusinessLoading } =
+    useGetBusinessInformationQuery(undefined);
 
   const order = orderRes?.data;
-  const owner = ownerRes?.data;
+  const business = businessRes?.data;
 
-  // Preload owner logo image for canvas export
-  const [ownerLogoImg, setOwnerLogoImg] = useState<HTMLImageElement | null>(null);
+  // Preload business logo image for canvas export
+  const [businessLogoImg, setBusinessLogoImg] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
-    if (owner?.photoUrl) {
+    if (business?.logoUrl) {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
-      img.src = owner.photoUrl;
+      img.src = business.logoUrl;
       img.onload = () => {
-        setOwnerLogoImg(img);
+        setBusinessLogoImg(img);
       };
       img.onerror = () => {
-        console.error("Failed to load owner logo for canvas download.");
+        console.error("Failed to load business logo for canvas download.");
       };
     }
-  }, [owner?.photoUrl]);
+  }, [business?.logoUrl]);
 
   if (!orderId) return null;
 
-  if (isOrderLoading || isOwnerLoading) {
+  if (isOrderLoading || isBusinessLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-[2px]">
         <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl border border-slate-100 flex flex-col gap-4 animate-pulse">
@@ -154,7 +154,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     const dummyCanvas = document.createElement("canvas");
     const dummyCtx = dummyCanvas.getContext("2d");
     let feedbackLinesCount = 1;
-    const feedbackText = owner?.feedbackMsg || "Let's give feedback on our service!";
+    const feedbackText = business?.feedbackMsg || "Let's give feedback on our service!";
 
     if (dummyCtx) {
       dummyCtx.font = "bold 11px 'Inter', -apple-system, sans-serif";
@@ -235,12 +235,12 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     };
     // Helper: Draw Coffee Cup Outline Logo or Owner Image
     const drawLogo = (x: number, y: number) => {
-      if (ownerLogoImg) {
+      if (businessLogoImg) {
         ctx.save();
         ctx.beginPath();
         ctx.arc(x, y, 26, 0, 2 * Math.PI);
         ctx.clip();
-        ctx.drawImage(ownerLogoImg, x - 26, y - 26, 52, 52);
+        ctx.drawImage(businessLogoImg, x - 26, y - 26, 52, 52);
         ctx.restore();
 
         // Also draw the circular border
@@ -286,20 +286,20 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     ctx.textAlign = "center";
     ctx.fillStyle = "#000000";
     ctx.font = "bold 20px 'Inter', -apple-system, sans-serif";
-    ctx.fillText((owner?.name || "SMART POS").toUpperCase(), 192, 112);
+    ctx.fillText((business?.name || "SMART POS").toUpperCase(), 192, 112);
 
     ctx.fillStyle = "#64748b";
     ctx.font = "500 11px 'Inter', -apple-system, sans-serif";
 
     // Split address by length to draw beautifully
-    const address = owner?.address || "Store Address";
+    const address = business?.address || "Store Address";
     if (address.length > 38) {
       ctx.fillText(address.substring(0, 38) + "...", 192, 130);
     } else {
       ctx.fillText(address, 192, 130);
     }
-    ctx.fillText(owner?.phone || "+62 ...", 192, 144);
-    ctx.fillText(owner?.email || "info@store.id", 192, 158);
+    ctx.fillText(business?.contact || "+62 ...", 192, 144);
+    ctx.fillText(business?.email || "info@store.id", 192, 158);
 
     // 3. Receipt section
     drawDashedLine(175);
@@ -576,13 +576,13 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
             className="w-full bg-white mx-auto text-slate-900 flex flex-col font-sans"
             style={{ maxWidth: "370px" }}
           >
-            {/* Owner Details Header */}
+            {/* Business Details Header */}
             <div className="flex items-start">
               <div className="relative size-14 rounded-full border border-slate-900 flex items-center justify-center overflow-hidden shrink-0 bg-slate-50">
-                {owner?.photoUrl ? (
+                {business?.logoUrl ? (
                   <Image
-                    src={owner.photoUrl}
-                    alt={owner.name || "Logo"}
+                    src={business.logoUrl}
+                    alt={business.name || "Logo"}
                     fill
                     className="object-cover"
                   />
@@ -606,14 +606,14 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
               </div>
               <div className="ml-4 flex-1">
                 <h4 className="font-extrabold text-[15px] tracking-wide text-slate-950 uppercase leading-snug">
-                  {owner?.name || "SMART POS"}
+                  {business?.name || "SMART POS"}
                 </h4>
                 <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-0.5 whitespace-pre-line">
-                  {owner?.address || "Address info placeholder"}
+                  {business?.address || "Address info placeholder"}
                   {"\n"}
-                  {owner?.phone || "Phone info placeholder"}
+                  {business?.contact || "Phone info placeholder"}
                   {"\n"}
-                  {owner?.email || "Email info placeholder"}
+                  {business?.email || "Email info placeholder"}
                 </p>
               </div>
             </div>
@@ -786,7 +786,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
                   👍
                 </div>
                 <div className="text-xs font-bold text-slate-800 leading-snug">
-                  {owner?.feedbackMsg || "Let's give feedback on our service!"}
+                  {business?.feedbackMsg || "Let's give feedback on our service!"}
                 </div>
               </div>
               {/* <button

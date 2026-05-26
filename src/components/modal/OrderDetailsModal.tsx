@@ -2,7 +2,8 @@
 "use client";
 import { X, ShoppingBag, CreditCard, Clock, MapPin, ClipboardList, Printer, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useGetOrderDetailsQuery, useGetOwnerDetailsForReceiptQuery } from "@/redux/features/order/order.api";
+import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
+import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
 import { Order } from "@/redux/features/order/order.type";
 
 
@@ -38,13 +39,13 @@ const formatInvoiceDate = (dateStr: string) => {
   return `${day} ${month} ${year}, ${hours}:${minutes}`;
 };
 
-const generateInvoiceInnerHtml = (order: Order, owner: any) => {
-  const ownerName = owner?.name || "Smart POS";
-  const ownerPhoto = owner?.photoUrl || "";
-  const ownerAddress = owner?.address || "";
-  const ownerPhone = owner?.phone || "";
-  const ownerEmail = owner?.email || "";
-  const feedbackMsg = owner?.feedbackMsg || "Everything is working well. The system looks clean and easy to use.,";
+const generateInvoiceInnerHtml = (order: Order, business: any) => {
+  const businessName = business?.name || "Smart POS";
+  const businessLogo = business?.logoUrl || "";
+  const businessAddress = business?.address || "";
+  const businessPhone = business?.contact || "";
+  const businessEmail = business?.email || "";
+  const feedbackMsg = business?.feedbackMsg || "Everything is working well. The system looks clean and easy to use.,";
 
   const subtotal = Number(order.subtotal);
   const total = Number(order.totalAmount);
@@ -102,7 +103,7 @@ const generateInvoiceInnerHtml = (order: Order, owner: any) => {
   return `
     <div class="header">
       <div class="logo-container">
-        ${ownerPhoto ? `<img class="logo-image" src="${ownerPhoto}" alt="Logo" />` : `
+        ${businessLogo ? `<img class="logo-image" src="${businessLogo}" alt="Logo" />` : `
         <div class="logo-circle">
           <svg viewBox="0 0 24 24" fill="none" stroke="#2d3748" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width: 32px; height: 32px;">
             <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
@@ -114,11 +115,11 @@ const generateInvoiceInnerHtml = (order: Order, owner: any) => {
         </div>
         `}
       </div>
-      <div class="brand-name">${ownerName.toUpperCase()}</div>
+      <div class="brand-name">${businessName.toUpperCase()}</div>
       <div class="address-info">
-        ${ownerAddress}<br/>
-        ${ownerPhone}<br/>
-        ${ownerEmail}
+        ${businessAddress}<br/>
+        ${businessPhone}<br/>
+        ${businessEmail}
       </div>
     </div>
     
@@ -204,7 +205,7 @@ const generateInvoiceInnerHtml = (order: Order, owner: any) => {
   `;
 };
 
-const generateInvoiceHtml = (order: Order, owner: any) => {
+const generateInvoiceHtml = (order: Order, business: any) => {
   return `
     <!DOCTYPE html>
     <html>
@@ -369,9 +370,9 @@ const generateInvoiceHtml = (order: Order, owner: any) => {
       </style>
     </head>
     <body>
-      <div class="receipt-container">
-        ${generateInvoiceInnerHtml(order, owner)}
-      </div>
+        <div class="receipt-container">
+          ${generateInvoiceInnerHtml(order, business)}
+        </div>
     </body>
     </html>
   `;
@@ -379,8 +380,8 @@ const generateInvoiceHtml = (order: Order, owner: any) => {
 
 const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
   const t = useTranslations("Order");
-  const { data: ownerRes } = useGetOwnerDetailsForReceiptQuery(undefined);
-  const owner = ownerRes?.data;
+  const { data: businessRes } = useGetBusinessInformationQuery(undefined);
+  const business = businessRes?.data;
 
   const { data: detailsRes, isLoading } = useGetOrderDetailsQuery(
     orderId,
@@ -424,7 +425,7 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
       document.body.appendChild(iframe);
     }
 
-    const htmlContent = generateInvoiceHtml(order, owner);
+    const htmlContent = generateInvoiceHtml(order, business);
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (doc) {
       doc.open();
@@ -441,12 +442,12 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
   const handleDownload = () => {
     if (!order) return;
 
-    const ownerName = owner?.name || "Smart POS";
-    const ownerPhoto = owner?.photoUrl || "";
-    const ownerAddress = owner?.address || "";
-    const ownerPhone = owner?.phone || "";
-    const ownerEmail = owner?.email || "";
-    const feedbackMsg = owner?.feedbackMsg || "Everything is working well. The system looks clean and easy to use.,";
+    const businessName = business?.name || "Smart POS";
+    const businessLogo = business?.logoUrl || "";
+    const businessAddress = business?.address || "";
+    const businessPhone = business?.contact || "";
+    const businessEmail = business?.email || "";
+    const feedbackMsg = business?.feedbackMsg || "Everything is working well. The system looks clean and easy to use.,";
 
     const drawAll = (logoImg?: HTMLImageElement) => {
       const width = 380;
@@ -547,13 +548,13 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
       ctx.textAlign = "center";
       ctx.fillStyle = "#000000";
       ctx.font = "bold 20px 'Inter', -apple-system, sans-serif";
-      ctx.fillText(ownerName.toUpperCase(), 190, 112);
+      ctx.fillText(businessName.toUpperCase(), 190, 112);
 
       ctx.fillStyle = "#64748b";
       ctx.font = "500 11px 'Inter', -apple-system, sans-serif";
-      ctx.fillText(ownerAddress, 190, 130);
-      ctx.fillText(ownerPhone, 190, 144);
-      ctx.fillText(ownerEmail, 190, 158);
+      ctx.fillText(businessAddress, 190, 130);
+      ctx.fillText(businessPhone, 190, 144);
+      ctx.fillText(businessEmail, 190, 158);
 
       // 3. Receipt section
       drawDashedLine(175);
@@ -796,10 +797,10 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
       }
     };
 
-    if (ownerPhoto) {
+    if (businessLogo) {
       const logoImg = new Image();
       logoImg.crossOrigin = "anonymous";
-      logoImg.src = ownerPhoto;
+      logoImg.src = businessLogo;
       logoImg.onload = () => {
         drawAll(logoImg);
       };
