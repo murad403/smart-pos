@@ -13,20 +13,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAllPriceAdjustmentsQuery, useCreatePriceAdjustmentMutation, useUpdatePriceAdjustmentMutation, useDeletePriceAdjustmentMutation } from "@/redux/features/price/price.api";
 import CustomPagination from "@/components/shared/CustomPagination";
 import { Plus, Edit, Trash2, Loader2, X, AlertTriangle } from "lucide-react";
+import BusinessInfo from "./BusinessInfo";
 
 const profileSchema = (t: any) => z.object({
-  businessName: z.string().min(1, t("businessNameRequired")),
+  businessName: z.string().min(1, t("nameRequired")),
   address: z.string().min(1, t("addressRequired")),
   contactNumber: z.string().min(1, t("contactRequired")),
   email: z.string().email(t("invalidEmail")),
   facebook: z.string().optional(),
   instagram: z.string().optional(),
-  feedbackMsg: z.string().optional(),
   enableInventoryReport: z.boolean(),
   adminOnlyPaymentProof: z.boolean(),
 });
 
 type ProfileFormValues = z.infer<ReturnType<typeof profileSchema>>;
+
+
 
 const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
@@ -165,7 +167,6 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
       email: "",
       facebook: "",
       instagram: "",
-      feedbackMsg: "",
       enableInventoryReport: true,
       adminOnlyPaymentProof: false,
     },
@@ -183,7 +184,6 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
       setValue("email", user.email || "");
       setValue("facebook", user.facebookUrl || "");
       setValue("instagram", user.instagramUrl || "");
-      setValue("feedbackMsg", user.feedbackMsg || "");
       if (user.photoUrl) {
         setImagePreview(user.photoUrl);
       }
@@ -200,7 +200,6 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
         address: data.address,
         facebookUrl: data.facebook || undefined,
         instagramUrl: data.instagram || undefined,
-        feedbackMsg: data.feedbackMsg || null,
       };
 
       if (!imagePreview) {
@@ -231,7 +230,6 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
           facebookUrl: result.data.facebookUrl,
           instagramUrl: result.data.instagramUrl,
           photoUrl: result.data.photoUrl,
-          feedbackMsg: result.data.feedbackMsg,
         });
       }
     } catch (error: any) {
@@ -313,7 +311,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Business Name & Address */}
+        {/* Profile Details */}
         <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
           <div className="flex flex-col gap-8 lg:flex-row">
             <div className="flex shrink-0 flex-col items-center gap-4">
@@ -358,11 +356,11 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
             </div>
 
             <div className="flex-1 space-y-6">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("businessNameAddress") || "Business Name & Address"}</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("userDetails") || "Profile Details"}</p>
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700">{t("businessName")}</label>
+                  <label className="text-sm font-semibold text-slate-700">{t("name")}</label>
                   <input
                     {...register("businessName")}
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
@@ -378,31 +376,27 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
                   />
                   {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
                 </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-slate-700">{t("contactNumber")}</label>
+                    <input
+                      {...register("contactNumber")}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                    />
+                    {errors.contactNumber && <p className="text-xs text-red-500">{errors.contactNumber.message}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-slate-700">{t("email")}</label>
+                    <input
+                      {...register("email")}
+                      readOnly
+                      className="w-full rounded-xl border border-transparent bg-[#F1F5F9] px-4 py-3 text-[15px] text-slate-500 outline-none cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Details */}
-        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
-          <p className="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("contactDetails")}</p>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700">{t("contactNumber")}</label>
-              <input
-                {...register("contactNumber")}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-              />
-              {errors.contactNumber && <p className="text-xs text-red-500">{errors.contactNumber.message}</p>}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700">{t("email")}</label>
-              <input
-                {...register("email")}
-                readOnly
-                className="w-full rounded-xl border border-transparent bg-[#F1F5F9] px-4 py-3 text-[15px] text-slate-500 outline-none cursor-not-allowed"
-              />
             </div>
           </div>
         </div>
@@ -429,32 +423,19 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
           </div>
         </div>
 
-        {/* Feedback Message Section */}
-        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
-          <p className="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-            {t("feedbackMsg") || "Feedback Message"}
-          </p>
-          <div className="space-y-1.5">
-            <textarea
-              {...register("feedbackMsg")}
-              rows={4}
-              placeholder="Enter feedback message..."
-              className="w-full rounded-xl border border-slate-200 bg-[#F8FAFC] px-4 py-3 text-[15px] outline-none transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-            />
-          </div>
-        </div>
-
         {/* Submit Button */}
         <div className="flex justify-end">
           <Button
-          type="submit"
-          disabled={isUpdating}
-          className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isUpdating ? t("saving") || "Saving..." : t("saveChanges")}
-        </Button>
+            type="submit"
+            disabled={isUpdating}
+            className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUpdating ? t("saving") || "Saving..." : t("saveChanges")}
+          </Button>
         </div>
       </form>
+
+      <BusinessInfo />
 
       {/* Pricing Adjustments Section */}
       <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8 space-y-6">

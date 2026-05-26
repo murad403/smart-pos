@@ -235,6 +235,28 @@ const dashboardApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["users"]
         }),
+
+
+        // business information***********************
+        getBusinessInformation: builder.query({
+            query: () => {
+                return {
+                    url: `/users/business`,
+                    method: "GET"
+                };
+            },
+            providesTags: ["business-information"]
+        }),
+        updateBusinessInformation: builder.mutation({
+            query: (data) => {
+                return {
+                    url: `/users/business`,
+                    method: "PATCH",
+                    body: data
+                };
+            },
+            invalidatesTags: ["business-information"]
+        }),
     }),
 });
 
@@ -259,4 +281,6 @@ export const {
     useUpdateUserMutation,
     useGetEfficiencyReportsQuery,
     usePaymentVerifyMutation,
+    useGetBusinessInformationQuery,
+    useUpdateBusinessInformationMutation,
 } = dashboardApi;
