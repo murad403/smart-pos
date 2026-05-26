@@ -17,6 +17,7 @@ import SelectPacketChoicesModal from "@/components/modal/SelectPacketChoicesModa
 import CreateOrderModal from "@/components/modal/CreateOrderModal";
 import EditOrderModal from "@/components/modal/EditOrderModal";
 import OrderReceiptModal from "@/components/modal/OrderReceiptModal";
+import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     if (params) React.use(params);
@@ -368,12 +369,13 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                 />
             )}
 
-            <OrderReceiptModal
+            <OrderDetailsModal
                 orderId={receiptOrderId}
                 onClose={() => setReceiptOrderId(null)}
             />
         </div>
     );
 };
+
 
 export default Page;
