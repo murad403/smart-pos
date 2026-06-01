@@ -134,7 +134,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("menuTab")}</h1>
@@ -226,7 +226,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
           </p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           {sections.map((section, index) => (
             <MenuCards
               key={section.id}

@@ -97,7 +97,7 @@ const MobileOwnerLayoutPage = () => {
                         <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-[#1A56DB] mb-3">
                             <ShieldCheck className="size-6" />
                         </div>
-                        <span className="text-[13px] font-bold text-slate-700">{t("paymentVerification")}</span>
+                        <span className="text-[13px] font-bold text-slate-700 text-center">{t("paymentVerification")}</span>
                     </Link>
 
                     {/* Inventory (Inventory Report) */}

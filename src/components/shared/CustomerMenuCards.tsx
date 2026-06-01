@@ -220,23 +220,23 @@ const CustomerMenuCards = ({
   const gridColsClass = {
     SINGLE: "grid grid-cols-1 gap-4 lg:grid-cols-1",
     DOUBLE: "grid grid-cols-2 gap-4 lg:grid-cols-2",
-    TRIPLE: "grid grid-cols-2 gap-4 lg:grid-cols-3",
+    TRIPLE: "grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-3",
     QUADRUPLE: "grid grid-cols-2 gap-4 lg:grid-cols-4",
     LIST_WITH_IMAGE: "space-y-4",
     LIST_NO_IMAGE: "space-y-4",
   }[layout] || "grid grid-cols-2 gap-4 lg:grid-cols-3";
 
   return (
-    <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-      <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+    <section className="overflow-hidden rounded-2xl sm:rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+      <div className="flex flex-col gap-2.5 border-b border-slate-100 px-3 py-3 sm:px-6 sm:py-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
+          <h2 className="text-xl sm:text-[1.75rem] font-bold tracking-tight text-slate-950">
             {sectionName || t("untitledSection")}
           </h2>
         </div>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="p-3 sm:p-6">
         {isLoading || items.length === 0 ? (
           layout === "LIST_NO_IMAGE" ? (
             <div className="space-y-3">
@@ -367,7 +367,7 @@ const CustomerMenuCards = ({
                         : layout === "DOUBLE"
                           ? "relative h-44 sm:h-64 lg:h-96 w-full"
                           : layout === "TRIPLE"
-                            ? "relative h-44 sm:h-52 lg:h-72 w-full"
+                            ? "relative h-28 sm:h-52 lg:h-72 w-full"
                             : "relative h-44 sm:h-48 lg:h-60 w-full"
                   }>
                     <Image
@@ -406,24 +406,26 @@ const CustomerMenuCards = ({
 
                   </div>
 
-                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-3.5 sm:p-4"}>
-                    <div className="space-y-3">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
-                      <h3 className="text-xl font-bold text-slate-900">{item.itemName}</h3>
-                      <div className="flex flex-col gap-0.5 text-xs text-slate-700 sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm">
+                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-2 sm:p-4"}>
+                    <div className="space-y-1 sm:space-y-3">
+                      <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
+                      <h3 className="text-sm sm:text-xl font-bold text-slate-900 line-clamp-1">{item.itemName}</h3>
+                      <div className="hidden sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm text-xs text-slate-700">
                         <p className="text-slate-600">{t("inventory")}: {item.inventory}</p>
                         <p className="text-slate-600">{t("stock")}: {item.stock}</p>
                         <p className="font-medium text-slate-900 sm:text-right">{item.statusLabel}</p>
                       </div>
                       {item.packetSections && item.packetSections.length > 0 && (
-                        <PacketSlider packetSections={item.packetSections} />
+                        <div className="hidden sm:block">
+                          <PacketSlider packetSections={item.packetSections} />
+                        </div>
                       )}
                     </div>
 
-                    <div className="mt-4 sm:mt-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-                      <div className="text-sm text-slate-600">
-                        <p className="text-slate-550 text-xs">{t("price")}</p>
-                        <p className="font-bold text-slate-900 text-lg">Rp{item.price.toLocaleString("en-US")}</p>
+                    <div className="mt-2.5 sm:mt-6 flex items-center justify-between gap-1 sm:gap-4">
+                      <div className="text-slate-600">
+                        <p className="text-slate-500 text-[10px] sm:text-xs leading-none">{t("price")}</p>
+                        <p className="font-bold text-slate-900 text-sm sm:text-lg">Rp{item.price.toLocaleString("en-US")}</p>
                       </div>
 
                       {isSelected && (

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client"
-import React from "react"
+import React, { use } from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
 import { Armchair, Boxes, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, HandCoins, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, Utensils, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
@@ -254,6 +254,7 @@ function Topbar({
   const isMobile = windowWidth < 768;
   const isMobileAdmin = user?.role?.toUpperCase() === "ADMIN" && isMobile;
   const isMobileOwner = user?.role?.toUpperCase() === "OWNER" && isMobile;
+  const path = user?.role?.toLowerCase() === "ADMIN" ? "/mobile-admin-layout" : "/mobile-owner-layout" ;
 
   return (
     <header className={cn(
@@ -264,14 +265,14 @@ function Topbar({
         <div className="flex min-w-0 items-center gap-3">
           {isMobileAdmin ? (
             <Link
-              href="/mobile-admin-layout"
+              href={path}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
             >
               <ArrowLeft className="size-5" />
             </Link>
           ) : isMobileOwner ? (
             <Link
-              href="/mobile-owner-layout"
+              href={path}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
             >
               <ArrowLeft className="size-5" />
