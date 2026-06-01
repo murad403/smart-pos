@@ -88,9 +88,9 @@ const MobileAdminLayoutPage = () => {
             href="/collection"
             className="relative flex flex-col items-center justify-center bg-white rounded-2xl p-4 shadow-sm border border-slate-100/80 transition hover:shadow-md active:scale-95 duration-200"
           >
-            <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-extrabold text-white">
+            {/* <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-extrabold text-white">
               1
-            </span>
+            </span> */}
             <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-[#1A56DB] mb-3">
               <BellDot className="size-6" />
             </div>
@@ -138,7 +138,7 @@ const MobileAdminLayoutPage = () => {
             <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-[#1A56DB] mb-3">
               <ShieldCheck className="size-6" />
             </div>
-            <span className="text-[13px] font-bold text-slate-700">{t("paymentVerification")}</span>
+            <span className="text-[13px] font-bold text-slate-700 text-center">{t("paymentVerification")}</span>
           </Link>
         </div>
       </div>

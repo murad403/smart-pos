@@ -371,7 +371,7 @@ const CustomerMenuCards = ({
 
                   </div>
 
-                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-4"}>
+                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-3.5 sm:p-4"}>
                     <div className="space-y-3">
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
                       <h3 className="text-xl font-bold text-slate-900">{item.itemName}</h3>
@@ -385,7 +385,7 @@ const CustomerMenuCards = ({
                       )}
                     </div>
 
-                    <div className="mt-6 flex items-end justify-between gap-4">
+                    <div className="mt-4 sm:mt-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                       <div className="text-sm text-slate-600">
                         <p className="text-slate-550 text-xs">{t("price")}</p>
                         <p className="font-bold text-slate-900 text-lg">Rp{item.price.toLocaleString("en-US")}</p>
@@ -393,7 +393,7 @@ const CustomerMenuCards = ({
 
                       {isSelected && (
                         <div
-                          className="flex items-center gap-2.5 bg-white border border-slate-150 rounded-xl p-1 shadow-sm shrink-0"
+                          className="flex items-center justify-between sm:justify-start gap-2.5 bg-white border border-slate-150 rounded-xl p-1 shadow-sm shrink-0 w-full sm:w-auto"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button

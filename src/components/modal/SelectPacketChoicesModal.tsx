@@ -47,7 +47,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
   if (!item) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-        <div className="relative w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
+        <div className="relative w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
           {/* Header Skeleton */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
             <div className="flex items-center gap-3 w-full">
@@ -87,14 +87,14 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
           </div>
 
           {/* Footer Skeleton */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between shrink-0">
-            <div className="space-y-1.5">
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
+            <div className="space-y-1.5 flex items-center justify-between sm:block w-full sm:w-auto">
               <div className="h-3 bg-slate-200 rounded-md w-16 animate-pulse" />
               <div className="h-6 bg-slate-200 rounded-md w-24 animate-pulse" />
             </div>
-            <div className="flex gap-2">
-              <div className="h-10 bg-slate-200 rounded-xl w-20 animate-pulse" />
-              <div className="h-10 bg-slate-200 rounded-xl w-32 animate-pulse" />
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="h-10 bg-slate-200 rounded-xl flex-1 sm:w-20 animate-pulse" />
+              <div className="h-10 bg-slate-200 rounded-xl flex-1 sm:w-32 animate-pulse" />
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-      <div className="relative w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
+      <div className="relative w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
@@ -365,28 +365,28 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between shrink-0">
-            <div className="leading-tight">
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
+            <div className="leading-tight flex items-center justify-between sm:block w-full sm:w-auto">
               <span className="text-xs text-slate-400 font-medium">{t("itemBasePrice")}</span>
               <p className="text-lg font-extrabold text-blue-600">
                 Rp{item.price.toLocaleString("en-US")}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                className="flex-1 sm:flex-initial text-center justify-center px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
               >
                 {t("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={!isAllValid}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-blue-500/10"
+                className="flex-1 sm:flex-initial text-center justify-center px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-blue-500/10"
               >
-                <ShoppingBag size={15} />
-                {t("addToOrder")}
+                <ShoppingBag size={15} className="shrink-0" />
+                <span className="truncate">{t("addToOrder")}</span>
               </button>
             </div>
           </div>

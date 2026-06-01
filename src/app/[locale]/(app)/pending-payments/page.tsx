@@ -134,7 +134,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-bold text-slate-900">{order.slug}</td>
+                      <td className="px-6 py-4 font-bold text-slate-900 whitespace-nowrap">{order.slug}</td>
                       <td className="px-6 py-4 font-medium text-slate-700">{order.customerName || "-"}</td>
                       <td className="px-6 py-4 font-semibold text-slate-700">
                         {order.table ? order.table.tableNumber : "-"}

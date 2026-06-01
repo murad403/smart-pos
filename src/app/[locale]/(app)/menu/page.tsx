@@ -306,28 +306,33 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
             {/* Floating bottom bar for Cart preview */}
             {cartItems.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 md:left-(--sidebar-width,16rem) bg-white border-t border-slate-205 px-6 py-4 flex justify-between items-center z-40 shadow-[0_-10px_35px_rgba(15,23,42,0.06)] animate-in slide-in-from-bottom duration-300 pb-safe">
-                    <div className="flex items-center gap-3">
-                        <span className="flex size-7 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-650">
-                            {cartItems.reduce((acc, ci) => acc + ci.quantity, 0)}
+                <div className="fixed bottom-0 left-0 right-0 md:left-(--sidebar-width,16rem) bg-white border-t border-slate-205 px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between items-stretch sm:items-center z-40 shadow-[0_-10px_35px_rgba(15,23,42,0.06)] animate-in slide-in-from-bottom duration-300 pb-safe">
+                    <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="flex size-7 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-650">
+                                {cartItems.reduce((acc, ci) => acc + ci.quantity, 0)}
+                            </span>
+                            <span className="text-slate-800 font-semibold text-sm md:text-base">
+                                items selected
+                            </span>
+                        </div>
+                        <span className="hidden sm:inline text-slate-400 font-medium text-xs md:text-sm">
+                            •
                         </span>
-                        <span className="text-slate-800 font-semibold text-sm md:text-base">
-                            items selected
-                        </span>
-                        <span className="text-slate-400 font-medium text-xs md:text-sm shrink-0">
-                            • Total: Rp{total.toLocaleString("en-US")}
+                        <span className="text-slate-800 sm:text-slate-400 font-semibold sm:font-medium text-sm md:text-sm shrink-0">
+                            Total: Rp{total.toLocaleString("en-US")}
                         </span>
                     </div>
                     <div className="flex gap-3">
                         <button 
                             onClick={handleClearCart}
-                            className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all active:scale-95"
+                            className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all active:scale-95"
                         >
                             Cancel
                         </button>
                         <button 
                             onClick={() => setIsCreateOrderModalOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-2.5 font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                            className="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-2.5 font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/20 active:scale-95"
                         >
                             Next <ArrowRight size={16} />
                         </button>
