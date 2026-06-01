@@ -53,7 +53,7 @@ import { Button } from "@/components/ui/button";
 import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
 
-import { useGetAllSectionDetailsByMenuIdQuery, useRemoveItemToSectionMutation } from "@/redux/features/menu/menu.api";
+import { useDeleteItemMutation, useGetAllSectionDetailsByMenuIdQuery, useRemoveItemToSectionMutation } from "@/redux/features/menu/menu.api";
 import { toast } from "sonner";
 
 export type MenuItemCardData = {
@@ -178,6 +178,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
   const t = useTranslations("Menu");
 
   const { data: sectionDetailsRes, isLoading } = useGetAllSectionDetailsByMenuIdQuery(sectionId);
+  const [deleteItem] = useDeleteItemMutation();
   const sectionDetails = sectionDetailsRes?.data;
   const sectionItems = sectionDetails?.sectionItems || [];
 
@@ -188,6 +189,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
     try {
       toast.loading("Removing item from section...", { id: "remove-item-section" });
       await removeItemToSection({ sectionId, itemId }).unwrap();
+      await deleteItem(itemId).unwrap();
       toast.success("Item removed from section successfully", { id: "remove-item-section" });
     } catch (err: any) {
       toast.error(err?.data?.message || err?.message || "Failed to remove item", { id: "remove-item-section" });
@@ -424,7 +426,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                     </div>
                   )}
 
-                  <div className="absolute right-1 bottom-1 sm:right-2 sm:bottom-2 flex flex-wrap gap-1 z-10">
+                  <div className="absolute -right-2 -bottom-2  flex flex-wrap gap-1 z-10">
                     {item.badges && item.badges.map((badge, badgeIndex) => {
                       const svgSrc = labelSvgMap[badge];
                       const bgColor = labelBgColorMap[badge] || "bg-slate-600";
@@ -439,7 +441,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                               src={svgSrc}
                               alt={badge}
                               fill
-                              className="object-contain brightness-0 invert"
+                              className="object-contain"
                             />
                           </div>
                         </div>

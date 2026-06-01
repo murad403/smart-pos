@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import Image from "next/image";
 import item1 from "@/assets/images/menu1.jpg";
@@ -14,9 +13,9 @@ import signatureMenuIcon from "@/assets/label/signature_menu.svg";
 import spicyIcon from "@/assets/label/spicy.svg";
 import vegetarianIcon from "@/assets/label/vegetarian.svg";
 
+
 const labelSvgMap: Record<string, any> = {
   NEW_MENU: newMenuIcon,
-  NEW: newMenuIcon,
   BEST_SELLER: bestSellerIcon,
   CHEF_RECOMMENDATION: chefRecommendationIcon,
   RECOMMENDED: chefRecommendationIcon,
@@ -25,14 +24,12 @@ const labelSvgMap: Record<string, any> = {
   SPICY: spicyIcon,
   VEGETARIAN: vegetarianIcon,
   SIGNATURE_MENU: signatureMenuIcon,
-  MUST_TRY: signatureMenuIcon,
   KIDS_MENU: kidsMenuIcon,
-  KIDS_CHOICE: kidsMenuIcon,
+  FAST_SERVE: fastServeIcon,
 };
 
 const labelBgColorMap: Record<string, string> = {
   NEW_MENU: "bg-blue-600",
-  NEW: "bg-blue-600",
   BEST_SELLER: "bg-amber-500",
   CHEF_RECOMMENDATION: "bg-purple-600",
   RECOMMENDED: "bg-purple-600",
@@ -41,9 +38,7 @@ const labelBgColorMap: Record<string, string> = {
   SPICY: "bg-red-600",
   VEGETARIAN: "bg-emerald-600",
   SIGNATURE_MENU: "bg-indigo-600",
-  MUST_TRY: "bg-indigo-600",
   KIDS_MENU: "bg-sky-500",
-  KIDS_CHOICE: "bg-sky-500",
   FAST_SERVE: "bg-amber-600",
 };
 
@@ -222,14 +217,14 @@ const CustomerMenuCards = ({
     };
   });
 
-  const layoutLabel: Record<SectionLayoutType, string> = {
-    SINGLE: t("1-image") || "1 Large Image",
-    DOUBLE: t("2-image") || "2 Images Side-by-Side",
-    TRIPLE: t("3-image-row") || "3-Image Row",
-    QUADRUPLE: "4-Image Row",
-    LIST_WITH_IMAGE: t("images-list") || "Images List View",
-    LIST_NO_IMAGE: t("no-image-list") || "No-Image List View",
-  };
+  // const layoutLabel: Record<SectionLayoutType, string> = {
+  //   SINGLE: t("1-image") || "1 Large Image",
+  //   DOUBLE: t("2-image") || "2 Images Side-by-Side",
+  //   TRIPLE: t("3-image-row") || "3-Image Row",
+  //   QUADRUPLE: "4-Image Row",
+  //   LIST_WITH_IMAGE: t("images-list") || "Images List View",
+  //   LIST_NO_IMAGE: t("no-image-list") || "No-Image List View",
+  // };
 
   const isNoImageLayout = layout === "LIST_NO_IMAGE";
   const isImageListLayout = layout === "LIST_WITH_IMAGE";
@@ -418,7 +413,7 @@ const CustomerMenuCards = ({
                                 src={svgSrc}
                                 alt={badge}
                                 fill
-                                className="object-contain brightness-0 invert"
+                                className="object-contain"
                               />
                             </div>
                           </div>
