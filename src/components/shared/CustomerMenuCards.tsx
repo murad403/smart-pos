@@ -57,6 +57,7 @@ export type MenuItemCardData = {
   stock: number;
   statusLabel: string;
   promoPrice: number;
+  hasPromo: boolean;
   imageType: "menu1" | "menu2";
   imageUrl?: string | null;
   badges: string[];
@@ -205,6 +206,7 @@ const CustomerMenuCards = ({
       itemNumber: item.slug || `i-${item.id}`,
       itemName: item.name,
       price: Number(item.price || 0),
+      hasPromo: item.hasPromo,
       inventory: item.inventoryQty || 0,
       stock: item.inventoryQty || 0,
       statusLabel: item.isOutOfStock ? "Out of Stock" : "In Stock",
@@ -282,15 +284,14 @@ const CustomerMenuCards = ({
             <div className={gridColsClass}>
               {Array.from({ length: ({ SINGLE: 1, DOUBLE: 2, TRIPLE: 3, QUADRUPLE: 4 }[layout] || 1) }).map((_, i) => (
                 <div key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-pulse">
-                  <div className={`relative bg-[#E2E8F0] w-full ${
-                    layout === "SINGLE"
-                      ? "h-64 md:h-96 lg:h-120"
-                      : layout === "DOUBLE"
-                        ? "h-44 sm:h-64 lg:h-96"
-                        : layout === "TRIPLE"
-                          ? "h-44 sm:h-52 lg:h-72"
-                          : "h-44 sm:h-48 lg:h-60"
-                  }`} />
+                  <div className={`relative bg-[#E2E8F0] w-full ${layout === "SINGLE"
+                    ? "h-64 md:h-96 lg:h-120"
+                    : layout === "DOUBLE"
+                      ? "h-44 sm:h-64 lg:h-96"
+                      : layout === "TRIPLE"
+                        ? "h-44 sm:h-52 lg:h-72"
+                        : "h-44 sm:h-48 lg:h-60"
+                    }`} />
                   <div className="flex-1 p-4 space-y-3">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/4" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/2" />
@@ -390,13 +391,13 @@ const CustomerMenuCards = ({
                       priority={index === 0}
                     />
 
-                    {item.promoPrice > 0 && (
+                    {/* {item.promoPrice > 0 && (
                       <div className="absolute right-1 top-1 sm:right-3 sm:top-3 z-10">
                         <span className="rounded-lg bg-green-600 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[11px] font-bold text-white shadow-sm">
                           Promo: Rp{item.promoPrice.toLocaleString("en-US")}
                         </span>
                       </div>
-                    )}
+                    )} */}
 
                     <div className="absolute right-1 bottom-1 sm:right-2 sm:bottom-2 flex flex-wrap gap-1 z-10">
                       {item.badges && item.badges.map((badge, badgeIndex) => {
@@ -442,8 +443,13 @@ const CustomerMenuCards = ({
 
                     <div className="mt-2.5 sm:mt-6 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 w-full">
                       <div className="text-slate-605">
-                        <p className="text-slate-500 text-[10px] sm:text-xs leading-none">{t("price")}</p>
-                        <p className="font-bold text-slate-900 text-sm sm:text-lg">Rp{item.price.toLocaleString("en-US")}</p>
+                        <p className={`font-bold text-slate-900 text-sm sm:text-lg ${item.hasPromo === true ? "line-through decoration-2" : ""}`}>{t("price")}: Rp{item.price.toLocaleString("en-US")}</p>
+                        {
+                          item.hasPromo === true &&
+                          <p className="font-bold text-red-500 text-sm sm:text-lg">
+                            {t("promoPrice")}: Rp{item.promoPrice.toLocaleString("en-US")}
+                          </p>
+                        }
                       </div>
 
                       {isSelected && (

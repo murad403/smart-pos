@@ -65,6 +65,7 @@ export type MenuItemCardData = {
   stock: number;
   statusLabel: string;
   promoPrice: number;
+  hasPromo: boolean;
   imageType: "menu1" | "menu2";
   imageUrl?: string | null;
   badges: string[];
@@ -189,7 +190,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
     try {
       toast.loading("Removing item from section...", { id: "remove-item-section" });
       await removeItemToSection({ sectionId, itemId }).unwrap();
-      await deleteItem(itemId).unwrap();
+      // await deleteItem(itemId).unwrap();
       toast.success("Item removed from section successfully", { id: "remove-item-section" });
     } catch (err: any) {
       toast.error(err?.data?.message || err?.message || "Failed to remove item", { id: "remove-item-section" });
@@ -198,10 +199,12 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
 
   const items: MenuItemCardData[] = (sectionItems || []).map((sectionItem: any) => {
     const item = sectionItem.item || sectionItem;
+    // console.log(item)
     return {
       id: item.id,
       itemNumber: item.slug || `i-${item.id}`,
       itemName: item.name,
+      hasPromo: item.hasPromo,
       price: Number(item.price || 0),
       inventory: item.inventoryQty || 0,
       stock: item.inventoryQty || 0,
@@ -214,7 +217,8 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
       originalItem: item,
     };
   });
-  // console.log(items[0]?.badges)
+
+  // console.log(items.)
 
   const layoutLabel: Record<SectionLayoutType, string> = {
     SINGLE: t("1-image") || "1 Large Image",
@@ -302,15 +306,14 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
             <div className={gridColsClass}>
               {Array.from({ length: (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : layout === "QUADRUPLE" ? 4 : 1) }).map((_, i) => (
                 <div key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-[#E2E8F0] shadow-sm animate-pulse">
-                  <div className={`relative bg-[#E2E8F0] w-full ${
-                    layout === "SINGLE"
+                  <div className={`relative bg-[#E2E8F0] w-full ${layout === "SINGLE"
                       ? "h-64 md:h-96 lg:h-120"
                       : layout === "DOUBLE"
                         ? "h-44 sm:h-64 lg:h-96"
                         : layout === "TRIPLE"
                           ? "h-44 sm:h-52 lg:h-72"
                           : "h-44 sm:h-48 lg:h-60"
-                  }`} />
+                    }`} />
                   <div className="flex-1 p-4 space-y-3">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/4" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/2" />
@@ -418,13 +421,13 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                     priority={index === 0}
                   />
 
-                  {item.promoPrice > 0 && (
+                  {/* {item.promoPrice > 0 && (
                     <div className="absolute right-1 top-1 sm:right-3 sm:top-3 z-10">
                       <span className="rounded-lg bg-green-600 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[11px] font-bold text-white shadow-sm">
                         Promo: Rp{item.promoPrice.toLocaleString("en-US")}
                       </span>
                     </div>
-                  )}
+                  )} */}
 
                   <div className="absolute -right-2 -bottom-2  flex flex-wrap gap-1 z-10">
                     {item.badges && item.badges.map((badge, badgeIndex) => {
@@ -468,8 +471,14 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
 
                   <div className="mt-2.5 sm:mt-6 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 w-full">
                     <div className="text-slate-600">
-                      <p className="text-slate-550 text-[10px] sm:text-xs leading-none">{t("price")}</p>
-                      <p className="font-bold text-slate-900 text-sm sm:text-lg">Rp{item.price.toLocaleString("en-US")}</p>
+                      {/* <p className="text-slate-550 text-[10px] sm:text-xs leading-none"></p> */}
+                      <p className={`font-bold text-slate-900 text-sm sm:text-lg ${item.hasPromo === true ? "line-through decoration-2" : ""}`}>{t("price")}: Rp{item.price.toLocaleString("en-US")}</p>
+                      {
+                        item.hasPromo === true &&
+                        <p className="font-bold text-red-500 text-sm sm:text-lg">
+                          {t("promoPrice")}: Rp{item.promoPrice.toLocaleString("en-US")}
+                        </p>
+                      }
                     </div>
                     <div className="flex gap-1.5 items-center shrink-0">
                       <Button
@@ -501,21 +510,19 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
               }).map((_, i) => (
                 <div
                   key={`placeholder-${i}`}
-                  className={`flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full ${
-                    layout === "SINGLE" ? "min-h-72 sm:min-h-105 md:min-h-140 lg:min-h-170" :
-                    layout === "DOUBLE" ? "min-h-48 sm:min-h-85 md:min-h-110 lg:min-h-142.5" :
-                    layout === "TRIPLE" ? "min-h-40 sm:min-h-60 md:min-h-97.5 lg:min-h-117.5" :
-                    "min-h-48 sm:min-h-85 md:min-h-92.5 lg:min-h-110"
-                  }`}
+                  className={`flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full ${layout === "SINGLE" ? "min-h-72 sm:min-h-105 md:min-h-140 lg:min-h-170" :
+                      layout === "DOUBLE" ? "min-h-48 sm:min-h-85 md:min-h-110 lg:min-h-142.5" :
+                        layout === "TRIPLE" ? "min-h-40 sm:min-h-60 md:min-h-97.5 lg:min-h-117.5" :
+                          "min-h-48 sm:min-h-85 md:min-h-92.5 lg:min-h-110"
+                    }`}
                 >
                   <button
                     type="button"
                     onClick={onAddItem}
-                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 ${
-                      layout === "SINGLE" ? "min-h-44 sm:min-h-64 md:min-h-96 lg:min-h-120" :
-                      layout === "DOUBLE" ? "min-h-32 sm:min-h-44 md:min-h-64 lg:min-h-96" :
-                      layout === "TRIPLE" ? "min-h-20 sm:min-h-28 md:min-h-52 lg:min-h-72" : "min-h-32 sm:min-h-44 md:min-h-48 lg:min-h-60"
-                    }`}
+                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 ${layout === "SINGLE" ? "min-h-44 sm:min-h-64 md:min-h-96 lg:min-h-120" :
+                        layout === "DOUBLE" ? "min-h-32 sm:min-h-44 md:min-h-64 lg:min-h-96" :
+                          layout === "TRIPLE" ? "min-h-20 sm:min-h-28 md:min-h-52 lg:min-h-72" : "min-h-32 sm:min-h-44 md:min-h-48 lg:min-h-60"
+                      }`}
                   >
                     <Plus size={36} className="text-white opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                   </button>
