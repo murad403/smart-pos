@@ -91,8 +91,8 @@ body {
 
 /* No circular shell — just a soft glow behind the logo */
 .splash-logo-shell {
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     display: grid;
     place-items: center;
     background: #F7F7F7;

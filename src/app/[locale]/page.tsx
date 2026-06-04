@@ -12,7 +12,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   useEffect(() => {
     const timerId = window.setTimeout(() => {
       setShowSplash(false);
-    }, 2000);
+    }, 3000);
 
     return () => {
       window.clearTimeout(timerId);

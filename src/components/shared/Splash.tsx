@@ -1,5 +1,5 @@
 import Image from "next/image";
-import splashLogo from "@/assets/logo/logo.png";
+import splashLogo from "@/assets/logo/logo2.png";
 
 const Splash = () => {
     return (
