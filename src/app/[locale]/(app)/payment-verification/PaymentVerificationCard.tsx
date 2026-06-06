@@ -72,17 +72,38 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
           <span>{t("paymentMethod")}</span>
           <span className="font-medium text-slate-700 border border-gray-300 px-1.5 py-0.5 rounded-xl">{item.paymentMethod}</span>
         </div>
-        <div className="flex items-center justify-between gap-2 text-slate-500">
+        {/* <div className="flex items-center justify-between gap-2 text-slate-500">
           <span>{item.personLabel}</span>
           <span className="font-medium text-slate-700">{item.personName}</span>
-        </div>
+        </div> */}
         <div className="flex items-center justify-between gap-2 text-slate-500">
           <span>{t("cashier")}</span>
           <span className="font-medium text-slate-700">{item.cashierName || "-"}</span>
         </div>
       </div>
 
+
+
       <div className="mt-2 space-y-2">
+        <button
+          type="button"
+          className="w-full rounded-md border border-slate-200 bg-green-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-green-600"
+        >
+          {t("match")}
+        </button>
+        <button
+          type="button"
+          className="w-full rounded-md border border-slate-200 bg-red-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-red-600"
+        >
+          {t("mismatch")}
+        </button>
+      </div>
+
+
+
+
+      {/* details and verify button */}
+      {/* <div className="mt-2 space-y-2">
         <p className="text-[11px] text-slate-400">{item.dateTime}</p>
         <button
           type="button"
@@ -99,7 +120,7 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
           {t("verify")}
         </button>
 
-      </div>
+      </div> */}
     </article>
   );
 };
