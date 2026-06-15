@@ -1194,7 +1194,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
           <button
             type="button"
             onClick={handleDownloadPNG}
-            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
+            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-colors flex whitespace-nowrap px-2 items-center justify-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
           >
             <Download size={16} />
             Download PNG
