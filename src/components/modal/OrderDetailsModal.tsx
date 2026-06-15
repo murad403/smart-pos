@@ -81,7 +81,10 @@ const generateInvoiceInnerHtml = (order: Order, business: any) => {
     if (item.packetChoices && item.packetChoices.length > 0) {
       choicesHtml = `
         <div class="item-choices">
-          ${item.packetChoices.map(c => `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ''}`).join('<br/>')}
+          ${item.packetChoices.map(c => {
+            const choiceName = c.choice || (c as any).item?.name || (c as any).choiceItem?.name || "";
+            return `${c.section}: ${c.quantity}x ${choiceName}`;
+          }).join('<br/>')}
         </div>
       `;
     }
@@ -667,7 +670,8 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
             nextY += 15;
             ctx.fillStyle = "#64748b";
             ctx.font = "500 10.5px 'Inter', -apple-system, sans-serif";
-            const choiceText = `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ''}`;
+            const choiceName = c.choice || (c as any).item?.name || (c as any).choiceItem?.name || "";
+            const choiceText = `${c.section}: ${c.quantity}x ${choiceName}`;
             ctx.fillText(choiceText, 50, nextY);
           });
         }
@@ -944,14 +948,14 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
                         {t("packetChoices") || "Combo Selections"}
                       </p>
                       <div className="space-y-0.5">
-                        {item.packetChoices?.map((choice, cIdx) => (
-                          <p key={cIdx} className="text-xs text-slate-500">
-                            {choice.section}: <span className="font-medium text-slate-700">{choice.choice}</span>
-                            {choice.quantity > 1 && (
-                              <span className="text-slate-400 text-[10px] ml-1">x{choice.quantity}</span>
-                            )}
-                          </p>
-                        ))}
+                        {item.packetChoices?.map((choice, cIdx) => {
+                          const choiceName = choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || "";
+                          return (
+                            <p key={cIdx} className="text-xs text-slate-500">
+                              {choice.section}: <span className="font-medium text-slate-700">{choice.quantity}x {choiceName}</span>
+                            </p>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

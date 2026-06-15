@@ -23,6 +23,7 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
   const [showPass, setShowPass] = React.useState(false);
   const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [photoError, setPhotoError] = React.useState<string | null>(null);
 
   const { data: stationsRes } = useGetAllProductionStationQuery({ limit: 100 });
   const stations = stationsRes?.data ?? [];
@@ -60,6 +61,7 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
       }
       setPhotoFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setPhotoError(null);
     }
   };
 
@@ -69,6 +71,7 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
     }
     setPhotoFile(null);
     setPreviewUrl(null);
+    setPhotoError(t("photoRequired") || "Profile photo is required");
   };
 
   React.useEffect(() => {
@@ -79,12 +82,19 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
       }
       setPhotoFile(null);
       setPreviewUrl(null);
+      setPhotoError(null);
     }
   }, [open, reset, defaultValues]);
 
   if (!open) return null;
 
   const onSubmit = async (data: AdminFormValues) => {
+    if (!photoFile) {
+      setPhotoError(t("photoRequired") || "Profile photo is required");
+      return;
+    }
+    setPhotoError(null);
+
     try {
       const payload: any = {
         ...data,
@@ -147,11 +157,11 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
           {/* Photo Upload Section */}
           <div className="flex flex-col items-center justify-center pb-4">
             <div className="relative group">
-              <div className="size-24 rounded-full overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:bg-slate-50 shadow-inner">
+              <div className={`size-24 rounded-full overflow-hidden bg-slate-100 border-2 border-dashed flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:bg-slate-50 shadow-inner ${photoError ? 'border-red-500 bg-red-50/20' : 'border-slate-200'}`}>
                 {previewUrl ? (
                   <img src={previewUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
                 ) : (
-                  <User className="size-10 text-slate-400" />
+                  <User className={`size-10 ${photoError ? 'text-red-400' : 'text-slate-400'}`} />
                 )}
               </div>
               <label className="absolute bottom-0 right-0 size-8 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-md hover:bg-blue-700 transition active:scale-95">
@@ -177,7 +187,8 @@ const AddAdminModal: React.FC<Props> = ({ open, onClose }) => {
                 </button>
               )}
             </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">Upload profile photo (Optional)</p>
+            <p className="text-xs text-slate-400 mt-2 font-medium">Upload profile photo <span className="text-red-500">*</span></p>
+            {photoError && <p className="text-xs text-red-500 mt-1 font-semibold">{photoError}</p>}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

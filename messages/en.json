@@ -314,6 +314,7 @@
     "facebookUrl": "Facebook URL",
     "instagramUrl": "Instagram URL",
     "uploadPhoto": "Upload photo",
+    "photoRequired": "Profile photo is required",
     "emailAddress": "Email Address",
     "uploadLogo": "Upload Logo",
     "change": "Change",

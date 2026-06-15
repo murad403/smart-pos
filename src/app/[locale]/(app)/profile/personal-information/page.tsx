@@ -203,7 +203,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
       };
 
       if (!imagePreview) {
-        payload.photoUrl = null;
+        payload.photoUrl = "";
       }
 
       const formData = new FormData();

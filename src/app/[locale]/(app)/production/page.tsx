@@ -443,11 +443,14 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
 
                                     {item.packetChoices && item.packetChoices.length > 0 && (
                                       <div className="ml-5 space-y-0.5 border-l border-slate-200 pl-2">
-                                        {item.packetChoices.map((choice, choiceIndex) => (
-                                          <p key={`${choice.section}-${choice.choice}-${choiceIndex}`} className="text-xs font-medium text-slate-500">
-                                            {choice.choice} x{choice.quantity}
-                                          </p>
-                                        ))}
+                                        {item.packetChoices.map((choice, choiceIndex) => {
+                                          const choiceName = choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || "";
+                                          return (
+                                            <p key={`${choice.section}-${choiceName}-${choiceIndex}`} className="text-xs font-medium text-slate-500">
+                                              {choice.quantity}x {choiceName}
+                                            </p>
+                                          );
+                                        })}
                                       </div>
                                     )}
                                   </div>
