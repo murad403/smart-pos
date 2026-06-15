@@ -7,8 +7,14 @@ import { useTranslations } from "next-intl";
 
 type Choice = {
   id: number;
-  name: string;
+  name?: string;
   maxQty: number;
+  itemId?: number | null;
+  item?: {
+    id: number;
+    name: string;
+    imageUrl?: string | null;
+  } | null;
 };
 
 type PacketSection = {
@@ -29,13 +35,13 @@ type Props = {
     imageUrl?: string | null;
     packetSections?: PacketSection[];
   } | null;
-  onConfirm: (choices: Array<{ section: string; choice: string; quantity: number; productionStationId?: number | null }>) => void;
+  onConfirm: (choices: Array<{ section: string; choice: string; choiceItemId: number; quantity: number; productionStationId?: number | null }>) => void;
 };
 
 const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConfirm }) => {
   const t = useTranslations("Menu");
-  // Format: { [sectionName]: { [choiceName]: quantity } }
-  const [selections, setSelections] = useState<Record<string, Record<string, number>>>({});
+  // Format: { [sectionName]: { [choiceId]: quantity } }
+  const [selections, setSelections] = useState<Record<string, Record<number, number>>>({});
 
   useEffect(() => {
     if (open) {
@@ -115,15 +121,15 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
     return Object.values(sectionSelections).reduce((sum, qty) => sum + qty, 0);
   };
 
-  const handleSelectChoiceSingle = (sectionName: string, choiceName: string) => {
+  const handleSelectChoiceSingle = (sectionName: string, choiceId: number) => {
     setSelections((prev) => {
       const sectionSelections = prev[sectionName] || {};
-      const currentQty = sectionSelections[choiceName] || 0;
+      const currentQty = sectionSelections[choiceId] || 0;
       // Toggle selection for maxQty === 1
       return {
         ...prev,
         [sectionName]: {
-          [choiceName]: currentQty === 1 ? 0 : 1,
+          [choiceId]: currentQty === 1 ? 0 : 1,
         },
       };
     });
@@ -137,7 +143,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
   ) => {
     setSelections((prev) => {
       const sectionSelections = prev[sectionName] || {};
-      const currentQty = sectionSelections[choice.name] || 0;
+      const currentQty = sectionSelections[choice.id] || 0;
       const nextQty = Math.max(0, currentQty + delta);
 
       // Enforce choice-level maxQty limit
@@ -158,7 +164,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
         ...prev,
         [sectionName]: {
           ...sectionSelections,
-          [choice.name]: nextQty,
+          [choice.id]: nextQty,
         },
       };
     });
@@ -175,18 +181,25 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
     e.preventDefault();
     if (!isAllValid) return;
 
-    const formattedChoices: Array<{ section: string; choice: string; quantity: number; productionStationId?: number | null }> = [];
+    const formattedChoices: Array<{ section: string; choice: string; choiceItemId: number; quantity: number; productionStationId?: number | null }> = [];
 
     Object.entries(selections).forEach(([sectionName, sectionChoices]) => {
       const matchingSection = sections.find((s) => s.name === sectionName);
       const productionStationId = matchingSection?.productionStationId || null;
 
-      Object.entries(sectionChoices).forEach(([choiceName, qty]) => {
-        if (qty > 0) {
+      Object.entries(sectionChoices).forEach(([choiceIdStr, qty]) => {
+        const qtyNum = Number(qty);
+        if (qtyNum > 0) {
+          const choiceId = Number(choiceIdStr);
+          const matchingChoice = matchingSection?.choices.find((c) => c.id === choiceId);
+          const choiceItemId = matchingChoice?.itemId || matchingChoice?.item?.id || 0;
+          const choiceName = matchingChoice?.item?.name || matchingChoice?.name || "";
+
           formattedChoices.push({
             section: sectionName,
             choice: choiceName,
-            quantity: qty,
+            choiceItemId,
+            quantity: qtyNum,
             productionStationId,
           });
         }
@@ -264,7 +277,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {(section.choices || []).map((choice) => {
-                      const qty = selections[section.name]?.[choice.name] || 0;
+                      const qty = selections[section.name]?.[choice.id] || 0;
                       const isSelected = qty > 0;
 
                       // For single choice sections (maxQty === 1)
@@ -273,7 +286,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                           <button
                             key={choice.id}
                             type="button"
-                            onClick={() => handleSelectChoiceSingle(section.name, choice.name)}
+                            onClick={() => handleSelectChoiceSingle(section.name, choice.id)}
                             className={`flex items-center justify-between p-3.5 rounded-xl border-2 text-left transition-all ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50/40 text-blue-900 shadow-sm"
@@ -281,7 +294,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                             }`}
                           >
                             <span className="text-sm font-semibold truncate pr-2">
-                              {choice.name}
+                              {choice.item?.name || choice.name}
                             </span>
                             <div
                               className={`size-4.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
@@ -319,7 +332,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                               : "border-slate-150 bg-white hover:border-slate-300 hover:bg-slate-50/55 text-slate-700 cursor-pointer"
                           }`}
                         >
-                          <span className="text-sm font-semibold truncate pr-2">{choice.name}</span>
+                          <span className="text-sm font-semibold truncate pr-2">{choice.item?.name || choice.name}</span>
 
                           {/* Controls / checkbox circle */}
                           {isSelected ? (

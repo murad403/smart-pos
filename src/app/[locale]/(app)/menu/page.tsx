@@ -78,7 +78,13 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
                 price: parseFloat(oi.promoPrice || oi.unitPrice || "0"),
                 quantity: oi.quantity,
                 imageUrl: oi.item?.imageUrl || null,
-                packetChoices: oi.packetChoices || null,
+                packetChoices: (oi.packetChoices || []).map((pc: any) => ({
+                    section: pc.section,
+                    choice: pc.choice || pc.item?.name || pc.choiceItem?.name || "",
+                    choiceItemId: pc.choiceItemId,
+                    quantity: pc.quantity,
+                    productionStationId: pc.productionStationId || null,
+                })),
                 productionStationId: oi.productionStationId || null,
             }));
             setCartItems(mapped);

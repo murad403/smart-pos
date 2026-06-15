@@ -68,7 +68,7 @@ const generateInvoiceInnerHtml = (order: any, business: any) => {
     if (item.packetChoices && item.packetChoices.length > 0) {
       choicesHtml = `
         <div class="item-choices">
-          ${item.packetChoices.map((c: any) => `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ''}`).join('<br/>')}
+          ${item.packetChoices.map((c: any) => `${c.section}: ${c.choice || c.item?.name || c.choiceItem?.name || ''}${c.quantity > 1 ? ` x${c.quantity}` : ''}`).join('<br/>')}
         </div>
       `;
     }
@@ -768,7 +768,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
           nextY += 15;
           ctx.fillStyle = "#64748b";
           ctx.font = "500 11px 'Inter', -apple-system, sans-serif";
-          const choiceText = `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ""
+          const choiceText = `${c.section}: ${c.choice || (c as any).item?.name || (c as any).choiceItem?.name || ''}${c.quantity > 1 ? ` x${c.quantity}` : ""
             }`;
           ctx.fillText(choiceText, 50, nextY);
         });
@@ -1093,7 +1093,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
                         <div className="text-[10px] text-slate-500 mt-1 space-y-0.5">
                           {item.packetChoices.map((choice, cidx) => (
                             <div key={cidx} className="font-medium">
-                              • {choice.section}: {choice.choice}
+                              • {choice.section}: {choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || ""}
                               {choice.quantity > 1 ? ` x${choice.quantity}` : ""}
                             </div>
                           ))}

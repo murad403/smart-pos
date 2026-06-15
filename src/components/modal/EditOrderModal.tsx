@@ -19,6 +19,7 @@ type CartItem = {
     packetChoices?: Array<{
         section: string;
         choice: string;
+        choiceItemId: number;
         quantity: number;
         productionStationId?: number | null
     }>;
@@ -80,7 +81,14 @@ const EditOrderModal: React.FC<Props> = ({
                 quantity: item.quantity,
                 productionStationId: item.productionStationId || null,
                 ...(item.packetChoices && item.packetChoices.length > 0
-                    ? { packetChoices: item.packetChoices }
+                    ? {
+                          packetChoices: item.packetChoices.map((pc: any) => ({
+                              section: pc.section,
+                              choiceItemId: pc.choiceItemId,
+                              quantity: pc.quantity,
+                              ...(pc.productionStationId ? { productionStationId: Number(pc.productionStationId) } : {}),
+                          })),
+                      }
                     : {}),
             })),
         };
@@ -180,7 +188,7 @@ const EditOrderModal: React.FC<Props> = ({
                                                                 key={cidx}
                                                                 className="text-[10px] font-semibold bg-white border border-slate-205 text-slate-500 px-1.5 py-0.5 rounded-md"
                                                             >
-                                                                {choice.section}: {choice.choice}
+                                                                {choice.section}: {choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || ""}
                                                             </span>
                                                         ))}
                                                     </div>
