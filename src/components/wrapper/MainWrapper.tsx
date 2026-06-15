@@ -259,8 +259,8 @@ function Topbar({
       "sticky top-0 z-20 border-b border-slate-200/80 bg-white",
       (pathname === "/mobile-admin-layout" || pathname === "/mobile-owner-layout") && "hidden md:block"
     )}>
-      <div className="flex py-3.5 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex py-3 items-center justify-between gap-2.5 px-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-2">
           {isMobileAdmin ? (
             <Link
               href={path}
@@ -289,11 +289,11 @@ function Topbar({
           </div> */}
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           {/* Device Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none">
+              <button className="flex h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 sm:px-3.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none">
                 <SelectedDeviceIcon className="size-4 text-slate-500" />
                 <span className="hidden sm:inline">{selectedDeviceLabel}</span>
                 <ChevronDown className="size-3.5 text-slate-400" />
@@ -327,7 +327,7 @@ function Topbar({
                 e.stopPropagation();
                 handleLocaleChange("en");
               }}
-              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${locale === "en" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
+              className={`rounded-xl px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-medium transition-all ${locale === "en" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
             >
               EN
             </button>
@@ -336,7 +336,7 @@ function Topbar({
                 e.stopPropagation();
                 handleLocaleChange("id");
               }}
-              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${locale === "id" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
+              className={`rounded-xl px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-medium transition-all ${locale === "id" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
             >
               ID
             </button>
@@ -345,19 +345,19 @@ function Topbar({
           {user && user.role?.toUpperCase() !== "USER" && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 text-left outline-none">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden">
+                <button className="flex items-center gap-1.5 sm:gap-3 text-left outline-none">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden shrink-0">
                     {user?.photoUrl ? (
                       <Image width={500} height={500} src={user.photoUrl} alt="Avatar" className="h-full w-full object-cover" />
                     ) : (
                       <User className="size-5" />
                     )}
                   </div>
-                  <div className="min-w-0 leading-tight">
+                  <div className="hidden sm:block min-w-0 leading-tight">
                     <div className="text-sm font-medium text-slate-950 sm:text-base">{displayUser.name}</div>
                     <div className="text-xs text-slate-500 sm:text-sm">{displayUser.role}</div>
                   </div>
-                  <ChevronDown className="size-4 text-slate-400" />
+                  <ChevronDown className="size-3.5 text-slate-400 shrink-0" />
                 </button>
               </DropdownMenuTrigger>
 
