@@ -3,11 +3,12 @@ import { useTranslations } from "next-intl";
 import { InventoryItem } from "@/redux/features/dashboard/dashboard.type";
 
 interface InventoryReportStatsProps {
-  items?: InventoryItem[];
+  lowStockItems?: InventoryItem[];
+  outOfStockItems?: InventoryItem[];
   isLoading?: boolean;
 }
 
-const InventoryReportStats = ({ items, isLoading }: InventoryReportStatsProps) => {
+const InventoryReportStats = ({ lowStockItems = [], outOfStockItems = [], isLoading }: InventoryReportStatsProps) => {
   const t = useTranslations("Inventory");
 
   if (isLoading) {
@@ -24,18 +25,6 @@ const InventoryReportStats = ({ items, isLoading }: InventoryReportStatsProps) =
       </div>
     );
   }
-
-  const outOfStockItems = (items ?? []).filter(
-    (item) => item.isOutOfStock || (item.inventoryQty !== null && item.inventoryQty === 0)
-  );
-
-  const lowStockItems = (items ?? []).filter(
-    (item) =>
-      !item.isOutOfStock &&
-      item.inventoryQty !== null &&
-      item.inventoryQty > 0 &&
-      item.inventoryQty <= 10
-  );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

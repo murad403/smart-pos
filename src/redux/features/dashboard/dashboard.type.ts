@@ -234,6 +234,10 @@ export interface GetInventoryReportResponse {
         total: number;
         pages: number;
     };
+    meta?: {
+        lowStack: InventoryItem[];
+        outOfStock: InventoryItem[];
+    };
     data: InventoryItem[];
 }
 
