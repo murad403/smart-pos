@@ -405,7 +405,7 @@
     "levelRequired": "Level is required",
     "typeRequired": "Type is required",
     "valueRequired": "Value is required",
-    "valueMin": "Value must be greater than 0",
+    "valueMin": "Value must not be 0",
     "cancel": "Cancel",
     "save": "Save",
     "percentage": "Percentage",

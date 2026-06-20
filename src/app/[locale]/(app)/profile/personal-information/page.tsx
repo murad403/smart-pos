@@ -106,8 +106,8 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
   const handleSaveAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!adjValue.trim() || Number(adjValue) <= 0) {
-      toast.error(tp("valueMin") || "Value must be greater than 0");
+    if (!adjValue.trim() || Number(adjValue) === 0) {
+      toast.error(tp("valueMin") || "Value must not be 0");
       return;
     }
 
@@ -607,7 +607,6 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
                   placeholder={adjType === "PERCENTAGE" ? "e.g., 10" : "e.g., 50"}
                   className="w-full rounded-[14px] bg-[#F1F5F9] px-4 py-3 text-[16px] text-slate-900 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 font-medium"
                   required
-                  min="0"
                   step="any"
                 />
               </div>

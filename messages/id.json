@@ -407,7 +407,7 @@
     "levelRequired": "Tingkat wajib diisi",
     "typeRequired": "Tipe wajib diisi",
     "valueRequired": "Nilai wajib diisi",
-    "valueMin": "Nilai harus lebih besar dari 0",
+    "valueMin": "Nilai tidak boleh 0",
     "cancel": "Batal",
     "save": "Simpan",
     "percentage": "Persentase",
