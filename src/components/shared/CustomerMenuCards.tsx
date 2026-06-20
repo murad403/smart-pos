@@ -245,8 +245,8 @@ const CustomerMenuCards = ({
           ) : layout === "LIST_WITH_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center animate-pulse">
-                  <div className="h-40 w-full rounded-2xl bg-[#E2E8F0]" />
+                <div key={i} className="grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 items-center animate-pulse">
+                  <div className="h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0]" />
                   <div className="space-y-3 w-full py-1">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/5" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
@@ -346,14 +346,14 @@ const CustomerMenuCards = ({
                   onClick={() => onAddItem(item)}
                   className={
                     (isImageListLayout
-                      ? "grid gap-4 rounded-2xl border bg-slate-50 p-3 sm:grid-cols-[280px_1fr] cursor-pointer transition-all duration-200"
+                      ? "grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border bg-slate-50 p-3 cursor-pointer transition-all duration-200"
                       : "flex flex-col h-full overflow-hidden rounded-2xl border bg-white cursor-pointer transition-all duration-200") +
                     ` ${isSelected ? "border-blue-600 bg-blue-50/10 ring-1 ring-blue-600 shadow-md" : "border-slate-200 hover:border-slate-350 hover:shadow-sm"}`
                   }
                 >
                   <div className={
                     isImageListLayout
-                      ? "relative h-40 overflow-hidden rounded-2xl sm:h-full w-full"
+                      ? "relative h-28 sm:h-full w-full overflow-hidden rounded-xl sm:rounded-2xl"
                       : layout === "SINGLE"
                         ? "relative h-64 md:h-96 lg:h-120 overflow-hidden w-full"
                         : layout === "DOUBLE"
@@ -387,7 +387,7 @@ const CustomerMenuCards = ({
                             src={svgSrc}
                             alt={badge}
                             fill
-                            className="object-contain object-right-bottom"
+                            className="object-contain object-bottom-right"
                           />
                         </div>
                       );

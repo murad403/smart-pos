@@ -259,8 +259,8 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
           ) : layout === "LIST_WITH_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center animate-pulse">
-                  <div className="h-40 w-full rounded-2xl bg-[#E2E8F0]" />
+                <div key={i} className="grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 items-center animate-pulse">
+                  <div className="h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0]" />
                   <div className="space-y-3 w-full py-1">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/5" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
@@ -369,13 +369,13 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                 key={`${item.itemNumber}-${index}`}
                 className={
                   isImageListLayout
-                    ? "grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr]"
+                    ? "grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3"
                     : "flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white hover:shadow-sm transition-all duration-200"
                 }
               >
                 <div className={
                   isImageListLayout
-                    ? "relative h-40 overflow-hidden rounded-2xl sm:h-full w-full"
+                    ? "relative h-28 sm:h-full w-full overflow-hidden rounded-xl sm:rounded-2xl"
                     : layout === "SINGLE"
                       ? "relative h-64 md:h-96 lg:h-120 overflow-hidden w-full"
                       : layout === "DOUBLE"
@@ -404,19 +404,19 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                     const svgSrc = labelSvgMap[badge];
                     if (!svgSrc) return null;
                     return (
-                      <div key={badgeIndex} className="absolute bottom-0 right-0 sm:w-50 sm:h-50 w-20 h-20">
+                      <div key={badgeIndex} className="absolute bottom-0 right-0 sm:w-50 sm:h-50 w-25 h-25">
                         <Image
                           src={svgSrc}
                           alt={badge}
                           fill
-                          className="object-contain object-right-bottom"
+                          className="object-contain object-bottom-right"
                         />
                       </div>
                     );
                   })}
                 </div>
 
-                <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-2 sm:p-4"}>
+                <div className={isImageListLayout ? "flex flex-col justify-between py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-2 sm:p-4"}>
                   <div className="space-y-1 sm:space-y-3">
                     <p className="text-xs sm:text-lg font-bold tracking-tight text-red-500">{item.itemNumber}</p>
                     <h3 className="text-sm sm:text-[1.35rem] font-bold tracking-tight text-red-500 line-clamp-1">{item.itemName}</h3>
@@ -497,9 +497,9 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
               <button
                 type="button"
                 onClick={onAddItem}
-                className="group w-full grid gap-4 rounded-2xl border border-dashed border-blue-400 bg-white hover:bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center text-left transition-all duration-300"
+                className="group w-full grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-dashed border-blue-400 bg-white hover:bg-slate-50 p-3 items-center text-left transition-all duration-300"
               >
-                <div className="relative h-40 rounded-xl bg-[#E2E8F0] group-hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300">
+                <div className="relative h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0] group-hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300">
                   <Plus size={36} className="text-white opacity-90 group-hover:scale-110 transition-all duration-300" />
                 </div>
               </button>
