@@ -83,6 +83,17 @@ const toElapsed = (startDateString: string | null | undefined) => {
   return `${minutes}m ${seconds}s`;
 };
 
+const toDuration = (startDateString: string | null | undefined, endDateString: string | null | undefined) => {
+  if (!startDateString || !endDateString) return "";
+  const start = new Date(startDateString).getTime();
+  const end = new Date(endDateString).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end)) return "";
+  const diffInSeconds = Math.max(0, Math.floor((end - start) / 1000));
+  const minutes = Math.floor(diffInSeconds / 60);
+  const seconds = diffInSeconds % 60;
+  return `${minutes}m ${seconds}s`;
+};
+
 const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
   const t = useTranslations("ProductionPage");
@@ -90,6 +101,14 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
   const [sourceFilter, setSourceFilter] = useState<ProductionSource | "">("");
   const [activeAction, setActiveAction] = useState<{ orderId: number; action: OrderAction } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [, setTicker] = useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setTicker((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data, isLoading, isFetching } = useGetAllProductionsQuery({
     page: 1,
@@ -416,6 +435,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
                   <div className="space-y-3">
                     {ordersByStatus.map((order) => {
                       const elapsed = toElapsed(order.processedAt || order.createdAt);
+                      const duration = toDuration(order.processedAt || order.createdAt, order.readyAt || order.updatedAt);
 
                       return (
                         <article key={order.id} className={`rounded-xl border border-slate-200 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border-l-3 ${statusView[order.status].cardClass}`}>
@@ -423,13 +443,16 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2 text-slate-800">
                                 <span className="text-sm font-bold uppercase tracking-tight">{t("orderLabel")} {order.slug.toUpperCase()}</span>
-                                <span className="text-xs font-semibold text-slate-450">-</span>
+                                <span className="text-xs font-semibold text-slate-455">-</span>
                                 <span className="text-xs font-semibold text-slate-500">{toClock(order.createdAt)}</span>
                                 <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md border ${statusView[order.status].statusClass} bg-white/70`}>
                                   {t(statusLabelKeys[order.status])}
                                 </span>
-                                {(order.status === "PROCESSING" || order.status === "READY") && elapsed && (
+                                {order.status === "PROCESSING" && elapsed && (
                                   <span className="text-xs font-semibold text-blue-500">{elapsed}</span>
+                                )}
+                                {order.status === "READY" && duration && (
+                                  <span className="text-xs font-semibold text-slate-500">{duration}</span>
                                 )}
                               </div>
 
