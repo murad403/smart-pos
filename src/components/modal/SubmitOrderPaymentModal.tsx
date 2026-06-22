@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { openCameraStream, captureImageFromFile } from "@/lib/openCamera";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useSubmitOrderPaymentMutation } from "@/redux/features/order/order.api";
@@ -80,12 +81,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
       try {
         setCameraError(null);
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-          },
-        });
+        const stream = await openCameraStream();
 
         cameraStreamRef.current = stream;
 
@@ -150,40 +146,12 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
   };
 
   const captureCameraImage = async () => {
-    const video = cameraVideoRef.current;
-    const canvas = cameraCanvasRef.current;
-
-    if (!video || !canvas) {
-      return;
-    }
-
-    const width = video.videoWidth;
-    const height = video.videoHeight;
-
-    if (!width || !height) {
-      setCameraError(tPending("cameraNotReady") || "Camera is not ready yet.");
-      return;
-    }
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      setCameraError(tPending("cameraNotReady") || "Camera is not ready yet.");
-      return;
-    }
-
-    context.drawImage(video, 0, 0, width, height);
-
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        setCameraError(tPending("cameraCaptureFailed") || "Failed to capture image.");
+    try {
+      const file = await captureImageFromFile(cameraVideoRef.current, cameraCanvasRef.current);
+      if (!file) {
+        setCameraError(tPending("cameraNotReady") || "Camera is not ready yet.");
         return;
       }
-
-      const file = new File([blob], `proof-${Date.now()}.jpg`, { type: "image/jpeg" });
 
       setSelectedProofImages((currentImages) => [
         ...currentImages,
@@ -194,7 +162,9 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
       ]);
 
       closeCamera();
-    }, "image/jpeg", 0.95);
+    } catch (error: any) {
+      setCameraError(error?.message || tPending("cameraCaptureFailed") || "Failed to capture image.");
+    }
   };
 
   const handleRemoveImage = (indexToRemove: number) => {

@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Upload, X, Loader2, CheckCircle2 } from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { Camera, X, Loader2, CheckCircle2 } from "lucide-react";
 import {
     useGetTodayPaymentsSummaryQuery,
     useTodayPaymentsVerifyMutation,
 } from "@/redux/features/dashboard/dashboard.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
+import { openCameraStream, captureImageFromFile } from "@/lib/openCamera";
 
 const formatCurrency = (value: number) =>
     `Rp ${value.toLocaleString("en-US")}`;
@@ -31,19 +32,85 @@ const TodayPaymentVerification = () => {
     const [remark, setRemark] = useState("");
     const [proofFile, setProofFile] = useState<File | null>(null);
     const [proofPreview, setProofPreview] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
+    const cameraStreamRef = useRef<MediaStream | null>(null);
+    const cameraCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setProofFile(file);
-        setProofPreview(URL.createObjectURL(file));
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [cameraError, setCameraError] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isCameraOpen) {
+            cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+            cameraStreamRef.current = null;
+            return;
+        }
+
+        const startCamera = async () => {
+            try {
+                setCameraError(null);
+                const stream = await openCameraStream();
+                cameraStreamRef.current = stream;
+
+                if (cameraVideoRef.current) {
+                    cameraVideoRef.current.srcObject = stream;
+                    await cameraVideoRef.current.play();
+                }
+            } catch (error: any) {
+                setCameraError(error?.message || "Unable to open the camera.");
+                setIsCameraOpen(false);
+            }
+        };
+
+        void startCamera();
+    }, [isCameraOpen]);
+
+    useEffect(() => {
+        if (!isCameraOpen && cameraVideoRef.current) {
+            cameraVideoRef.current.srcObject = null;
+        }
+    }, [isCameraOpen]);
+
+    const closeCamera = () => {
+        cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+        cameraStreamRef.current = null;
+        setIsCameraOpen(false);
+    };
+
+    const openCamera = async () => {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCameraError("Camera is not supported in this browser.");
+            return;
+        }
+        setCameraError(null);
+        setIsCameraOpen(true);
+    };
+
+    const captureCameraImage = async () => {
+        try {
+            const file = await captureImageFromFile(cameraVideoRef.current, cameraCanvasRef.current);
+            if (!file) {
+                setCameraError("Camera is not ready yet.");
+                return;
+            }
+
+            setProofFile(file);
+            setProofPreview(URL.createObjectURL(file));
+            closeCamera();
+        } catch (error: any) {
+            setCameraError(error?.message || "Failed to capture image.");
+        }
     };
 
     const handleRemoveFile = () => {
         setProofFile(null);
         setProofPreview(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -140,7 +207,6 @@ const TodayPaymentVerification = () => {
                         <input
                             id="actualAmount"
                             type="number"
-                            min="0"
                             step="0.01"
                             value={actualAmount}
                             onChange={(e) => setActualAmount(e.target.value)}
@@ -194,21 +260,13 @@ const TodayPaymentVerification = () => {
                         ) : (
                             <button
                                 type="button"
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={openCamera}
                                 className="flex h-13 w-36.25 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
                             >
-                                <Upload size={16} />
-                                Upload Image
+                                <Camera size={16} />
+                                Take Photo
                             </button>
                         )}
-
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileChange}
-                        />
                     </div>
 
                     {/* Submit */}
@@ -229,6 +287,64 @@ const TodayPaymentVerification = () => {
                 </div>
 
             </form>
+
+            {isCameraOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-6 backdrop-blur-[2px]">
+                    <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-slate-950 shadow-2xl border border-slate-800">
+                        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-white bg-slate-900">
+                            <div>
+                                <p className="text-sm font-semibold">Camera Preview</p>
+                                <p className="text-xs text-white/70">Frame the proof image and capture it in real time.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeCamera}
+                                className="rounded-full p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div className="relative aspect-4/3 bg-black">
+                            <video
+                                ref={cameraVideoRef}
+                                autoPlay
+                                muted
+                                playsInline
+                                className="h-full w-full object-cover"
+                            />
+                            <canvas ref={cameraCanvasRef} className="hidden" />
+
+                            {cameraError ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/90 px-4 text-center text-sm text-white">
+                                    <div>
+                                        <p className="font-semibold">{cameraError}</p>
+                                        <p className="mt-1 text-white/70">Use a secure browser context and allow camera access.</p>
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-black/55 p-3">
+                                <button
+                                    type="button"
+                                    onClick={closeCamera}
+                                    className="h-10 rounded-xl border border-white/20 bg-white/10 px-4 text-white hover:bg-white/20 transition-all text-xs font-semibold"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={captureCameraImage}
+                                    className="h-12 rounded-full bg-blue-600 hover:bg-blue-700 px-5 text-white flex items-center gap-2 text-xs font-semibold transition-all"
+                                >
+                                    <Camera size={16} />
+                                    Capture Photo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
