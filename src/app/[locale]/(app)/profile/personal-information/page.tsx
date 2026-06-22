@@ -12,8 +12,9 @@ import { getUserData, saveUserData } from "@/utils/auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAllPriceAdjustmentsQuery, useCreatePriceAdjustmentMutation, useUpdatePriceAdjustmentMutation, useDeletePriceAdjustmentMutation } from "@/redux/features/price/price.api";
 import CustomPagination from "@/components/shared/CustomPagination";
-import { Plus, Edit, Trash2, Loader2, X, AlertTriangle } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, X, AlertTriangle, Armchair } from "lucide-react";
 import BusinessInfo from "./BusinessInfo";
+import { Link } from "@/i18n/routing";
 
 const profileSchema = (t: any) => z.object({
   businessName: z.string().min(1, t("nameRequired")),
@@ -305,8 +306,14 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("ownerProfile")}</h1>
           <p className="mt-1 text-slate-600 text-sm">{t("subtitle")}</p>
         </div>
-        <div className="inline-flex items-center rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold tracking-wide text-blue-600">
-          {t("verified")}
+        <div className="flex gap-2">
+          <div className="inline-flex items-center rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold tracking-wide text-blue-600">
+            {t("verified")}
+          </div>
+          <Link className="flex items-center gap-2 text-white font-medium rounded-lg bg-blue-500 px-4 py-2" href={"/manage-table"}>
+            <Armchair size={17} />
+            Table Management
+          </Link>
         </div>
       </div>
 

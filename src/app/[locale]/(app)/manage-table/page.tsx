@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Edit3, Trash2, CheckCircle2, XCircle, X, Armchair, Copy, Download, Printer, Check, LayoutGrid, List, QrCode } from "lucide-react";
+import { Plus, Search, Edit3, Trash2, CheckCircle2, XCircle, X, Armchair, Copy, Download, Printer, Check, LayoutGrid, List, QrCode, ArrowLeft } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetTablesQuery, useAddTableMutation, useUpdateTableMutation, useDeleteTableMutation } from "@/redux/features/table/table.api";
@@ -421,9 +422,17 @@ const TableManagementPage = () => {
         <div className="space-y-6">
             {/* Top Hero and Action Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("title")}</h1>
-                    <p className="mt-1 text-slate-600 text-sm">{t("description")}</p>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/profile/personal-information"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
+                    >
+                        <ArrowLeft className="size-5" />
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("title")}</h1>
+                        <p className="mt-1 text-slate-600 text-sm">{t("description")}</p>
+                    </div>
                 </div>
                 <div>
                     <Button

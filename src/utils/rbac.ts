@@ -8,7 +8,7 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
     "/menu-management",
     "/pending-payments",
     "/payment-verification",
-    "/payments-history"
+    "/payments-history",
   ],
   SERVICE: ["/production", "/collection"],
   OWNER: [
@@ -25,7 +25,8 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
     // "/order",
     "/payments-history",
     "/view-all",
-    "/efficiency-report"
+    "/efficiency-report",
+    "/manage-table"
   ]
 };
 

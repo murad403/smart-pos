@@ -72,7 +72,6 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
     // { label: t("item"), icon: Utensils, href: "/item" },
     { label: t("productionStation"), icon: Fuel, href: "/production-station" },
     { label: t("production"), icon: Speaker, href: "/production" },
-    { label: t("manageTable"), icon: Armchair, href: "/manage-table" },
     // { label: t("shiftWorkflow"), icon: CalendarRange, href: "/shift-workflow" },
     { label: t("order"), icon: ShoppingBag, href: "/order" },
   ]
