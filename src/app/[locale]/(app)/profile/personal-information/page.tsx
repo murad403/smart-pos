@@ -312,7 +312,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
           </div>
           <Link className="flex items-center gap-2 text-white font-medium rounded-lg bg-blue-500 px-4 py-2" href={"/manage-table"}>
             <Armchair size={17} />
-            Table Management
+            {t("tableManagement")}
           </Link>
         </div>
       </div>

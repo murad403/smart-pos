@@ -353,7 +353,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
                 <Camera size={16} />
                 <span>{tPending("takePhoto") || "Take photo"}</span>
               </Button>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 className="h-11 rounded-xl border-slate-200 bg-white px-4"
@@ -361,7 +361,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
               >
                 <Plus size={16} />
                 <span>{tPending("addImages") || "Add images"}</span>
-              </Button>
+              </Button> */}
             </div>
             <input
               ref={fileInputRef}

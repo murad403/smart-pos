@@ -295,6 +295,7 @@
   },
   "Profile": {
     "ownerProfile": "Owner Profile",
+    "tableManagement": "Table Management",
     "businessNameAddress": "Business Name & Address",
     "userManagementTitle": "USER & ACCESS MANAGEMENT",
     "search": "Search users",
