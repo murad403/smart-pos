@@ -49,7 +49,7 @@ const BusinessInfo = () => {
       setValue("businessAddress", businessData.address || "");
       setValue("businessPhone", businessData.contact || "");
       setValue("businessEmail", businessData.email || "");
-      setValue("feedbackMsg", businessData.feedbackMsg || "");
+      setValue("feedbackMsg", businessData.customNote || businessData.feedbackMsg || "");
       if (businessData.logoUrl) {
         setBusinessLogoPreview(businessData.logoUrl);
       }
@@ -79,16 +79,12 @@ const BusinessInfo = () => {
   const onBusinessSubmit = async (data: BusinessFormValues) => {
     try {
       const payload: any = {
-        name: data.businessName,
-        address: data.businessAddress,
-        contact: data.businessPhone,
-        email: data.businessEmail,
+        businessName: data.businessName,
+        businessAddress: data.businessAddress,
+        businessPhone: data.businessPhone,
+        businessEmail: data.businessEmail,
         feedbackMsg: data.feedbackMsg || null,
       };
-
-      if (!businessLogoPreview) {
-        payload.logoUrl = null;
-      }
 
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));

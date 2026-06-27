@@ -42,7 +42,13 @@ const generateInvoiceInnerHtml = (order: any, business: any) => {
 
   const menuCount = order.orderItems?.length || 0;
   const menuSuffix = menuCount === 1 ? "1 menu" : `${menuCount} menu`;
-  const paymentMethod = order.payment?.[0]?.method || "CASH";
+  const isPaid = order.payment?.some((p: any) => p.status === "PAID");
+  const unpaidHtml = !isPaid ? `
+    <div class="totals-row" style="color: #dc2626; font-weight: 700;">
+      <span>Payment Status</span>
+      <span>UNPAID</span>
+    </div>
+  ` : "";
 
   const adjustmentsHtml = order.pricingAdjustments?.map((adj: any) => {
     const amount = adj.type === "PERCENTAGE"
@@ -172,10 +178,7 @@ const generateInvoiceInnerHtml = (order: any, business: any) => {
         <span>${formattedSubtotal}</span>
       </div>
       ${adjustmentsHtml}
-      <div class="totals-row">
-        <span>Payment Method</span>
-        <span style="font-weight: 700; color: #000000;">${paymentMethod.toUpperCase()}</span>
-      </div>
+      ${unpaidHtml}
       <div class="dashed-divider" style="margin: 8px 0;"></div>
       <div class="totals-row total-amount">
         <span>Total</span>
@@ -482,23 +485,10 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
   // Calculations
   const subtotalVal = Number(order.subtotal);
   const totalVal = Number(order.totalAmount);
-  const difference = totalVal - subtotalVal;
-
-  let platformFeeVal = 0;
-  let otherFeesVal = 0;
-
-  if (difference > 0) {
-    if (difference >= 1800) {
-      platformFeeVal = 1800;
-      otherFeesVal = difference - 1800;
-    } else {
-      otherFeesVal = difference;
-    }
-  }
 
   const menuCount = order.orderItems?.length || 0;
   const menuSuffix = menuCount === 1 ? "1 menu" : `${menuCount} menu`;
-  const paymentMethod = order.payment?.[0]?.method || "CASH";
+  const isPaid = order.payment?.some((payment) => payment.status === "PAID");
 
   const handleCopySlug = () => {
     navigator.clipboard.writeText(order.slug);
@@ -550,7 +540,10 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     const hasTable = order.type === "DINE_IN" && order.table;
     const baseHeight = hasTable ? 425 : 380;
     const listHeight = itemCount * 30 + choiceCount * 18;
-    const footerHeight = 240 + (feedbackBoxHeight - 75);
+
+    const adjustmentCount = order.pricingAdjustments?.length || 0;
+    const extraRows = adjustmentCount + (isPaid ? 0 : 1);
+    const footerHeight = 165 + (extraRows - 3) * 18 + feedbackBoxHeight;
     const height = baseHeight + listHeight + footerHeight;
 
     const canvas = document.createElement("canvas");
@@ -787,31 +780,33 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     ctx.fillText(formatReceiptCurrency(subtotalVal), 360, nextY);
     ctx.textAlign = "left";
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Platform Fee", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillText(formatReceiptCurrency(platformFeeVal), 360, nextY);
-    ctx.textAlign = "left";
+    order.pricingAdjustments?.forEach((adj: any) => {
+      nextY += 18;
+      const amount = adj.type === "PERCENTAGE"
+        ? (subtotalVal * Number(adj.percentage || 0)) / 100
+        : Number(adj.fixedAmount);
+      const isNegative = amount < 0;
+      const formattedVal = formatReceiptCurrency(Math.abs(amount));
+      const sign = isNegative ? "-" : "+";
+      const label = `${adj.level}${adj.type === "PERCENTAGE" ? ` (${adj.percentage}%)` : ""}`;
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Other fees", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillText(formatReceiptCurrency(otherFeesVal), 360, nextY);
-    ctx.textAlign = "left";
+      ctx.fillStyle = "#475569";
+      ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
+      ctx.fillText(label, 24, nextY);
+      ctx.textAlign = "right";
+      ctx.fillText(`${sign}${formattedVal}`, 360, nextY);
+      ctx.textAlign = "left";
+    });
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Payment Method", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText(paymentMethod, 360, nextY);
-    ctx.textAlign = "left";
+    if (!isPaid) {
+      nextY += 18;
+      ctx.fillStyle = "#dc2626";
+      ctx.font = "bold 13px 'Inter', -apple-system, sans-serif";
+      ctx.fillText("Payment Status", 24, nextY);
+      ctx.textAlign = "right";
+      ctx.fillText("UNPAID", 360, nextY);
+      ctx.textAlign = "left";
+    }
 
     nextY += 12;
     drawDashedLine(nextY);
@@ -1121,24 +1116,31 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
                   {formatReceiptCurrency(subtotalVal)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Platform Fee</span>
-                <span className="text-slate-900 font-semibold">
-                  {formatReceiptCurrency(platformFeeVal)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Other fees</span>
-                <span className="text-slate-900 font-semibold">
-                  {formatReceiptCurrency(otherFeesVal)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Payment Method</span>
-                <span className="text-slate-950 font-bold uppercase">
-                  {paymentMethod}
-                </span>
-              </div>
+              {order.pricingAdjustments?.map((adj) => {
+                const amount = adj.type === "PERCENTAGE"
+                  ? (subtotalVal * Number(adj.percentage || 0)) / 100
+                  : Number(adj.fixedAmount);
+                const isNegative = amount < 0;
+                const formattedValue = formatReceiptCurrency(Math.abs(amount));
+                return (
+                  <div key={adj.id} className="flex justify-between">
+                    <span>
+                      {adj.level}
+                      {adj.type === "PERCENTAGE" && ` (${adj.percentage}%)`}
+                    </span>
+                    <span className="text-slate-900 font-semibold">
+                      {isNegative ? `-${formattedValue}` : `+${formattedValue}`}
+                    </span>
+                  </div>
+                );
+              })}
+
+              {!isPaid && (
+                <div className="flex justify-between text-red-600 font-bold">
+                  <span>Payment Status</span>
+                  <span>UNPAID</span>
+                </div>
+              )}
 
               {/* Total Row */}
               <div className="border-t border-dashed border-slate-300 pt-3 flex justify-between items-center mt-4">
