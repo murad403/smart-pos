@@ -88,9 +88,14 @@ const CreateOrderModal: React.FC<Props> = ({
     let detectedSource: "QR_TABLE" | "TOUCHSCREEN" | "STAFF" | "ADMIN" = "TOUCHSCREEN";
     let autoTableId: number | undefined = undefined;
 
+    const storedTable = typeof window !== "undefined" ? localStorage.getItem("table") : null;
+
     if (tableParam) {
         detectedSource = "QR_TABLE";
         autoTableId = parseInt(tableParam, 10);
+    } else if (storedTable) {
+        detectedSource = "QR_TABLE";
+        autoTableId = parseInt(storedTable, 10);
     } else if (currentUser) {
         if (currentUser.role === "ADMIN" || currentUser.role === "OWNER") {
             detectedSource = "ADMIN";
