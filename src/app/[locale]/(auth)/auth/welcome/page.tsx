@@ -16,11 +16,9 @@ const Welcome = () => {
         try {
             const result = await customerSignIn().unwrap();
             saveUserData(result.data, true);
-            // toast.success(result.message || "Login successful", { id: toastId });
             router.push("/auth/customer-welcome");
 
         } catch (err: any) {
-            // console.error("Customer sign-in error:", err);
             const errorMessage = err?.data?.message || err?.message || "An unexpected error occurred.";
         }
     };
