@@ -4,6 +4,8 @@ import { BriefcaseBusiness, Lock, ShieldCheck, ShoppingCart, UserCog } from "luc
 import { useTranslations } from "next-intl";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { saveUserData } from "@/utils/auth";
+import logo from "@/assets/logo/logo2.png"
+import Image from "next/image";
 
 
 
@@ -28,7 +30,7 @@ const Welcome = () => {
             <div className="w-full max-w-md">
 
                 {/* Header */}
-                <div className="mb-6 flex flex-col items-center text-center">
+                {/* <div className="mb-6 flex flex-col items-center text-center">
                     <div className="mb-3.5 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#3b6ef6]">
                         <Lock size={26} color="#fff" strokeWidth={2} />
                     </div>
@@ -38,6 +40,15 @@ const Welcome = () => {
                     <p className="mt-1.5 text-xs font-medium tracking-widest text-text-color uppercase">
                         {t("subtitle")}
                     </p>
+                </div> */}
+                <div className="flex justify-center pb-4">
+                    <Image
+                    src={logo}
+                    alt="Logo"
+                    width={500}
+                    height={500}
+                    className="w-50 h-full"
+                    />
                 </div>
 
                 {/* Card */}
