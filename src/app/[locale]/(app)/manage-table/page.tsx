@@ -79,7 +79,7 @@ const TableManagementPage = () => {
             const pathname = window.location.pathname;
             const segments = pathname.split("/").filter(Boolean);
             const locale = segments[0] || "en";
-            setCustomQrUrl(`https://blueowlapp.com/${locale}/menu?table=${selectedTable.tableNumber}`);
+            setCustomQrUrl(`https://blueowlapp.com/${locale}/menu?table=${selectedTable?.id}`);
         }
     }, [selectedTable]);
 
