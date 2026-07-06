@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client"
-import React, { use } from "react"
+import React, { use, useLayoutEffect } from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
 import { Armchair, ChevronDown, CreditCard, Fuel, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
@@ -14,6 +14,7 @@ import { clearUserData, getUserData } from "@/utils/auth"
 import { isRouteAllowed, DEFAULT_ROLE_ROUTE } from "@/utils/rbac"
 import { toast } from "sonner"
 import logo from "@/assets/logo/logo2.png";
+import { useSearchParams } from "next/navigation"
 
 
 
@@ -33,6 +34,8 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const t = useTranslations("Common");
   const [user, setUser] = React.useState<any>(null);
+
+
 
   React.useEffect(() => {
     setProfileOpen(pathName.startsWith("/profile"));
@@ -398,6 +401,13 @@ function Topbar({
 }
 
 const MainWrapper = ({ children }: { children: React.ReactNode }) => {
+  const searchParams = useSearchParams();
+
+  useLayoutEffect(() => {
+    const table = searchParams.get("table");
+    if (table) localStorage.setItem("table", table);
+  }, []);
+
   const pathName = usePathname();
   const router = useRouter();
   const [isChecking, setIsChecking] = React.useState(true);
