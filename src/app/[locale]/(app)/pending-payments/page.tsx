@@ -56,7 +56,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
   };
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-6 pb-10 w-full min-w-0">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -211,6 +211,15 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
         key={selectedPaymentOrder?.id ?? "payment-modal"}
         order={selectedPaymentOrder}
         onClose={() => setSelectedPaymentOrder(null)}
+      />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            main {
+              min-width: 0 !important;
+            }
+          `,
+        }}
       />
     </div>
   );
