@@ -12,6 +12,7 @@ import { TableItem } from "@/redux/features/table/table.type";
 import { toast } from "sonner";
 import CustomPagination from "@/components/shared/CustomPagination";
 import { useTranslations } from "next-intl";
+import logo from "@/assets/logo/logo2.png";
 
 
 
@@ -188,26 +189,142 @@ const TableManagementPage = () => {
         setTimeout(() => setIsCopied(false), 2000);
     };
 
+    const loadImage = (src: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            if (src.startsWith("http")) {
+                img.crossOrigin = "anonymous";
+            }
+            img.onload = () => resolve(img);
+            img.onerror = (e) => reject(e);
+            img.src = src;
+        });
+    };
+
     const handleDownloadQR = async () => {
         if (!selectedTable) return;
         try {
             toast.loading(t("preparingDownload"), { id: "qr-download" });
-            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(customQrUrl)}`;
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(customQrUrl)}`;
 
-            const res = await fetch(qrImageUrl);
-            const blob = await res.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
+            // Load images in parallel
+            const [logoImg, qrImg] = await Promise.all([
+                loadImage(logo.src),
+                loadImage(qrImageUrl)
+            ]);
 
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = `table-${selectedTable.tableNumber}-qr.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            // Create canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = 400;
+            canvas.height = 560;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("Could not get 2d context");
 
-            toast.success(t("qrDownloaded"), { id: "qr-download" });
+            // Enable smooth scaling
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
+            // 1. Draw white background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, 400, 560);
+
+            // 2. Draw card border (rounded rectangle)
+            const cardX = 15;
+            const cardY = 15;
+            const cardW = 370;
+            const cardH = 530;
+            const cardR = 24;
+
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(cardX, cardY, cardW, cardH, cardR);
+            } else {
+                ctx.moveTo(cardX + cardR, cardY);
+                ctx.arcTo(cardX + cardW, cardY, cardX + cardW, cardY + cardH, cardR);
+                ctx.arcTo(cardX + cardW, cardY + cardH, cardX, cardY + cardH, cardR);
+                ctx.arcTo(cardX, cardY + cardH, cardX, cardY, cardR);
+                ctx.arcTo(cardX, cardY, cardX + cardW, cardY, cardR);
+            }
+            ctx.stroke();
+
+            // 3. Draw Logo centered
+            // Scale logo to height = 48px
+            const logoH = 48;
+            const logoW = logoImg.width * (logoH / logoImg.height);
+            const logoX = (400 - logoW) / 2;
+            const logoY = 45;
+            ctx.drawImage(logoImg, logoX, logoY, logoW, logoH);
+
+            // 4. Draw "Scan & Order" text
+            ctx.font = "bold 12px 'Roboto', 'Inter', sans-serif";
+            ctx.fillStyle = "#64748b";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            if ('letterSpacing' in ctx) {
+                (ctx as any).letterSpacing = "0.1em";
+            }
+            ctx.fillText("SCAN & ORDER", 200, 115);
+            if ('letterSpacing' in ctx) {
+                (ctx as any).letterSpacing = "normal"; // reset
+            }
+
+            // 5. Draw QR Container
+            const qrContainerX = 75;
+            const qrContainerY = 145;
+            const qrContainerW = 250;
+            const qrContainerH = 250;
+            const qrContainerR = 16;
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(qrContainerX, qrContainerY, qrContainerW, qrContainerH, qrContainerR);
+            } else {
+                ctx.moveTo(qrContainerX + qrContainerR, qrContainerY);
+                ctx.arcTo(qrContainerX + qrContainerW, qrContainerY, qrContainerX + qrContainerW, qrContainerY + qrContainerH, qrContainerR);
+                ctx.arcTo(qrContainerX + qrContainerW, qrContainerY + qrContainerH, qrContainerX, qrContainerY + qrContainerH, qrContainerR);
+                ctx.arcTo(qrContainerX, qrContainerY + qrContainerH, qrContainerX, qrContainerY, qrContainerR);
+                ctx.arcTo(qrContainerX, qrContainerY, qrContainerX + qrContainerW, qrContainerY, qrContainerR);
+            }
+            ctx.fill();
+            ctx.strokeStyle = "#f1f5f9";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 6. Draw QR Image inside container (centered)
+            const qrSize = 200;
+            const qrX = qrContainerX + (qrContainerW - qrSize) / 2;
+            const qrY = qrContainerY + (qrContainerH - qrSize) / 2;
+            ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+            // 7. Draw Table Title (e.g. "TABLE 1")
+            ctx.font = "900 32px 'Roboto', 'Inter', sans-serif";
+            ctx.fillStyle = "#0f172a";
+            ctx.fillText(`${t("tableLabel").toUpperCase()} ${selectedTable.tableNumber}`, 200, 435);
+
+            // 8. Draw Instructions
+            ctx.font = "14px 'Roboto', 'Inter', sans-serif";
+            ctx.fillStyle = "#475569";
+            ctx.fillText(t("scanQrCode") || "Scan or scan to order", 200, 480);
+
+            // Export to blob and download
+            canvas.toBlob((blob) => {
+                if (!blob) throw new Error("Blob generation failed");
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = `table-${selectedTable.tableNumber}-qr.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+                toast.success(t("qrDownloaded"), { id: "qr-download" });
+            }, "image/png");
+
         } catch (error) {
+            console.error("QR Download Error:", error);
             toast.error(t("qrDownloadFailed"), { id: "qr-download" });
         }
     };
@@ -247,13 +364,14 @@ const TableManagementPage = () => {
               max-width: 400px;
               width: 100%;
               box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
             }
-            .logo-text {
-              font-size: 24px;
-              font-weight: 800;
-              color: #3f7fe8;
+            .logo-image {
+              height: 48px;
+              object-fit: contain;
               margin-bottom: 8px;
-              letter-spacing: -0.025em;
             }
             .sub-logo {
               font-size: 12px;
@@ -301,7 +419,7 @@ const TableManagementPage = () => {
         </head>
         <body>
           <div class="card">
-            <div class="logo-text">SMART POS</div>
+            <img class="logo-image" src="${logo.src}" alt="Logo" />
             <div class="sub-logo">Scan & Order</div>
             <div class="qr-container">
               <img class="qr-image" src="${qrImageUrl}" alt="${t("qrCodeTitle")}" />
