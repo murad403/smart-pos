@@ -2,8 +2,6 @@
 import { Link, useRouter } from "@/i18n/routing";
 import { BriefcaseBusiness, Lock, ShieldCheck, ShoppingCart, UserCog } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
-import { saveUserData } from "@/utils/auth";
 import logo from "@/assets/logo/logo2.png"
 import Image from "next/image";
 
@@ -12,35 +10,10 @@ import Image from "next/image";
 const Welcome = () => {
     const t = useTranslations("welcome");
     const router = useRouter();
-    const [customerSignIn, { isLoading: isSigningIn }] = useCustomerSignInMutation();
-
-    const handleCustomerSignIn = async () => {
-        try {
-            const result = await customerSignIn().unwrap();
-            saveUserData(result.data, true);
-            router.push("/auth/customer-welcome");
-
-        } catch (err: any) {
-            const errorMessage = err?.data?.message || err?.message || "An unexpected error occurred.";
-        }
-    };
 
     return (
         <section className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
             <div className="w-full max-w-md">
-
-                {/* Header */}
-                {/* <div className="mb-6 flex flex-col items-center text-center">
-                    <div className="mb-3.5 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#3b6ef6]">
-                        <Lock size={26} color="#fff" strokeWidth={2} />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-bold leading-none tracking-tight text-text-color">
-                        {t("title")}
-                    </h1>
-                    <p className="mt-1.5 text-xs font-medium tracking-widest text-text-color uppercase">
-                        {t("subtitle")}
-                    </p>
-                </div> */}
                 <div className="flex justify-center pb-4">
                     <Image
                     src={logo}
@@ -59,10 +32,10 @@ const Welcome = () => {
 
                     <div className="flex flex-col gap-4">
 
-                        <button
-                            type="button"
-                            disabled={isSigningIn}
-                            onClick={handleCustomerSignIn}
+
+                        {/* Customer */}
+                        <Link
+                            href="/auth/customer-welcome"
                             aria-label={t("customerAria")}
                             className="flex w-full items-center gap-2.5 rounded-xl bg-[#3b6ef6] px-3.5 py-4 text-[13px] font-semibold text-white no-underline transition-all duration-150 hover:-translate-y-0.5 hover:saturate-[1.1] active:scale-[0.98]"
                         >
@@ -70,7 +43,7 @@ const Welcome = () => {
                                 <ShoppingCart size={17} strokeWidth={2} />
                             </span>
                             {t("customer")}
-                        </button>
+                        </Link>
 
                         {/* Staff */}
                         <Link

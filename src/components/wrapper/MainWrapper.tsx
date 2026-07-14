@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client"
-import React, { use, useLayoutEffect } from "react"
+import React, { useLayoutEffect } from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
-import { Armchair, ChevronDown, CreditCard, Fuel, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
+import { ChevronDown, CreditCard, Fuel, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter, Link } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
-import { clearUserData, getUserData } from "@/utils/auth"
+import { clearUserData, getUserData, saveUserData } from "@/utils/auth"
 import { isRouteAllowed, DEFAULT_ROLE_ROUTE } from "@/utils/rbac"
 import { toast } from "sonner"
 import logo from "@/assets/logo/logo2.png";
+import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { useSearchParams } from "next/navigation"
 
 
@@ -402,6 +403,7 @@ function Topbar({
 
 const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   const searchParams = useSearchParams();
+  const [customerSignIn] = useCustomerSignInMutation();
 
   useLayoutEffect(() => {
     const table = searchParams.get("table");
@@ -474,41 +476,62 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   };
 
   React.useEffect(() => {
-    const currentUser = getUserData();
-    if (currentUser) {
-      const role = currentUser.role || "";
-      const isMobile = windowWidth < 768;
+    const checkAuth = async () => {
+      let currentUser = getUserData();
 
-      let allowed = isRouteAllowed(role, pathName);
-
-      const upperRole = role.toUpperCase();
-      // Prevent desktop ADMINs from accessing mobile-admin-layout
-      if (upperRole === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
-        allowed = false;
+      if (!currentUser && (pathName === "/menu" || pathName.startsWith("/menu/"))) {
+        try {
+          setIsChecking(true);
+          const result = await customerSignIn().unwrap();
+          saveUserData(result.data, true);
+          window.dispatchEvent(new Event("selectedDeviceChanged"));
+          currentUser = result.data;
+        } catch (err) {
+          console.error("Auto customer login failed:", err);
+          setIsAuthorized(false);
+          router.push("/auth/welcome");
+          setIsChecking(false);
+          return;
+        }
       }
-      // Prevent desktop OWNERs from accessing mobile-owner-layout
-      if (upperRole === "OWNER" && !isMobile && pathName === "/mobile-owner-layout") {
-        allowed = false;
-      }
 
-      if (allowed) {
-        setIsAuthorized(true);
+      if (currentUser) {
+        const role = currentUser.role || "";
+        const isMobile = windowWidth < 768;
+
+        let allowed = isRouteAllowed(role, pathName);
+
+        const upperRole = role.toUpperCase();
+        // Prevent desktop ADMINs from accessing mobile-admin-layout
+        if (upperRole === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
+          allowed = false;
+        }
+        // Prevent desktop OWNERs from accessing mobile-owner-layout
+        if (upperRole === "OWNER" && !isMobile && pathName === "/mobile-owner-layout") {
+          allowed = false;
+        }
+
+        if (allowed) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
+          let defaultRoute = DEFAULT_ROLE_ROUTE[upperRole] || "/auth/welcome";
+          if (upperRole === "ADMIN" && isMobile) {
+            defaultRoute = "/mobile-admin-layout";
+          } else if (upperRole === "OWNER" && isMobile) {
+            defaultRoute = "/mobile-owner-layout";
+          }
+          router.push(defaultRoute);
+        }
       } else {
         setIsAuthorized(false);
-        let defaultRoute = DEFAULT_ROLE_ROUTE[upperRole] || "/auth/welcome";
-        if (upperRole === "ADMIN" && isMobile) {
-          defaultRoute = "/mobile-admin-layout";
-        } else if (upperRole === "OWNER" && isMobile) {
-          defaultRoute = "/mobile-owner-layout";
-        }
-        router.push(defaultRoute);
+        router.push("/auth/welcome");
       }
-    } else {
-      setIsAuthorized(false);
-      router.push("/auth/welcome");
-    }
-    setIsChecking(false);
-  }, [pathName, router, windowWidth]);
+      setIsChecking(false);
+    };
+
+    checkAuth();
+  }, [pathName, router, windowWidth, customerSignIn]);
 
   if (isChecking || !isAuthorized) {
     return (
