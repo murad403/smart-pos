@@ -3,6 +3,7 @@
 import { X, ShoppingBag, CreditCard, Clock, MapPin, ClipboardList, Printer, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
+import { useGetTableDetailsQuery } from "@/redux/features/table/table.api";
 import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
 import { Order } from "@/redux/features/order/order.type";
 
@@ -391,6 +392,20 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
     { skip: !orderId }
   );
 
+  const orderData = detailsRes?.data;
+
+  const { data: tableRes } = useGetTableDetailsQuery(
+    orderData?.tableId as number,
+    { skip: !orderData?.tableId || !orderId }
+  );
+
+  const order: Order | undefined = orderData
+    ? {
+        ...orderData,
+        table: orderData.table || tableRes?.data || null,
+      }
+    : undefined;
+
   if (!orderId) return null;
 
   if (isLoading) {
@@ -409,8 +424,8 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
       </div>
     );
   }
-
-  const order: Order | undefined = detailsRes?.data;
+  
+    console.log(order)
 
   const handlePrint = () => {
     if (!order) return;
@@ -897,7 +912,7 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
           <div className="rounded-xl border border-slate-100 p-2.5 bg-slate-50/30">
             <p className="text-slate-400 font-bold uppercase tracking-wider">{t("table")}</p>
             <p className="text-sm font-semibold text-slate-800 mt-0.5">
-              {order.table ? `#${order.table.tableNumber}` : "No Table"}
+              {order?.table ? `#${order.table.tableNumber}` : "No Table"}
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 p-2.5 bg-slate-50/30">

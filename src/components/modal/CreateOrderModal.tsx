@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCreateOrderMutation } from "@/redux/features/order/order.api";
 import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
+import { useGetTableDetailsQuery } from "@/redux/features/table/table.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -60,6 +61,33 @@ const CreateOrderModal: React.FC<Props> = ({
     const { data: priceAdjRes } = useGetAllPriceAdjustmentsQuery({ limit: 100 }, { skip: !open });
     const priceAdjustments = priceAdjRes?.data ?? [];
 
+    // Determine Source and Table ID
+    const currentUser = getUserData();
+    let detectedSource: "QR_TABLE" | "TOUCHSCREEN" | "STAFF" | "ADMIN" = "TOUCHSCREEN";
+    let autoTableId: number | undefined = undefined;
+
+    const storedTable = typeof window !== "undefined" ? localStorage.getItem("table") : null;
+
+    if (tableParam) {
+        detectedSource = "QR_TABLE";
+        autoTableId = parseInt(tableParam, 10);
+    } else if (storedTable) {
+        detectedSource = "QR_TABLE";
+        autoTableId = parseInt(storedTable, 10);
+    } else if (currentUser) {
+        if (currentUser.role === "ADMIN" || currentUser.role === "OWNER") {
+            detectedSource = "ADMIN";
+        } else if (currentUser.role === "STAFF" || currentUser.role === "SERVICE") {
+            detectedSource = "STAFF";
+        }
+    }
+
+    const { data: tableRes } = useGetTableDetailsQuery(
+        autoTableId as number,
+        { skip: !autoTableId || !open }
+    );
+    const tableNumber = tableRes?.data?.tableNumber || autoTableId;
+
     // Reset form on open
     useEffect(() => {
         if (open) {
@@ -81,28 +109,6 @@ const CreateOrderModal: React.FC<Props> = ({
             total += Number(adjustment.fixedAmount);
         }
     });
-
-    // Determine Source and Table ID
-    const currentUser = getUserData();
-    //   console.log(currentUser?.id)
-    let detectedSource: "QR_TABLE" | "TOUCHSCREEN" | "STAFF" | "ADMIN" = "TOUCHSCREEN";
-    let autoTableId: number | undefined = undefined;
-
-    const storedTable = typeof window !== "undefined" ? localStorage.getItem("table") : null;
-
-    if (tableParam) {
-        detectedSource = "QR_TABLE";
-        autoTableId = parseInt(tableParam, 10);
-    } else if (storedTable) {
-        detectedSource = "QR_TABLE";
-        autoTableId = parseInt(storedTable, 10);
-    } else if (currentUser) {
-        if (currentUser.role === "ADMIN" || currentUser.role === "OWNER") {
-            detectedSource = "ADMIN";
-        } else if (currentUser.role === "STAFF" || currentUser.role === "SERVICE") {
-            detectedSource = "STAFF";
-        }
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -168,7 +174,7 @@ const CreateOrderModal: React.FC<Props> = ({
                             {autoTableId && (
                                 <span>
                                     {" "}
-                                    • {t("tableLabel")}: <span className="font-semibold text-blue-600">{autoTableId}</span>
+                                    • {t("tableLabel")}: <span className="font-semibold text-blue-600">{tableNumber}</span>
                                 </span>
                             )}
                         </p>
