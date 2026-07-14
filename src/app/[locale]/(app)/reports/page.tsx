@@ -66,7 +66,7 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
       {/* Order Breakdown + Production Performance */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <OrderBreakdown breakdown={reportData?.orderBreakdown} isLoading={isLoading} />
-        <ProductionPerformance performance={reportData?.productionPerformance} isLoading={isLoading} />
+        {/* <ProductionPerformance performance={reportData?.productionPerformance} isLoading={isLoading} /> */}
       </div>
     </div>
   );

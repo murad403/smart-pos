@@ -121,7 +121,7 @@ const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: Sale
             </div>
 
             {/* Monthly earning card */}
-            <div className="flex items-center justify-between rounded-2xl bg-blue-50 px-6 py-5">
+            {/* <div className="flex items-center justify-between rounded-2xl bg-blue-50 px-6 py-5">
                 <div>
                     <p className="text-lg font-bold text-slate-800">{t("thisMonthEarning")}</p>
                     <p className="mt-1 text-2xl font-bold text-slate-900">
@@ -134,7 +134,7 @@ const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: Sale
                     </p>
                     <p className="mt-1 text-sm text-blue-500">{t("comparedToLastMonth")}</p>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };
