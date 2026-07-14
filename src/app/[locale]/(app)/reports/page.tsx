@@ -7,6 +7,7 @@ import ProductionPerformance from "./ProductionPerformance";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
 import { useGetSalesReportsQuery } from "@/redux/features/dashboard/dashboard.api";
+import OrdersCount from "./OrdersCount";
 
 const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
@@ -62,6 +63,7 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
         period={reportData?.period}
         isLoading={isLoading}
       />
+      <OrdersCount salesSummary={reportData?.salesSummary} isLoading={isLoading} />
 
       {/* Top Sales Table */}
       <div className="mt-5">

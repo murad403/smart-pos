@@ -206,6 +206,8 @@
   },
   "Reports": {
     "title": "Laporan",
+    "orders": "Pesanan",
+    "ordersCount": "Jumlah Pesanan",
     "salesSummary": "Ringkasan Penjualan",
     "topSales": "Penjualan Teratas",
     "orderBreakdown": "Rincian Pesanan",

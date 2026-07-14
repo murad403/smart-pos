@@ -206,6 +206,8 @@
   },
   "Reports": {
     "title": "Reports",
+    "orders": "orders",
+    "ordersCount": "Orders Count",
     "salesSummary": "Sales Summary",
     "topSales": "Top Sales",
     "orderBreakdown": "Order Breakdown",
