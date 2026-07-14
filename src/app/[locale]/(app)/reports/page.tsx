@@ -1,5 +1,5 @@
 "use client";
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import SalesSummary from "./SalesSummary";
 import TopSales from "./TopSales";
 import OrderBreakdown from "./OrderBreakdown";
@@ -14,6 +14,11 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
+  useEffect(() => {
+    setStartDate(new Date());
+    setEndDate(new Date());
+  }, []);
+
   // Helper to format Date object as YYYY-MM-DD in local timezone
   const formatDateString = (date: Date | null) => {
     if (!date) return undefined;
@@ -25,8 +30,8 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
   // Fetch report data
   const { data: salesReportRes, isLoading } = useGetSalesReportsQuery({
-    startDate: formatDateString(startDate),
-    endDate: formatDateString(endDate),
+    startDate: formatDateString(startDate || new Date()),
+    endDate: formatDateString(endDate || new Date()),
   });
 
   const reportData = salesReportRes?.data;
