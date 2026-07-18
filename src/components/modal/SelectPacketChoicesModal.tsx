@@ -7,8 +7,14 @@ import { useTranslations } from "next-intl";
 
 type Choice = {
   id: number;
-  name: string;
+  name?: string;
   maxQty: number;
+  itemId?: number | null;
+  item?: {
+    id: number;
+    name: string;
+    imageUrl?: string | null;
+  } | null;
 };
 
 type PacketSection = {
@@ -16,6 +22,7 @@ type PacketSection = {
   name: string;
   maxQty: number;
   choices: Choice[];
+  productionStationId?: number | null;
 };
 
 type Props = {
@@ -28,13 +35,13 @@ type Props = {
     imageUrl?: string | null;
     packetSections?: PacketSection[];
   } | null;
-  onConfirm: (choices: Array<{ section: string; choice: string; quantity: number }>) => void;
+  onConfirm: (choices: Array<{ section: string; choice: string; choiceItemId: number; quantity: number; productionStationId?: number | null }>) => void;
 };
 
 const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConfirm }) => {
   const t = useTranslations("Menu");
-  // Format: { [sectionName]: { [choiceName]: quantity } }
-  const [selections, setSelections] = useState<Record<string, Record<string, number>>>({});
+  // Format: { [sectionName]: { [choiceId]: quantity } }
+  const [selections, setSelections] = useState<Record<string, Record<number, number>>>({});
 
   useEffect(() => {
     if (open) {
@@ -47,7 +54,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
   if (!item) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-        <div className="relative w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
+        <div className="relative w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
           {/* Header Skeleton */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
             <div className="flex items-center gap-3 w-full">
@@ -87,14 +94,14 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
           </div>
 
           {/* Footer Skeleton */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between shrink-0">
-            <div className="space-y-1.5">
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
+            <div className="space-y-1.5 flex items-center justify-between sm:block w-full sm:w-auto">
               <div className="h-3 bg-slate-200 rounded-md w-16 animate-pulse" />
               <div className="h-6 bg-slate-200 rounded-md w-24 animate-pulse" />
             </div>
-            <div className="flex gap-2">
-              <div className="h-10 bg-slate-200 rounded-xl w-20 animate-pulse" />
-              <div className="h-10 bg-slate-200 rounded-xl w-32 animate-pulse" />
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="h-10 bg-slate-200 rounded-xl flex-1 sm:w-20 animate-pulse" />
+              <div className="h-10 bg-slate-200 rounded-xl flex-1 sm:w-32 animate-pulse" />
             </div>
           </div>
         </div>
@@ -114,15 +121,15 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
     return Object.values(sectionSelections).reduce((sum, qty) => sum + qty, 0);
   };
 
-  const handleSelectChoiceSingle = (sectionName: string, choiceName: string) => {
+  const handleSelectChoiceSingle = (sectionName: string, choiceId: number) => {
     setSelections((prev) => {
       const sectionSelections = prev[sectionName] || {};
-      const currentQty = sectionSelections[choiceName] || 0;
+      const currentQty = sectionSelections[choiceId] || 0;
       // Toggle selection for maxQty === 1
       return {
         ...prev,
         [sectionName]: {
-          [choiceName]: currentQty === 1 ? 0 : 1,
+          [choiceId]: currentQty === 1 ? 0 : 1,
         },
       };
     });
@@ -136,7 +143,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
   ) => {
     setSelections((prev) => {
       const sectionSelections = prev[sectionName] || {};
-      const currentQty = sectionSelections[choice.name] || 0;
+      const currentQty = sectionSelections[choice.id] || 0;
       const nextQty = Math.max(0, currentQty + delta);
 
       // Enforce choice-level maxQty limit
@@ -157,7 +164,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
         ...prev,
         [sectionName]: {
           ...sectionSelections,
-          [choice.name]: nextQty,
+          [choice.id]: nextQty,
         },
       };
     });
@@ -174,15 +181,26 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
     e.preventDefault();
     if (!isAllValid) return;
 
-    const formattedChoices: Array<{ section: string; choice: string; quantity: number }> = [];
+    const formattedChoices: Array<{ section: string; choice: string; choiceItemId: number; quantity: number; productionStationId?: number | null }> = [];
 
     Object.entries(selections).forEach(([sectionName, sectionChoices]) => {
-      Object.entries(sectionChoices).forEach(([choiceName, qty]) => {
-        if (qty > 0) {
+      const matchingSection = sections.find((s) => s.name === sectionName);
+      const productionStationId = matchingSection?.productionStationId || null;
+
+      Object.entries(sectionChoices).forEach(([choiceIdStr, qty]) => {
+        const qtyNum = Number(qty);
+        if (qtyNum > 0) {
+          const choiceId = Number(choiceIdStr);
+          const matchingChoice = matchingSection?.choices.find((c) => c.id === choiceId);
+          const choiceItemId = matchingChoice?.itemId || matchingChoice?.item?.id || 0;
+          const choiceName = matchingChoice?.item?.name || matchingChoice?.name || "";
+
           formattedChoices.push({
             section: sectionName,
             choice: choiceName,
-            quantity: qty,
+            choiceItemId,
+            quantity: qtyNum,
+            productionStationId,
           });
         }
       });
@@ -193,7 +211,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-      <div className="relative w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
+      <div className="relative w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
@@ -259,7 +277,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {(section.choices || []).map((choice) => {
-                      const qty = selections[section.name]?.[choice.name] || 0;
+                      const qty = selections[section.name]?.[choice.id] || 0;
                       const isSelected = qty > 0;
 
                       // For single choice sections (maxQty === 1)
@@ -268,7 +286,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                           <button
                             key={choice.id}
                             type="button"
-                            onClick={() => handleSelectChoiceSingle(section.name, choice.name)}
+                            onClick={() => handleSelectChoiceSingle(section.name, choice.id)}
                             className={`flex items-center justify-between p-3.5 rounded-xl border-2 text-left transition-all ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50/40 text-blue-900 shadow-sm"
@@ -276,7 +294,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                             }`}
                           >
                             <span className="text-sm font-semibold truncate pr-2">
-                              {choice.name}
+                              {choice.item?.name || choice.name}
                             </span>
                             <div
                               className={`size-4.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
@@ -314,7 +332,7 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
                               : "border-slate-150 bg-white hover:border-slate-300 hover:bg-slate-50/55 text-slate-700 cursor-pointer"
                           }`}
                         >
-                          <span className="text-sm font-semibold truncate pr-2">{choice.name}</span>
+                          <span className="text-sm font-semibold truncate pr-2">{choice.item?.name || choice.name}</span>
 
                           {/* Controls / checkbox circle */}
                           {isSelected ? (
@@ -365,28 +383,28 @@ const SelectPacketChoicesModal: React.FC<Props> = ({ open, onClose, item, onConf
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between shrink-0">
-            <div className="leading-tight">
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
+            <div className="leading-tight flex items-center justify-between sm:block w-full sm:w-auto">
               <span className="text-xs text-slate-400 font-medium">{t("itemBasePrice")}</span>
               <p className="text-lg font-extrabold text-blue-600">
                 Rp{item.price.toLocaleString("en-US")}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                className="flex-1 sm:flex-initial text-center justify-center px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
               >
                 {t("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={!isAllValid}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-blue-500/10"
+                className="flex-1 sm:flex-initial text-center justify-center px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-blue-500/10"
               >
-                <ShoppingBag size={15} />
-                {t("addToOrder")}
+                <ShoppingBag size={15} className="shrink-0" />
+                <span className="truncate">{t("addToOrder")}</span>
               </button>
             </div>
           </div>

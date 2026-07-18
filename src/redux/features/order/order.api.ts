@@ -41,6 +41,16 @@ const orderApi = baseApi.injectEndpoints({
             },
             providesTags: ["orders"]
         }),
+        getPaymentsHistory: builder.query<GetAllOrdersResponse, { page?: number; limit?: number; status?: string; source?: string; date?: string; search?: string } | void>({
+            query: (params) => {
+                return {
+                    url: `/orders/paid-payment`,
+                    method: "GET",
+                    params: params || undefined
+                };
+            },
+            providesTags: ["orders"]
+        }),
         createOrder: builder.mutation({
             query: (data) => {
                 return {
@@ -110,6 +120,7 @@ export const {
     useGetOrderDetailsQuery,
     useGetOwnerDetailsForReceiptQuery,
     useGetPendingPaymentOrdersQuery,
+    useGetPaymentsHistoryQuery,
     useCreateOrderMutation,
     useEditOrderMutation,
     useSendOrderToProductionMutation,

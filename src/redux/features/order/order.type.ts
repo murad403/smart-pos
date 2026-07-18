@@ -13,6 +13,7 @@ export interface PacketChoice {
     choice: string;
     section: string;
     quantity: number;
+    productionStationId?: number | null;
 }
 
 export interface ProductionStation {

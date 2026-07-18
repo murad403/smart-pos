@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +8,7 @@ import { CollectionOrder } from "@/redux/features/collection/collection.type";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
+
 
 declare global {
   interface Window {
@@ -47,11 +47,30 @@ const toElapsed = (startDateString: string | null | undefined) => {
   return `${minutes}m ${seconds}s`;
 };
 
+const toDuration = (startDateString: string | null | undefined, endDateString: string | null | undefined) => {
+  if (!startDateString || !endDateString) return "";
+  const start = new Date(startDateString).getTime();
+  const end = new Date(endDateString).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end)) return "";
+  const diffInSeconds = Math.max(0, Math.floor((end - start) / 1000));
+  const minutes = Math.floor(diffInSeconds / 60);
+  const seconds = diffInSeconds % 60;
+  return `${minutes}m ${seconds}s`;
+};
+
 const CollectionPage = () => {
   const t = useTranslations("CollectionPage");
   const [activeTab, setActiveTab] = useState<"READY" | "PICKED_UP">("READY");
   const [activeActionId, setActiveActionId] = useState<number | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [, setTicker] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTicker((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data, isLoading, isFetching } = useGetAllCollectionQuery({
     status: activeTab,
@@ -216,7 +235,11 @@ const CollectionPage = () => {
         ) : (
           <div className="space-y-3">
             {sortedOrders.map((order) => {
-              const elapsed = toElapsed(order.processedAt || order.createdAt);
+              const elapsed = toElapsed(order.readyAt || order.processedAt || order.createdAt);
+              const duration = toDuration(
+                order.readyAt || order.processedAt || order.createdAt,
+                order.pickedUpAt || order.updatedAt
+              );
               const isActionBusy = activeActionId === order.id;
 
               return (
@@ -241,6 +264,9 @@ const CollectionPage = () => {
                         </span>
                         {order.status === "READY" && elapsed && (
                           <span className="text-xs font-semibold text-blue-500">{elapsed}</span>
+                        )}
+                        {order.status === "PICKED_UP" && duration && (
+                          <span className="text-xs font-semibold text-slate-500">{duration}</span>
                         )}
                       </div>
 

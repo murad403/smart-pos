@@ -88,12 +88,12 @@ const DashboardStats = ({ overview, orderTypeBreakdown, isLoading }: DashboardSt
                                 </div>
                             </div>
                             <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-                            <p className="mt-1 flex items-center gap-1 text-xs text-blue-100">
+                            {/* <p className="mt-1 flex items-center gap-1 text-xs text-blue-100">
                                 <span className={isPositive ? "text-emerald-300" : "text-red-300"}>
                                     {isPositive ? "↑" : "↓"}
                                 </span>
                                 {stat.change}
-                            </p>
+                            </p> */}
                             {/* decorative circle */}
                             <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10" />
                         </div>
@@ -112,17 +112,17 @@ const DashboardStats = ({ overview, orderTypeBreakdown, isLoading }: DashboardSt
                                 </div>
                             </div>
                             <p className="text-2xl font-bold tracking-tight text-slate-900">{stat.value}</p>
-                            {stat.change && (
+                            {/* {stat.change && (
                                 <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
                                     <span className={isPositive ? "text-emerald-500" : "text-red-500"}>
                                         {isPositive ? "↑" : "↓"}
                                     </span>
                                     {stat.change}
                                 </p>
-                            )}
-                            {stat.sub && (
+                            )} */}
+                            {/* {stat.sub && (
                                 <p className="mt-1 text-xs text-slate-400">{stat.sub}</p>
-                            )}
+                            )} */}
                         </div>
                     );
                 }

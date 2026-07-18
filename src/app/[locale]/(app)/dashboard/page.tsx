@@ -1,19 +1,25 @@
 "use client";
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import DashboardStats from "./DashboardStats";
 import SalesOverTime from "./SalesOverTime";
 import OrdersPerHour from "./OrdersPerHour";
 import TopSellingItems from "./TopSellingItems";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
 import { useTranslations } from "next-intl";
 import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
+
 
 const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const t = useTranslations("Dashboard");
+
+  // Set default dates to today on mount
+  useEffect(() => {
+    setStartDate(new Date());
+    setEndDate(new Date());
+  }, []);
 
   // Helper function to format Date object as YYYY-MM-DD format in local timezone
   const formatDateString = (date: Date | null) => {
@@ -26,8 +32,8 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
 
   // Fetch dashboard data based on selected start and end dates
   const { data: analyticsRes, isLoading } = useGetAnalyticsQuery({
-    startDate: formatDateString(startDate),
-    endDate: formatDateString(endDate),
+    startDate: formatDateString(startDate || new Date()),
+    endDate: formatDateString(endDate || new Date()),
   });
 
   const analyticsData = analyticsRes?.data;
@@ -52,8 +58,8 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
       />
 
       {/* Charts Row */}
-      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <SalesOverTime sales={analyticsData?.salesOverTime} isLoading={isLoading} />
+      <div className="mt-5">
+        {/* <SalesOverTime sales={analyticsData?.salesOverTime} isLoading={isLoading} /> */}
         <OrdersPerHour ordersPerHour={analyticsData?.ordersPerHour} isLoading={isLoading} />
       </div>
 

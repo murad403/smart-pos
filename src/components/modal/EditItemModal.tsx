@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from "react";
-import { X, Upload, Plus, Trash2 } from "lucide-react";
+import { X, Upload, Plus, Trash2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useGetAllProductionStationQuery, useUpdateItemMutation, useAddPacketSectionMutation, useUpdatePacketSectionMutation, useDeletePacketSectionMutation, useAddPacketSectionChoiceMutation, useUpdatePacketSectionChoiceMutation, useDeletePacketSectionChoiceMutation } from "@/redux/features/menu/menu.api";
+import { useGetAllProductionStationQuery, useUpdateItemMutation, useAddPacketSectionMutation, useUpdatePacketSectionMutation, useDeletePacketSectionMutation, useAddPacketSectionChoiceMutation, useUpdatePacketSectionChoiceMutation, useDeletePacketSectionChoiceMutation, useGetAllItemsQuery } from "@/redux/features/menu/menu.api";
 import { toast } from "sonner";
+import SearchableItemDropdown from "../shared/SearchableItemDropdown";
+
 
 type Props = {
   open: boolean;
@@ -19,6 +21,10 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
   // Fetch production stations with limit 100
   const { data: stationsRes, isLoading: isStationsLoading } = useGetAllProductionStationQuery({ limit: 100 });
   const stations = stationsRes?.data ?? [];
+
+  // Fetch items for selection with limit 100 (excluding current item)
+  const { data: itemsRes } = useGetAllItemsQuery({ limit: 100 });
+  const itemsList = (itemsRes?.data ?? []).filter((i: any) => i.id !== item?.id);
 
   // Mutations
   const [updateItem, { isLoading: isUpdating }] = useUpdateItemMutation();
@@ -55,13 +61,10 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
 
   const LABEL_OPTIONS = [
     { key: "BEST_SELLER", label: t("bestSeller") || "Best Seller" },
-    { key: "RECOMMENDED", label: t("recommended") || "Recommended" },
-    { key: "FAVORITE", label: t("favorite") || "Favorite" },
     { key: "MUST_TRY", label: t("mustTry") || "Must Try" },
-    { key: "NEW", label: t("new") || "New" },
-    { key: "VEGETARIAN", label: t("vegetarian") || "Vegetarian" },
-    { key: "KIDS_CHOICE", label: t("kidsChoice") || "Kids Choice" },
+    { key: "PROMO", label: t("promo") || "Promo" },
     { key: "SPICY", label: t("spicy") || "Spicy" },
+    { key: "VEGETARIAN", label: t("vegetarian") || "Vegetarian" }
   ];
 
   // Initialize form when item changes
@@ -87,9 +90,10 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
           id: sec.id,
           name: sec.name,
           maxQty: sec.maxQty,
+          productionStationId: sec.productionStationId ? String(sec.productionStationId) : "",
           choices: (sec.choices || []).map((ch: any) => ({
             id: ch.id,
-            name: ch.name,
+            itemId: ch.itemId ?? null,
             maxQty: ch.maxQty,
           })),
         }));
@@ -112,9 +116,9 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
 
   const toggleLabel = (labelKey: string) => {
     if (selectedLabels.includes(labelKey)) {
-      setSelectedLabels(selectedLabels.filter((l) => l !== labelKey));
+      setSelectedLabels([]);
     } else {
-      setSelectedLabels([...selectedLabels, labelKey]);
+      setSelectedLabels([labelKey]);
     }
   };
 
@@ -124,7 +128,8 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
       id: crypto.randomUUID(),
       name: "",
       maxQty: 1,
-      choices: [{ id: crypto.randomUUID(), name: "", maxQty: 1 }],
+      productionStationId: "",
+      choices: [{ id: crypto.randomUUID(), itemId: null, maxQty: 1 }],
     };
     setSections([...sections, newSection]);
   };
@@ -133,7 +138,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
     setSections(sections.filter((s) => s.id !== sectionId));
   };
 
-  const handleSectionChange = (sectionId: string | number, field: "name" | "maxQty", value: any) => {
+  const handleSectionChange = (sectionId: string | number, field: "name" | "maxQty" | "productionStationId", value: any) => {
     setSections(
       sections.map((s) => {
         if (s.id === sectionId) {
@@ -150,7 +155,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
         if (s.id === sectionId) {
           return {
             ...s,
-            choices: [...s.choices, { id: crypto.randomUUID(), name: "", maxQty: 1 }],
+            choices: [...s.choices, { id: crypto.randomUUID(), itemId: null, maxQty: 1 }],
           };
         }
         return s;
@@ -172,7 +177,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
     );
   };
 
-  const handleChoiceChange = (sectionId: string | number, choiceId: string | number, field: "name" | "maxQty", value: any) => {
+  const handleChoiceChange = (sectionId: string | number, choiceId: string | number, field: "itemId" | "maxQty", value: any) => {
     setSections(
       sections.map((s) => {
         if (s.id === sectionId) {
@@ -211,7 +216,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
 
       // Set optional values or clear them
       payload.slug = slug.trim() || null;
-      payload.productionStationId = productionStationId ? Number(productionStationId) : undefined;
+      payload.productionStationId = (itemType !== "PACKET" && productionStationId) ? Number(productionStationId) : undefined;
       payload.inventoryQty = inventoryQty !== "" ? Number(inventoryQty) : undefined;
       payload.labels = selectedLabels;
       payload.promoName = hasPromo && promoName.trim() ? promoName : undefined;
@@ -268,17 +273,27 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
               data: {
                 name: sec.name,
                 maxQty: Number(sec.maxQty),
+                ...(sec.productionStationId ? { productionStationId: Number(sec.productionStationId) } : {}),
               },
             }).unwrap();
             sid = sectionRes?.data?.id;
           } else {
             const originalSec = originalSections.find((s: any) => s.id === sid);
-            if (originalSec && (originalSec.name !== sec.name || originalSec.maxQty !== sec.maxQty)) {
+            const origStationId = originalSec?.productionStationId ? String(originalSec.productionStationId) : "";
+            const currentStationId = sec.productionStationId || "";
+
+            if (
+              originalSec &&
+              (originalSec.name !== sec.name ||
+                originalSec.maxQty !== sec.maxQty ||
+                origStationId !== currentStationId)
+            ) {
               await updatePacketSection({
                 sId: sid,
                 data: {
                   name: sec.name,
                   maxQty: Number(sec.maxQty),
+                  productionStationId: sec.productionStationId ? Number(sec.productionStationId) : null,
                 },
               }).unwrap();
             }
@@ -286,7 +301,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
 
           if (sid) {
             for (const choice of sec.choices) {
-              if (!choice.name.trim()) continue;
+              if (!choice.itemId) continue;
 
               const isNewChoice = typeof choice.id === "string";
 
@@ -294,7 +309,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                 await addPacketSectionChoice({
                   sid,
                   data: {
-                    name: choice.name,
+                    itemId: Number(choice.itemId),
                     maxQty: Number(choice.maxQty),
                   },
                 }).unwrap();
@@ -305,11 +320,11 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                   originalChoice = (originalSec.choices || []).find((c: any) => c.id === choice.id);
                 }
 
-                if (originalChoice && (originalChoice.name !== choice.name || originalChoice.maxQty !== choice.maxQty)) {
+                if (originalChoice && (originalChoice.itemId !== choice.itemId || originalChoice.maxQty !== choice.maxQty)) {
                   await updatePacketSectionChoice({
                     cid: choice.id,
                     data: {
-                      name: choice.name,
+                      itemId: Number(choice.itemId),
                       maxQty: Number(choice.maxQty),
                     },
                   }).unwrap();
@@ -419,38 +434,40 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                 </div>
 
                 {/* Production Station */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Production Destination</label>
-                  <div className="relative">
-                    <select
-                      value={productionStationId}
-                      onChange={(e) => setProductionStationId(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-800 appearance-none cursor-pointer pr-8"
-                    >
-                      <option value="">Select Production Station...</option>
-                      {isStationsLoading ? (
-                        <option disabled>Loading stations...</option>
-                      ) : (
-                        stations.map((s: any) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                    <svg
-                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                      width="14"
-                      height="14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                {itemType !== "PACKET" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Production Destination</label>
+                    <div className="relative">
+                      <select
+                        value={productionStationId}
+                        onChange={(e) => setProductionStationId(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-800 appearance-none cursor-pointer pr-8"
+                      >
+                        <option value="">Select Production Station...</option>
+                        {isStationsLoading ? (
+                          <option disabled>Loading stations...</option>
+                        ) : (
+                          stations.map((s: any) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                      <svg
+                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Inventory Qty */}
                 <div>
@@ -554,8 +571,8 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                       type="button"
                       onClick={() => toggleLabel(opt.key)}
                       className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${isSelected
-                          ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10 scale-95"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10 scale-95"
+                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                         }`}
                     >
                       {opt.label}
@@ -622,7 +639,7 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                     <div key={sec.id} className="border border-blue-100 rounded-xl p-4 bg-white shadow-sm space-y-4">
                       {/* Section Header */}
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1 grid grid-cols-3 gap-3">
+                        <div className="flex-1 grid grid-cols-4 gap-3">
                           <div className="col-span-2">
                             <label className="text-xs font-semibold text-gray-500">Section Name (e.g. Choose Appetizer)</label>
                             <input
@@ -643,6 +660,34 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                               className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-center font-semibold"
                             />
                           </div>
+                          <div>
+                            <label className="text-xs font-semibold text-gray-500">Product Destination</label>
+                            <div className="relative">
+                              <select
+                                value={sec.productionStationId || ""}
+                                onChange={(e) => handleSectionChange(sec.id, "productionStationId", e.target.value)}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer text-gray-800 bg-white appearance-none pr-8"
+                              >
+                                <option value="">Select Destination...</option>
+                                {stations.map((s: any) => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <svg
+                                className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500"
+                                width="12"
+                                height="12"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                              >
+                                <polyline points="6 9 12 15 18 9" />
+                              </svg>
+                            </div>
+                          </div>
                         </div>
 
                         <button
@@ -659,12 +704,10 @@ const EditItemModal: React.FC<Props> = ({ open, onClose, onSuccess, item }) => {
                         <span className="text-xs font-bold text-gray-600 block mb-1">Choice Options</span>
                         {sec.choices.map((choice: any) => (
                           <div key={choice.id} className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={choice.name}
-                              onChange={(e) => handleChoiceChange(sec.id, choice.id, "name", e.target.value)}
-                              placeholder="Option name (e.g. French Fries)"
-                              className="flex-1 border border-gray-200 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            <SearchableItemDropdown
+                              items={itemsList}
+                              selectedId={choice.itemId}
+                              onChange={(id) => handleChoiceChange(sec.id, choice.id, "itemId", id)}
                             />
                             <input
                               type="number"

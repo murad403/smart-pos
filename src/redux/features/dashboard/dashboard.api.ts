@@ -281,6 +281,16 @@ const dashboardApi = baseApi.injectEndpoints({
             },
             invalidatesTags: ["payments"]
         }),
+        changeVerificationStatus: builder.mutation({
+            query: ({data, paymentId}) => {
+                return {
+                    url: `/payments/${paymentId}/verification-status`,
+                    method: "PATCH",
+                    body: data
+                };
+            },
+            invalidatesTags: ["payments"]
+        }),
 
 
         
@@ -312,4 +322,5 @@ export const {
     useUpdateBusinessInformationMutation,
     useGetTodayPaymentsSummaryQuery,
     useTodayPaymentsVerifyMutation,
+    useChangeVerificationStatusMutation,
 } = dashboardApi;

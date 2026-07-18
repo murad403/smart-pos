@@ -7,6 +7,7 @@ import { useGetInventoryLogsQuery } from "@/redux/features/dashboard/dashboard.a
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import CustomPagination from "@/components/shared/CustomPagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "../ui/button";
 
 interface InventoryLogsModalProps {
   open: boolean;
@@ -49,7 +50,7 @@ const InventoryLogsModal: React.FC<InventoryLogsModalProps> = ({ open, onClose }
   const { data: logsRes, isLoading, isFetching } = useGetInventoryLogsQuery(
     {
       page,
-      limit: 10,
+      limit: 15,
       startDate: formatDateForApi(startDate),
       endDate: formatDateForApi(endDate),
     },
@@ -159,10 +160,13 @@ const InventoryLogsModal: React.FC<InventoryLogsModalProps> = ({ open, onClose }
               }}
             />
           </div>
+          <a href={`${process.env.NEXT_PUBLIC_BASE_URL}/inventory/logs-export`}>
+            <Button variant="outline" className="cursor-pointer">Download History</Button>
+          </a>
         </div>
 
         {/* Table/List Area */}
-        <div className="flex-1 overflow-y-auto min-h-[300px] relative">
+        <div className="flex-1 overflow-y-auto min-h-75 relative">
           {isLoading || isFetching ? (
             renderSkeleton()
           ) : logs.length === 0 ? (

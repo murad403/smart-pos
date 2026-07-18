@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { BadgeDollarSign, Eye, SquarePen } from "lucide-react";
+import { BadgeDollarSign, ClipboardClock, Eye, SquarePen } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api";
 import CustomPagination from "@/components/shared/CustomPagination";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
@@ -56,7 +56,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
   };
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-6 pb-10 w-full min-w-0">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -67,6 +67,10 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
             {tPending("subtitle") || "Review and process orders awaiting payment completion."}
           </p>
         </div>
+        <Link href={"/payments-history"} className="inline-flex rounded-md bg-blue-400 py-2 gap-2 text-sm font-medium px-4 items-center text-white">
+          <ClipboardClock size={16} />
+          <span>Payments History</span>
+        </Link>  
       </div>
 
       {/* Main Content */}
@@ -134,7 +138,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-bold text-slate-900">{order.slug}</td>
+                      <td className="px-6 py-4 font-bold text-slate-900 whitespace-nowrap">{order.slug}</td>
                       <td className="px-6 py-4 font-medium text-slate-700">{order.customerName || "-"}</td>
                       <td className="px-6 py-4 font-semibold text-slate-700">
                         {order.table ? order.table.tableNumber : "-"}
@@ -207,6 +211,15 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
         key={selectedPaymentOrder?.id ?? "payment-modal"}
         order={selectedPaymentOrder}
         onClose={() => setSelectedPaymentOrder(null)}
+      />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            main {
+              min-width: 0 !important;
+            }
+          `,
+        }}
       />
     </div>
   );

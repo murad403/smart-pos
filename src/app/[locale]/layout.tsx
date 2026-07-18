@@ -21,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "smart-pos-admin",
-  description: "A simple admin panel for managing smart POS systems.",
+  title: "smart-pos",
+  description: "Smartpos is a pos management system for restaurants.",
 };
 
 export default async function RootLayout({

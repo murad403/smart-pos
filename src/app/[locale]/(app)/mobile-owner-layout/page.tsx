@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Home, Menu, Pencil, ShieldCheck, Package, TrendingUp, BarChart3, User, DollarSign, ShoppingCart, ChevronRight } from "lucide-react";
+import { Home, Menu, Pencil, ShieldCheck, Package, TrendingUp, BarChart3, User } from "lucide-react";
 import { Link, useRouter } from "@/i18n/routing";
 import { useSidebar } from "@/components/ui/sidebar";
 import { getUserData } from "@/utils/auth";
@@ -34,8 +34,8 @@ const MobileOwnerLayoutPage = () => {
     const analyticsData = analyticsRes?.data;
 
     // Fetch Recent Orders (Limit: 5)
-    const { data: paymentsRes, isLoading: isLoadingPayments } = useGetPaymentsQuery({ limit: 5 });
-    const paymentsData = paymentsRes?.data;
+    // const { data: paymentsRes, isLoading: isLoadingPayments } = useGetPaymentsQuery({ limit: 5 });
+    // const paymentsData = paymentsRes?.data;
 
     const userName = user?.name || "John Wick";
     const userPhoto = user?.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
@@ -97,7 +97,7 @@ const MobileOwnerLayoutPage = () => {
                         <div className="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-[#1A56DB] mb-3">
                             <ShieldCheck className="size-6" />
                         </div>
-                        <span className="text-[13px] font-bold text-slate-700">{t("paymentVerification")}</span>
+                        <span className="text-[13px] font-bold text-slate-700 text-center">{t("paymentVerification")}</span>
                     </Link>
 
                     {/* Inventory (Inventory Report) */}
@@ -149,7 +149,9 @@ const MobileOwnerLayoutPage = () => {
             {/* Dashboard Metrics */}
             <div className="px-6 mt-6">
                 <h3 className="text-base font-bold text-slate-850 tracking-wide mb-4">{t("dashboard")}</h3>
-                <DashboardStats />
+                <DashboardStats overview={analyticsData?.overview}
+                    orderTypeBreakdown={analyticsData?.orderTypeBreakdown}
+                    isLoading={isLoadingAnalytics} />
                 <Link className="flex justify-end mt-4 text-blue-500 text-sm hover:underline" href={"/view-all"}>{t("viewAll")}</Link>
             </div>
         </div>

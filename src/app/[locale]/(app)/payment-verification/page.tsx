@@ -59,6 +59,7 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
         cashierName: item.cashier?.name,
         markAsMissMatch: item.markAsMissMatch,
         isVerified: item.isVerified,
+        verificationStatus: item.verificationStatus,
       };
     });
   }, [payments, t]);

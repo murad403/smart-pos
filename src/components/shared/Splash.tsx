@@ -1,5 +1,5 @@
 import Image from "next/image";
-import splashLogo from "@/assets/logo/logo.png";
+import splashLogo from "@/assets/logo/logo2.png";
 
 const Splash = () => {
     return (
@@ -16,8 +16,7 @@ const Splash = () => {
                     width={260}
                     height={240}
                     priority
-                    sizes="260px"
-                    className="h-full w-full object-contain"
+                    className="object-contain"
                 />
             </div>
         </section>

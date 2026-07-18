@@ -116,7 +116,7 @@ const EditSectionModal: React.FC<Props> = ({ open, onClose, onSave, sectionId })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-[2px]">
-      <div className="relative w-full max-w-[480px] rounded-[24px] bg-white p-8 shadow-2xl">
+      <div className="relative w-full max-w-120 rounded-[24px] bg-white p-8 shadow-2xl">
         <button
           type="button"
           onClick={onClose}
@@ -189,7 +189,7 @@ const EditSectionModal: React.FC<Props> = ({ open, onClose, onSave, sectionId })
                         isSelected ? "border-[#2563EB] bg-white shadow-sm" : "border-[#E2E8F0] bg-white hover:border-slate-300"
                       }`}
                     >
-                      <div className="mb-3 flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-white">
+                      <div className="mb-3 flex aspect-4/5 w-full items-center justify-center rounded-xl bg-white">
                         {item.previewContent}
                       </div>
                       <span className="mb-1 text-center text-[12px] font-medium leading-tight text-slate-900">

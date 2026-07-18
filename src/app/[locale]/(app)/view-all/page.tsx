@@ -10,7 +10,7 @@ const page = () => {
     const analyticsData = analyticsRes?.data;
     return (
         <div className='space-y-4'>
-            <SalesOverTime sales={analyticsData?.salesOverTime} isLoading={isLoading} />
+            {/* <SalesOverTime sales={analyticsData?.salesOverTime} isLoading={isLoading} /> */}
             <OrdersPerHour ordersPerHour={analyticsData?.ordersPerHour} isLoading={isLoading} />
             <TopSellingItems items={analyticsData?.topSellingItems} isLoading={isLoading} />
         </div>

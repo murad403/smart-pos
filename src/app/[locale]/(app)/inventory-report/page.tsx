@@ -16,15 +16,12 @@ const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch all inventory items for accurate stats card calculations
-  const { data: allInventoryRes, refetch: refetchAll } = useGetInventoryReportQuery();
-  const allItems = allInventoryRes?.data;
-
   // Fetch paginated inventory data for the main overview table
-  const { data: inventoryReportRes, isLoading, refetch } = useGetInventoryReportQuery({ page: currentPage, limit: 10 });
+  const { data: inventoryReportRes, isLoading, refetch } = useGetInventoryReportQuery({ page: currentPage, limit: 15 });
   const inventoryItems = inventoryReportRes?.data;
   const pagination = inventoryReportRes?.pagination;
   const totalPages = pagination?.pages || 1;
+  const meta = inventoryReportRes?.meta;
 
   return (
     <div>
@@ -63,7 +60,11 @@ const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> 
         </div>
       </div>
       
-      <InventoryReportStats items={allItems} isLoading={isLoading} />
+      <InventoryReportStats
+        lowStockItems={meta?.lowStack}
+        outOfStockItems={meta?.outOfStock}
+        isLoading={isLoading}
+      />
       
       <InventoryOverviewTable
         items={inventoryItems}
@@ -79,7 +80,6 @@ const InventoryReportPage = ({ params }: { params?: Promise<{ locale: string }> 
         mode={modalMode}
         onSuccess={() => {
           refetch();
-          refetchAll();
         }}
       />
 

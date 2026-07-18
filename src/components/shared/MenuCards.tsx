@@ -1,15 +1,31 @@
 "use client";
-
 import React, { useState } from "react";
 import Image from "next/image";
 import item1 from "@/assets/images/menu1.jpg";
 import item2 from "@/assets/images/menu2.png";
+import spicyImage from "@/assets/tag/spicy.svg";
+import mustTryImage from "@/assets/tag/must_try.svg";
+import promoImage from "@/assets/tag/promo.svg";
+import bestSellerImage from "@/assets/tag/best_saller.svg";
+import vegetarianImage from "@/assets/tag/vagetarian.svg";
+
+
+
+const labelSvgMap: Record<string, any> = {
+  VEGETARIAN: vegetarianImage,
+  SPICY: spicyImage,
+  BEST_SELLER: bestSellerImage,
+  PROMO: promoImage,
+  MUST_TRY: mustTryImage,
+};
+
+
 import { SquarePen, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
 
-import { useGetAllSectionDetailsByMenuIdQuery, useRemoveItemToSectionMutation } from "@/redux/features/menu/menu.api";
+import { useDeleteItemMutation, useGetAllSectionDetailsByMenuIdQuery, useRemoveItemToSectionMutation } from "@/redux/features/menu/menu.api";
 import { toast } from "sonner";
 
 export type MenuItemCardData = {
@@ -21,9 +37,10 @@ export type MenuItemCardData = {
   stock: number;
   statusLabel: string;
   promoPrice: number;
+  hasPromo: boolean;
   imageType: "menu1" | "menu2";
   imageUrl?: string | null;
-  badges: [string, string];
+  badges: string[];
   packetSections?: any[];
   originalItem?: any;
 };
@@ -132,8 +149,8 @@ const PacketSlider = ({ packetSections }: { packetSections: any[] }) => {
 
 const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, onEditSection, onDeleteSection, onEditItem }: Props) => {
   const t = useTranslations("Menu");
-
   const { data: sectionDetailsRes, isLoading } = useGetAllSectionDetailsByMenuIdQuery(sectionId);
+  const [deleteItem] = useDeleteItemMutation();
   const sectionDetails = sectionDetailsRes?.data;
   const sectionItems = sectionDetails?.sectionItems || [];
 
@@ -144,6 +161,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
     try {
       toast.loading("Removing item from section...", { id: "remove-item-section" });
       await removeItemToSection({ sectionId, itemId }).unwrap();
+      // await deleteItem(itemId).unwrap();
       toast.success("Item removed from section successfully", { id: "remove-item-section" });
     } catch (err: any) {
       toast.error(err?.data?.message || err?.message || "Failed to remove item", { id: "remove-item-section" });
@@ -152,10 +170,12 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
 
   const items: MenuItemCardData[] = (sectionItems || []).map((sectionItem: any) => {
     const item = sectionItem.item || sectionItem;
+    // console.log(item)
     return {
       id: item.id,
       itemNumber: item.slug || `i-${item.id}`,
       itemName: item.name,
+      hasPromo: item.hasPromo,
       price: Number(item.price || 0),
       inventory: item.inventoryQty || 0,
       stock: item.inventoryQty || 0,
@@ -168,7 +188,8 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
       originalItem: item,
     };
   });
-  // console.log(items[0]?.badges)
+
+  // console.log(items.)
 
   const layoutLabel: Record<SectionLayoutType, string> = {
     SINGLE: t("1-image") || "1 Large Image",
@@ -185,17 +206,17 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
   const gridColsClass = {
     SINGLE: "grid grid-cols-1 gap-4 lg:grid-cols-1",
     DOUBLE: "grid grid-cols-2 gap-4 lg:grid-cols-2",
-    TRIPLE: "grid grid-cols-2 gap-4 lg:grid-cols-3",
+    TRIPLE: "grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-3",
     QUADRUPLE: "grid grid-cols-2 gap-4 lg:grid-cols-4",
     LIST_WITH_IMAGE: "space-y-4",
     LIST_NO_IMAGE: "space-y-4",
   }[layout] || "grid grid-cols-2 gap-4 lg:grid-cols-3";
 
   return (
-    <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-      <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+    <section className="overflow-hidden rounded-2xl sm:rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+      <div className="flex flex-col gap-2.5 border-b border-slate-100 px-3 py-3 sm:px-6 sm:py-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
+          <h2 className="text-xl sm:text-[1.75rem] font-bold tracking-tight text-slate-950">
             {sectionName || t("untitledSection")} | {t("layoutType")}: {layoutLabel[layout]}
           </h2>
         </div>
@@ -222,7 +243,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
         </div>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="p-3 sm:p-6">
         {isLoading ? (
           layout === "LIST_NO_IMAGE" ? (
             <div className="space-y-3">
@@ -238,8 +259,8 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
           ) : layout === "LIST_WITH_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center animate-pulse">
-                  <div className="h-40 w-full rounded-2xl bg-[#E2E8F0]" />
+                <div key={i} className="grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 items-center animate-pulse">
+                  <div className="h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0]" />
                   <div className="space-y-3 w-full py-1">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/5" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
@@ -256,15 +277,14 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
             <div className={gridColsClass}>
               {Array.from({ length: (layout === "SINGLE" ? 1 : layout === "DOUBLE" ? 2 : layout === "TRIPLE" ? 3 : layout === "QUADRUPLE" ? 4 : 1) }).map((_, i) => (
                 <div key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-[#E2E8F0] shadow-sm animate-pulse">
-                  <div className={`relative bg-[#E2E8F0] w-full ${
-                    layout === "SINGLE"
-                      ? "h-64 md:h-96 lg:h-120"
-                      : layout === "DOUBLE"
-                        ? "h-44 sm:h-64 lg:h-96"
-                        : layout === "TRIPLE"
-                          ? "h-44 sm:h-52 lg:h-72"
-                          : "h-44 sm:h-48 lg:h-60"
-                  }`} />
+                  <div className={`relative bg-[#E2E8F0] w-full ${layout === "SINGLE"
+                    ? "h-64 md:h-96 lg:h-120"
+                    : layout === "DOUBLE"
+                      ? "h-44 sm:h-64 lg:h-96"
+                      : layout === "TRIPLE"
+                        ? "h-44 sm:h-52 lg:h-72"
+                        : "h-44 sm:h-48 lg:h-60"
+                    }`} />
                   <div className="flex-1 p-4 space-y-3">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/4" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/2" />
@@ -349,19 +369,19 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                 key={`${item.itemNumber}-${index}`}
                 className={
                   isImageListLayout
-                    ? "grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr]"
+                    ? "grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3"
                     : "flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white hover:shadow-sm transition-all duration-200"
                 }
               >
                 <div className={
                   isImageListLayout
-                    ? "relative h-40 overflow-hidden rounded-2xl sm:h-full w-full"
+                    ? "relative h-28 sm:h-full w-full overflow-hidden rounded-xl sm:rounded-2xl"
                     : layout === "SINGLE"
                       ? "relative h-64 md:h-96 lg:h-120 overflow-hidden w-full"
                       : layout === "DOUBLE"
                         ? "relative h-44 sm:h-64 lg:h-96 w-full"
                         : layout === "TRIPLE"
-                          ? "relative h-44 sm:h-52 lg:h-72 w-full"
+                          ? "relative h-28 sm:h-52 lg:h-72 w-full"
                           : "relative h-44 sm:h-48 lg:h-60 w-full"
                 }>
                   <Image
@@ -372,58 +392,73 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                     priority={index === 0}
                   />
 
-                  <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                    {item.badges && item.badges.map((badge, badgeIndex) => (
-                      <span key={badgeIndex} className="rounded-lg bg-white/92 px-3 py-1 text-[11px] font-semibold text-red-500 shadow-sm backdrop-blur">
-                        {badge}
-                      </span>
-                    ))}
-                  </div>
-
-                  {item.promoPrice > 0 && (
-                    <div className="absolute right-3 bottom-3 sm:top-3 sm:bottom-auto">
-                      <span className="rounded-lg bg-green-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+                  {/* {item.promoPrice > 0 && (
+                    <div className="absolute right-1 top-1 sm:right-3 sm:top-3 z-10">
+                      <span className="rounded-lg bg-green-600 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[11px] font-bold text-white shadow-sm">
                         Promo: Rp{item.promoPrice.toLocaleString("en-US")}
                       </span>
                     </div>
-                  )}
+                  )} */}
+
+                  {item.badges && item.badges.map((badge, badgeIndex) => {
+                    const svgSrc = labelSvgMap[badge];
+                    if (!svgSrc) return null;
+                    return (
+                      <div key={badgeIndex} className="absolute bottom-0 right-0 sm:w-50 sm:h-50 w-25 h-25">
+                        <Image
+                          src={svgSrc}
+                          alt={badge}
+                          fill
+                          className="object-contain object-bottom-right"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-4"}>
-                  <div className="space-y-3">
-                    <p className="text-lg font-bold tracking-tight text-red-500">{item.itemNumber}</p>
-                    <h3 className="text-[1.35rem] font-bold tracking-tight text-red-500">{item.itemName}</h3>
-                    <div className="flex flex-col gap-0.5 text-xs text-slate-700 sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm">
+                <div className={isImageListLayout ? "flex flex-col justify-between py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-2 sm:p-4"}>
+                  <div className="space-y-1 sm:space-y-3">
+                    <p className="text-xs sm:text-lg font-bold tracking-tight text-red-500">{item.itemNumber}</p>
+                    <h3 className="text-sm sm:text-[1.35rem] font-bold tracking-tight text-red-500 line-clamp-1">{item.itemName}</h3>
+                    <div className="hidden sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm text-xs text-slate-700">
                       <p className="text-slate-600">{t("inventory")}: {item.inventory}</p>
                       <p className="text-slate-600">{t("stock")}: {item.stock}</p>
                       <p className="font-medium text-slate-900 sm:text-right">{item.statusLabel}</p>
                     </div>
                     {item.packetSections && item.packetSections.length > 0 && (
-                      <PacketSlider packetSections={item.packetSections} />
+                      <div className="hidden sm:block">
+                        <PacketSlider packetSections={item.packetSections} />
+                      </div>
                     )}
                   </div>
 
-                  <div className="mt-6 flex items-end justify-between gap-4">
-                    <div className="text-sm text-slate-600">
-                      <p className="text-slate-500">{t("price")}</p>
-                      <p className="font-semibold text-slate-900">Rp{item.price.toLocaleString("en-US")}</p>
+                  <div className="mt-2.5 sm:mt-6 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 w-full">
+                    <div className="text-slate-600">
+                      {/* <p className="text-slate-550 text-[10px] sm:text-xs leading-none"></p> */}
+                      <p className={`font-bold text-slate-900 text-sm sm:text-lg ${item.hasPromo === true ? "line-through decoration-2" : ""}`}>{t("price")}: Rp{item.price.toLocaleString("en-US")}</p>
+                      {
+                        item.hasPromo === true &&
+                        <p className="font-bold text-red-500 text-sm sm:text-lg">
+                          {t("promoPrice")}: Rp{item.promoPrice.toLocaleString("en-US")}
+                        </p>
+                      }
                     </div>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-1.5 items-center shrink-0">
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => onEditItem?.(item.originalItem)}
-                        className="h-9 w-9 p-0 rounded-xl border-blue-100 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors"
+                        className="h-7 w-7 sm:h-9 sm:w-9 p-0 rounded-lg sm:rounded-xl border-blue-100 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors"
                       >
-                        <SquarePen className="size-4" />
+                        <SquarePen className="size-3.5 sm:size-4" />
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => handleRemoveItem(item.id)}
-                        className="h-9 w-9 p-0 rounded-xl border-red-100 bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-600 transition-colors"
+                        className="h-7 w-7 sm:h-9 sm:w-9 p-0 rounded-lg sm:rounded-xl border-red-100 bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-600 transition-colors"
                       >
-                        <Trash2 className="size-4" />
+                        <Trash2 className="size-3.5 sm:size-4" />
                       </Button>
                     </div>
                   </div>
@@ -438,21 +473,19 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
               }).map((_, i) => (
                 <div
                   key={`placeholder-${i}`}
-                  className={`flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full ${
-                    layout === "SINGLE" ? "min-h-105 md:min-h-140 lg:min-h-170" :
-                    layout === "DOUBLE" ? "min-h-85 sm:min-h-110 lg:min-h-142.5" :
-                    layout === "TRIPLE" ? "min-h-85 sm:min-h-97.5 lg:min-h-117.5" :
-                    "min-h-85 sm:min-h-92.5 lg:min-h-110"
-                  }`}
+                  className={`flex flex-col rounded-[22px] border border-blue-500 bg-white p-4 shadow-sm w-full h-full ${layout === "SINGLE" ? "min-h-72 sm:min-h-105 md:min-h-140 lg:min-h-170" :
+                    layout === "DOUBLE" ? "min-h-48 sm:min-h-85 md:min-h-110 lg:min-h-142.5" :
+                      layout === "TRIPLE" ? "min-h-40 sm:min-h-60 md:min-h-97.5 lg:min-h-117.5" :
+                        "min-h-48 sm:min-h-85 md:min-h-92.5 lg:min-h-110"
+                    }`}
                 >
                   <button
                     type="button"
                     onClick={onAddItem}
-                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 ${
-                      layout === "SINGLE" ? "min-h-64 md:min-h-96 lg:min-h-120" :
-                      layout === "DOUBLE" ? "min-h-44 sm:min-h-64 lg:min-h-96" :
-                      layout === "TRIPLE" ? "min-h-44 sm:min-h-52 lg:min-h-72" : "min-h-44 sm:min-h-48 lg:min-h-60"
-                    }`}
+                    className={`group relative w-full overflow-hidden rounded-[18px] bg-[#E2E8F0] hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300 flex-1 ${layout === "SINGLE" ? "min-h-44 sm:min-h-64 md:min-h-96 lg:min-h-120" :
+                      layout === "DOUBLE" ? "min-h-32 sm:min-h-44 md:min-h-64 lg:min-h-96" :
+                        layout === "TRIPLE" ? "min-h-20 sm:min-h-28 md:min-h-52 lg:min-h-72" : "min-h-32 sm:min-h-44 md:min-h-48 lg:min-h-60"
+                      }`}
                   >
                     <Plus size={36} className="text-white opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
                   </button>
@@ -464,9 +497,9 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
               <button
                 type="button"
                 onClick={onAddItem}
-                className="group w-full grid gap-4 rounded-2xl border border-dashed border-blue-400 bg-white hover:bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center text-left transition-all duration-300"
+                className="group w-full grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-dashed border-blue-400 bg-white hover:bg-slate-50 p-3 items-center text-left transition-all duration-300"
               >
-                <div className="relative h-40 rounded-xl bg-[#E2E8F0] group-hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300">
+                <div className="relative h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0] group-hover:bg-[#D9E2EC] flex items-center justify-center transition-all duration-300">
                   <Plus size={36} className="text-white opacity-90 group-hover:scale-110 transition-all duration-300" />
                 </div>
               </button>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-import brandLogo from "@/assets/logo/logo.png";
+import brandLogo from "@/assets/logo/logo2.png";
 
 interface AuthPageWrapperProps {
     illustration?: React.ReactNode;
@@ -35,8 +35,7 @@ const AuthPageWrapper = ({ illustration, children }: AuthPageWrapperProps) => {
 
 
                 {/* ── Right blue panel ── */}
-                <div className="relative flex min-h-90 items-center justify-center overflow-hidden bg-[#BAD3FF] px-6 py-10 sm:min-h-115 lg:min-h-0 lg:px-10 lg:py-12">
-                    {/* Subtle radial glows */}
+                <div className="relative md:flex hidden min-h-90 items-center justify-center overflow-hidden bg-[#BAD3FF] px-6 py-10 sm:min-h-115 lg:min-h-0 lg:px-10 lg:py-12">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.34),transparent_32%),radial-gradient(circle_at_70%_72%,rgba(255,255,255,0.16),transparent_28%)]" />
                     <div className="absolute left-8 top-16 h-20 w-20 rounded-full bg-white/20 blur-2xl" />
                     <div className="absolute bottom-14 right-12 h-28 w-28 rounded-full bg-white/15 blur-3xl" />

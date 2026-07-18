@@ -1,9 +1,24 @@
 "use client";
-
 import React, { useState } from "react";
 import Image from "next/image";
 import item1 from "@/assets/images/menu1.jpg";
 import item2 from "@/assets/images/menu2.png";
+import spicyImage from "@/assets/tag/spicy.svg";
+import mustTryImage from "@/assets/tag/must_try.svg";
+import promoImage from "@/assets/tag/promo.svg";
+import bestSellerImage from "@/assets/tag/best_saller.svg";
+import vegetarianImage from "@/assets/tag/vagetarian.svg";
+
+
+const labelSvgMap: Record<string, any> = {
+  VEGETARIAN: vegetarianImage,
+  SPICY: spicyImage,
+  BEST_SELLER: bestSellerImage,
+  PROMO: promoImage,
+  MUST_TRY: mustTryImage,
+};
+
+
 import { SectionLayoutType } from "@/redux/features/menu/menu.type";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
@@ -19,11 +34,13 @@ export type MenuItemCardData = {
   stock: number;
   statusLabel: string;
   promoPrice: number;
+  hasPromo: boolean;
   imageType: "menu1" | "menu2";
   imageUrl?: string | null;
-  badges: [string, string];
+  badges: string[];
   packetSections?: any[];
   maxPacketItems?: number | null;
+  productionStationId?: number | null;
 };
 
 type Props = {
@@ -167,6 +184,7 @@ const CustomerMenuCards = ({
       itemNumber: item.slug || `i-${item.id}`,
       itemName: item.name,
       price: Number(item.price || 0),
+      hasPromo: item.hasPromo,
       inventory: item.inventoryQty || 0,
       stock: item.inventoryQty || 0,
       statusLabel: item.isOutOfStock ? "Out of Stock" : "In Stock",
@@ -176,17 +194,18 @@ const CustomerMenuCards = ({
       badges: item?.labels || [],
       packetSections: item.packetSections || [],
       maxPacketItems: item.maxPacketItems || null,
+      productionStationId: item.productionStationId || null,
     };
   });
 
-  const layoutLabel: Record<SectionLayoutType, string> = {
-    SINGLE: t("1-image") || "1 Large Image",
-    DOUBLE: t("2-image") || "2 Images Side-by-Side",
-    TRIPLE: t("3-image-row") || "3-Image Row",
-    QUADRUPLE: "4-Image Row",
-    LIST_WITH_IMAGE: t("images-list") || "Images List View",
-    LIST_NO_IMAGE: t("no-image-list") || "No-Image List View",
-  };
+  // const layoutLabel: Record<SectionLayoutType, string> = {
+  //   SINGLE: t("1-image") || "1 Large Image",
+  //   DOUBLE: t("2-image") || "2 Images Side-by-Side",
+  //   TRIPLE: t("3-image-row") || "3-Image Row",
+  //   QUADRUPLE: "4-Image Row",
+  //   LIST_WITH_IMAGE: t("images-list") || "Images List View",
+  //   LIST_NO_IMAGE: t("no-image-list") || "No-Image List View",
+  // };
 
   const isNoImageLayout = layout === "LIST_NO_IMAGE";
   const isImageListLayout = layout === "LIST_WITH_IMAGE";
@@ -194,23 +213,23 @@ const CustomerMenuCards = ({
   const gridColsClass = {
     SINGLE: "grid grid-cols-1 gap-4 lg:grid-cols-1",
     DOUBLE: "grid grid-cols-2 gap-4 lg:grid-cols-2",
-    TRIPLE: "grid grid-cols-2 gap-4 lg:grid-cols-3",
+    TRIPLE: "grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-3",
     QUADRUPLE: "grid grid-cols-2 gap-4 lg:grid-cols-4",
     LIST_WITH_IMAGE: "space-y-4",
     LIST_NO_IMAGE: "space-y-4",
   }[layout] || "grid grid-cols-2 gap-4 lg:grid-cols-3";
 
   return (
-    <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-      <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+    <section className="overflow-hidden rounded-2xl sm:rounded-[26px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+      <div className="flex flex-col gap-2.5 border-b border-slate-100 px-3 py-3 sm:px-6 sm:py-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-[1.75rem] font-bold tracking-tight text-slate-950">
+          <h2 className="text-xl sm:text-[1.75rem] font-bold tracking-tight text-slate-950">
             {sectionName || t("untitledSection")}
           </h2>
         </div>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="p-3 sm:p-6">
         {isLoading || items.length === 0 ? (
           layout === "LIST_NO_IMAGE" ? (
             <div className="space-y-3">
@@ -226,8 +245,8 @@ const CustomerMenuCards = ({
           ) : layout === "LIST_WITH_IMAGE" ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[280px_1fr] items-center animate-pulse">
-                  <div className="h-40 w-full rounded-2xl bg-[#E2E8F0]" />
+                <div key={i} className="grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 items-center animate-pulse">
+                  <div className="h-28 sm:h-40 w-full rounded-xl sm:rounded-2xl bg-[#E2E8F0]" />
                   <div className="space-y-3 w-full py-1">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/5" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/3" />
@@ -244,15 +263,14 @@ const CustomerMenuCards = ({
             <div className={gridColsClass}>
               {Array.from({ length: ({ SINGLE: 1, DOUBLE: 2, TRIPLE: 3, QUADRUPLE: 4 }[layout] || 1) }).map((_, i) => (
                 <div key={i} className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-pulse">
-                  <div className={`relative bg-[#E2E8F0] w-full ${
-                    layout === "SINGLE"
-                      ? "h-64 md:h-96 lg:h-120"
-                      : layout === "DOUBLE"
-                        ? "h-44 sm:h-64 lg:h-96"
-                        : layout === "TRIPLE"
-                          ? "h-44 sm:h-52 lg:h-72"
-                          : "h-44 sm:h-48 lg:h-60"
-                  }`} />
+                  <div className={`relative bg-[#E2E8F0] w-full ${layout === "SINGLE"
+                    ? "h-64 md:h-96 lg:h-120"
+                    : layout === "DOUBLE"
+                      ? "h-44 sm:h-64 lg:h-96"
+                      : layout === "TRIPLE"
+                        ? "h-44 sm:h-52 lg:h-72"
+                        : "h-44 sm:h-48 lg:h-60"
+                    }`} />
                   <div className="flex-1 p-4 space-y-3">
                     <div className="h-4 bg-[#E2E8F0] rounded w-1/4" />
                     <div className="h-6 bg-[#E2E8F0] rounded w-1/2" />
@@ -328,20 +346,20 @@ const CustomerMenuCards = ({
                   onClick={() => onAddItem(item)}
                   className={
                     (isImageListLayout
-                      ? "grid gap-4 rounded-2xl border bg-slate-50 p-3 sm:grid-cols-[280px_1fr] cursor-pointer transition-all duration-200"
+                      ? "grid grid-cols-[120px_1fr] sm:grid-cols-[280px_1fr] gap-3 sm:gap-4 rounded-2xl border bg-slate-50 p-3 cursor-pointer transition-all duration-200"
                       : "flex flex-col h-full overflow-hidden rounded-2xl border bg-white cursor-pointer transition-all duration-200") +
                     ` ${isSelected ? "border-blue-600 bg-blue-50/10 ring-1 ring-blue-600 shadow-md" : "border-slate-200 hover:border-slate-350 hover:shadow-sm"}`
                   }
                 >
                   <div className={
                     isImageListLayout
-                      ? "relative h-40 overflow-hidden rounded-2xl sm:h-full w-full"
+                      ? "relative h-28 sm:h-full w-full overflow-hidden rounded-xl sm:rounded-2xl"
                       : layout === "SINGLE"
                         ? "relative h-64 md:h-96 lg:h-120 overflow-hidden w-full"
                         : layout === "DOUBLE"
                           ? "relative h-44 sm:h-64 lg:h-96 w-full"
                           : layout === "TRIPLE"
-                            ? "relative h-44 sm:h-52 lg:h-72 w-full"
+                            ? "relative h-28 sm:h-52 lg:h-72 w-full"
                             : "relative h-44 sm:h-48 lg:h-60 w-full"
                   }>
                     <Image
@@ -352,66 +370,80 @@ const CustomerMenuCards = ({
                       priority={index === 0}
                     />
 
-                    <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                      {item.badges && item.badges.map((badge, badgeIndex) => (
-                        <span key={badgeIndex} className="rounded-lg bg-white/92 px-3 py-1 text-[11px] font-semibold text-red-500 shadow-sm backdrop-blur">
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-
-                    {item.promoPrice > 0 && (
-                      <div className="absolute right-3 bottom-3 sm:top-3 sm:bottom-auto">
-                        <span className="rounded-lg bg-green-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+                    {/* {item.promoPrice > 0 && (
+                      <div className="absolute right-1 top-1 sm:right-3 sm:top-3 z-10">
+                        <span className="rounded-lg bg-green-600 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[11px] font-bold text-white shadow-sm">
                           Promo: Rp{item.promoPrice.toLocaleString("en-US")}
                         </span>
                       </div>
-                    )}
+                    )} */}
+
+                    {item.badges && item.badges.map((badge, badgeIndex) => {
+                      const svgSrc = labelSvgMap[badge];
+                      if (!svgSrc) return null;
+                      return (
+                        <div key={badgeIndex} className="absolute bottom-0 right-0 sm:w-50 sm:h-50 w-20 h-20">
+                          <Image
+                            src={svgSrc}
+                            alt={badge}
+                            fill
+                            className="object-contain object-bottom-right"
+                          />
+                        </div>
+                      );
+                    })}
 
 
                   </div>
 
-                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-4"}>
-                    <div className="space-y-3">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
-                      <h3 className="text-xl font-bold text-slate-900">{item.itemName}</h3>
-                      <div className="flex flex-col gap-0.5 text-xs text-slate-700 sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm">
+                  <div className={isImageListLayout ? "flex flex-col justify-between gap-5 py-1 sm:pr-2" : "flex-1 flex flex-col justify-between p-2 sm:p-4"}>
+                    <div className="space-y-1 sm:space-y-3">
+                      <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.itemNumber}</p>
+                      <h3 className="text-sm sm:text-lg font-bold text-slate-900">{item.itemName}</h3>
+                      <div className="hidden sm:grid sm:grid-cols-3 sm:gap-3 sm:text-sm text-xs text-slate-700">
                         <p className="text-slate-600">{t("inventory")}: {item.inventory}</p>
                         <p className="text-slate-600">{t("stock")}: {item.stock}</p>
                         <p className="font-medium text-slate-900 sm:text-right">{item.statusLabel}</p>
                       </div>
                       {item.packetSections && item.packetSections.length > 0 && (
-                        <PacketSlider packetSections={item.packetSections} />
+                        <div className="hidden sm:block">
+                          <PacketSlider packetSections={item.packetSections} />
+                        </div>
                       )}
                     </div>
 
-                    <div className="mt-6 flex items-end justify-between gap-4">
-                      <div className="text-sm text-slate-600">
-                        <p className="text-slate-550 text-xs">{t("price")}</p>
-                        <p className="font-bold text-slate-900 text-lg">Rp{item.price.toLocaleString("en-US")}</p>
+                    <div className="mt-2.5 sm:mt-6 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 w-full">
+                      <div className="text-slate-605">
+                        <p className={`font-bold text-slate-900 text-sm sm:text-lg ${item.hasPromo === true ? "line-through decoration-2" : ""}`}>{t("price")}: Rp{item.price.toLocaleString("en-US")}</p>
+                        {
+                          item.hasPromo === true &&
+                          <p className="font-bold text-red-500 text-sm sm:text-lg">
+                            {t("promoPrice")}: Rp{item.promoPrice.toLocaleString("en-US")}
+                          </p>
+                        }
                       </div>
 
                       {isSelected && (
                         <div
-                          className="flex items-center gap-2.5 bg-white border border-slate-150 rounded-xl p-1 shadow-sm shrink-0"
+                          className="flex items-center justify-between sm:justify-start gap-1.5 bg-white border border-slate-150 rounded-lg p-0.5 shadow-xs shrink-0 w-full sm:w-auto"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
                             type="button"
                             onClick={() => handleDecrement(item)}
-                            className="size-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-[#E2E8F0] text-slate-650 transition-colors cursor-pointer"
+                            className="size-5 sm:size-7 rounded bg-slate-100 flex items-center justify-center hover:bg-[#E2E8F0] text-slate-650 transition-colors cursor-pointer"
                           >
-                            <Minus size={13} />
+                            <Minus size={10} className="sm:size-3.5" />
                           </button>
-                          <span className="text-sm font-bold text-slate-800 w-4 text-center select-none">
+                          <span className="text-xs sm:text-sm font-bold text-slate-800 w-4 text-center select-none">
                             {totalQty}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleIncrement(item)}
-                            className="size-7 rounded-lg bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white transition-colors cursor-pointer"
+                            className="size-5 sm:size-7 rounded bg-blue-600 flex items-center justify-center hover:bg-blue-700 text-white transition-colors cursor-pointer"
                           >
-                            <Plus size={13} />
+                            <Plus size={10} className="sm:size-3.5" />
                           </button>
                         </div>
                       )}

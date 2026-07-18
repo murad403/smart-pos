@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import { CheckCircle2, Eye, Loader2, Package2, ShoppingBag, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { getUserData } from "@/utils/auth";
 import { useAcceptOrderMutation, useCancelOrderMutation, useGetAllProductionsQuery, usePickupOrderMutation, useReadyOrderMutation } from "@/redux/features/production/production.api";
 import { ProductionOrder, ProductionOrderStatus, ProductionSource } from "@/redux/features/production/production.type";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,17 @@ const toElapsed = (startDateString: string | null | undefined) => {
   return `${minutes}m ${seconds}s`;
 };
 
+const toDuration = (startDateString: string | null | undefined, endDateString: string | null | undefined) => {
+  if (!startDateString || !endDateString) return "";
+  const start = new Date(startDateString).getTime();
+  const end = new Date(endDateString).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end)) return "";
+  const diffInSeconds = Math.max(0, Math.floor((end - start) / 1000));
+  const minutes = Math.floor(diffInSeconds / 60);
+  const seconds = diffInSeconds % 60;
+  return `${minutes}m ${seconds}s`;
+};
+
 const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
   const t = useTranslations("ProductionPage");
@@ -89,6 +101,14 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
   const [sourceFilter, setSourceFilter] = useState<ProductionSource | "">("");
   const [activeAction, setActiveAction] = useState<{ orderId: number; action: OrderAction } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [, setTicker] = useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setTicker((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data, isLoading, isFetching } = useGetAllProductionsQuery({
     page: 1,
@@ -186,15 +206,53 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     };
   }, []);
 
+  const filteredOrders = useMemo(() => {
+    const user = getUserData() as any;
+    const stationId = user?.productionStationId;
+
+    if (!stationId) {
+      return localOrders;
+    }
+
+    return localOrders
+      .map((order) => {
+        const filteredItems = order.orderItems
+          .map((item) => {
+            if (item.packetChoices && item.packetChoices.length > 0) {
+              const filteredChoices = item.packetChoices.filter(
+                (choice) => choice.productionStationId === stationId
+              );
+              return {
+                ...item,
+                packetChoices: filteredChoices,
+              };
+            }
+            return item;
+          })
+          .filter((item) => {
+            if (item.packetChoices && item.packetChoices.length > 0) {
+              return true;
+            }
+            return item.productionStationId === stationId;
+          });
+
+        return {
+          ...order,
+          orderItems: filteredItems,
+        };
+      })
+      .filter((order) => order.orderItems.length > 0);
+  }, [localOrders]);
+
   const sortedOrders = useMemo(() => {
-    return [...localOrders].sort((left, right) => {
+    return [...filteredOrders].sort((left, right) => {
       const statusDiff = statusPriority[left.status] - statusPriority[right.status];
 
       if (statusDiff !== 0) return statusDiff;
 
       return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
     });
-  }, [localOrders]);
+  }, [filteredOrders]);
 
   const groupedOrders = useMemo(() => {
     const groups: Record<ProductionOrderStatus, ProductionOrder[]> = {
@@ -377,6 +435,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
                   <div className="space-y-3">
                     {ordersByStatus.map((order) => {
                       const elapsed = toElapsed(order.processedAt || order.createdAt);
+                      const duration = toDuration(order.processedAt || order.createdAt, order.readyAt || order.updatedAt);
 
                       return (
                         <article key={order.id} className={`rounded-xl border border-slate-200 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border-l-3 ${statusView[order.status].cardClass}`}>
@@ -384,13 +443,16 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2 text-slate-800">
                                 <span className="text-sm font-bold uppercase tracking-tight">{t("orderLabel")} {order.slug.toUpperCase()}</span>
-                                <span className="text-xs font-semibold text-slate-450">-</span>
+                                <span className="text-xs font-semibold text-slate-455">-</span>
                                 <span className="text-xs font-semibold text-slate-500">{toClock(order.createdAt)}</span>
                                 <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md border ${statusView[order.status].statusClass} bg-white/70`}>
                                   {t(statusLabelKeys[order.status])}
                                 </span>
-                                {(order.status === "PROCESSING" || order.status === "READY") && elapsed && (
+                                {order.status === "PROCESSING" && elapsed && (
                                   <span className="text-xs font-semibold text-blue-500">{elapsed}</span>
+                                )}
+                                {order.status === "READY" && duration && (
+                                  <span className="text-xs font-semibold text-slate-500">{duration}</span>
                                 )}
                               </div>
 
@@ -404,11 +466,14 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
 
                                     {item.packetChoices && item.packetChoices.length > 0 && (
                                       <div className="ml-5 space-y-0.5 border-l border-slate-200 pl-2">
-                                        {item.packetChoices.map((choice, choiceIndex) => (
-                                          <p key={`${choice.section}-${choice.choice}-${choiceIndex}`} className="text-xs font-medium text-slate-500">
-                                            {choice.choice} x{choice.quantity}
-                                          </p>
-                                        ))}
+                                        {item.packetChoices.map((choice, choiceIndex) => {
+                                          const choiceName = choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || "";
+                                          return (
+                                            <p key={`${choice.section}-${choiceName}-${choiceIndex}`} className="text-xs font-medium text-slate-500">
+                                              {choice.quantity}x {choiceName}
+                                            </p>
+                                          );
+                                        })}
                                       </div>
                                     )}
                                   </div>

@@ -1,18 +1,26 @@
 "use client";
 import React, { useEffect, useState, use } from "react";
 import Splash from "@/components/shared/Splash";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getUserData } from "@/utils/auth";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const p = params ? use(params) : { locale: "en" };
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tableParam = searchParams.get("table");
+
+  useEffect(() => {
+    if (tableParam) {
+      localStorage.setItem("table", tableParam);
+    }
+  }, [tableParam]);
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
       setShowSplash(false);
-    }, 2000);
+    }, 3000);
 
     return () => {
       window.clearTimeout(timerId);

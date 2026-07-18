@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, use } from "react";
+import React, { useState, use, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, FileText, Download } from "lucide-react";
 import { useGetEfficiencyReportsQuery } from "@/redux/features/dashboard/dashboard.api";
@@ -16,6 +16,11 @@ const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }>
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
+  useEffect(() => {
+    setStartDate(new Date());
+    setEndDate(new Date());
+  }, []);
+
   // Helper to format Date object as YYYY-MM-DD
   const formatDateString = (date: Date | null) => {
     if (!date) return undefined;
@@ -27,8 +32,8 @@ const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }>
 
   // Fetch efficiency report data
   const { data: reportRes, isLoading } = useGetEfficiencyReportsQuery({
-    startDate: formatDateString(startDate),
-    endDate: formatDateString(endDate),
+    startDate: formatDateString(startDate || new Date()),
+    endDate: formatDateString(endDate || new Date()),
   });
 
   const reportData = reportRes?.data;
@@ -186,7 +191,7 @@ const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }>
   };
 
   return (
-    <div className="flex flex-col space-y-4 md:space-y-6 print:p-4">
+    <div className="flex flex-col space-y-4 md:space-y-6 print:p-4 w-full min-w-0">
       {/* Top Header Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 print:hidden">
         <div>
@@ -280,6 +285,9 @@ const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }>
       <style
         dangerouslySetInnerHTML={{
           __html: `
+            main {
+              min-width: 0 !important;
+            }
             @media print {
               /* Hide sidebar, headers, and print-hidden elements */
               aside,

@@ -24,6 +24,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
   const [editUser, { isLoading: isSubmitting }] = useEditUserMutation();
   const [photoFile, setPhotoFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [photoError, setPhotoError] = React.useState<string | null>(null);
 
   const { data: userRes, isLoading: isUserLoading } = useGetUserByIdQuery(userId as number, {
     skip: !userId || !open,
@@ -65,6 +66,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
       }
       setPhotoFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setPhotoError(null);
     }
   };
 
@@ -74,6 +76,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
     }
     setPhotoFile(null);
     setPreviewUrl(null);
+    setPhotoError(t("photoRequired") || "Profile photo is required");
   };
 
   React.useEffect(() => {
@@ -90,6 +93,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
       });
       setPreviewUrl(user.photoUrl || null);
       setPhotoFile(null);
+      setPhotoError(null);
     } else if (!open) {
       reset(defaultValues);
       if (previewUrl && previewUrl.startsWith("blob:")) {
@@ -97,6 +101,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
       }
       setPreviewUrl(null);
       setPhotoFile(null);
+      setPhotoError(null);
     }
   }, [open, user, reset, defaultValues]);
 
@@ -104,6 +109,12 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
 
   const onSubmit = async (data: EditAdminFormValues) => {
     if (!userId) return;
+
+    if (!previewUrl) {
+      setPhotoError(t("photoRequired") || "Profile photo is required");
+      return;
+    }
+    setPhotoError(null);
 
     try {
       const payload: any = {
@@ -123,7 +134,7 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
       }
 
       if (!previewUrl) {
-        payload.photoUrl = null;
+        payload.photoUrl = "";
       }
 
       const formData = new FormData();
@@ -181,11 +192,11 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
             {/* Photo Upload Section */}
             <div className="flex flex-col items-center justify-center pb-4">
               <div className="relative group">
-                <div className="size-24 rounded-full overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:bg-slate-50 shadow-inner">
+                <div className={`size-24 rounded-full overflow-hidden bg-slate-100 border-2 border-dashed flex items-center justify-center transition-all group-hover:border-blue-400 group-hover:bg-slate-50 shadow-inner ${photoError ? 'border-red-500 bg-red-50/20' : 'border-slate-200'}`}>
                   {previewUrl ? (
                     <img src={previewUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
                   ) : (
-                    <User className="size-10 text-slate-400" />
+                    <User className={`size-10 ${photoError ? 'text-red-400' : 'text-slate-400'}`} />
                   )}
                 </div>
                 <label className="absolute bottom-0 right-0 size-8 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-md hover:bg-blue-700 transition active:scale-95">
@@ -211,7 +222,8 @@ const EditAdminModal: React.FC<Props> = ({ open, onClose, userId }) => {
                   </button>
                 )}
               </div>
-              <p className="text-xs text-slate-400 mt-2 font-medium">Upload profile photo (Optional)</p>
+              <p className="text-xs text-slate-400 mt-2 font-medium">Upload profile photo <span className="text-red-500">*</span></p>
+              {photoError && <p className="text-xs text-red-500 mt-1 font-semibold">{photoError}</p>}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">

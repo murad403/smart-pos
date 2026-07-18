@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCreateOrderMutation } from "@/redux/features/order/order.api";
 import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
+import { useGetTableDetailsQuery } from "@/redux/features/table/table.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -19,10 +20,13 @@ type CartItem = {
     price: number;
     quantity: number;
     imageUrl?: string | null;
+    productionStationId?: number | null;
     packetChoices?: Array<{
         section: string;
         choice: string;
+        choiceItemId: number;
         quantity: number;
+        productionStationId?: number | null;
     }>;
 };
 
@@ -46,6 +50,7 @@ const CreateOrderModal: React.FC<Props> = ({
     const t = useTranslations("Menu");
     const searchParams = useSearchParams();
     const tableParam = searchParams.get("table");
+    // console.log(cartItems)
 
     // Local Form States
     const [customerName, setCustomerName] = useState("");
@@ -55,6 +60,33 @@ const CreateOrderModal: React.FC<Props> = ({
     const [createOrder, { isLoading: isSubmitting }] = useCreateOrderMutation();
     const { data: priceAdjRes } = useGetAllPriceAdjustmentsQuery({ limit: 100 }, { skip: !open });
     const priceAdjustments = priceAdjRes?.data ?? [];
+
+    // Determine Source and Table ID
+    const currentUser = getUserData();
+    let detectedSource: "QR_TABLE" | "TOUCHSCREEN" | "STAFF" | "ADMIN" = "TOUCHSCREEN";
+    let autoTableId: number | undefined = undefined;
+
+    const storedTable = typeof window !== "undefined" ? localStorage.getItem("table") : null;
+
+    if (tableParam) {
+        detectedSource = "QR_TABLE";
+        autoTableId = parseInt(tableParam, 10);
+    } else if (storedTable) {
+        detectedSource = "QR_TABLE";
+        autoTableId = parseInt(storedTable, 10);
+    } else if (currentUser) {
+        if (currentUser.role === "ADMIN" || currentUser.role === "OWNER") {
+            detectedSource = "ADMIN";
+        } else if (currentUser.role === "STAFF" || currentUser.role === "SERVICE") {
+            detectedSource = "STAFF";
+        }
+    }
+
+    const { data: tableRes } = useGetTableDetailsQuery(
+        autoTableId as number,
+        { skip: !autoTableId || !open }
+    );
+    const tableNumber = tableRes?.data?.tableNumber || autoTableId;
 
     // Reset form on open
     useEffect(() => {
@@ -78,23 +110,6 @@ const CreateOrderModal: React.FC<Props> = ({
         }
     });
 
-    // Determine Source and Table ID
-    const currentUser = getUserData();
-    //   console.log(currentUser?.id)
-    let detectedSource: "QR_TABLE" | "TOUCHSCREEN" | "STAFF" | "ADMIN" = "TOUCHSCREEN";
-    let autoTableId: number | undefined = undefined;
-
-    if (tableParam) {
-        detectedSource = "QR_TABLE";
-        autoTableId = parseInt(tableParam, 10);
-    } else if (currentUser) {
-        if (currentUser.role === "ADMIN" || currentUser.role === "OWNER") {
-            detectedSource = "ADMIN";
-        } else if (currentUser.role === "STAFF" || currentUser.role === "SERVICE") {
-            detectedSource = "STAFF";
-        }
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -117,8 +132,16 @@ const CreateOrderModal: React.FC<Props> = ({
             items: cartItems.map((item) => ({
                 itemId: item.itemId,
                 quantity: item.quantity,
+                productionStationId: item.productionStationId || null,
                 ...(item.packetChoices && item.packetChoices.length > 0
-                    ? { packetChoices: item.packetChoices }
+                    ? {
+                          packetChoices: item.packetChoices.map((pc: any) => ({
+                              section: pc.section,
+                              choiceItemId: pc.choiceItemId,
+                              quantity: pc.quantity,
+                              ...(pc.productionStationId ? { productionStationId: Number(pc.productionStationId) } : {}),
+                          })),
+                      }
                     : {}),
             })),
         };
@@ -151,7 +174,7 @@ const CreateOrderModal: React.FC<Props> = ({
                             {autoTableId && (
                                 <span>
                                     {" "}
-                                    • {t("tableLabel")}: <span className="font-semibold text-blue-600">{autoTableId}</span>
+                                    • {t("tableLabel")}: <span className="font-semibold text-blue-600">{tableNumber}</span>
                                 </span>
                             )}
                         </p>
@@ -204,9 +227,9 @@ const CreateOrderModal: React.FC<Props> = ({
                                                         {item.packetChoices.map((choice, cidx) => (
                                                             <span
                                                                 key={cidx}
-                                                                className="text-[10px] font-semibold bg-white border border-slate-205 text-slate-500 px-1.5 py-0.5 rounded-md"
+                                                                className="text-[10px] font-semibold bg-white border border-slate-205 text-slate-550 px-1.5 py-0.5 rounded-md"
                                                             >
-                                                                {choice.section}: {choice.choice}
+                                                                {choice.section}: {choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || ""}
                                                             </span>
                                                         ))}
                                                     </div>

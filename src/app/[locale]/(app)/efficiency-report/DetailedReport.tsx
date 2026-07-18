@@ -47,7 +47,7 @@ const DetailedReport: React.FC<Props> = ({ reportData = [], isLoading }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 p-6 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-100 p-6 shadow-sm overflow-hidden w-full min-w-0">
       <h3 className="text-base font-bold text-slate-800 mb-6 border-b border-slate-100 pb-3">
         {t("detailedReport")}
       </h3>
@@ -71,7 +71,7 @@ const DetailedReport: React.FC<Props> = ({ reportData = [], isLoading }) => {
               {stationNames.map((sName) => (
                 <th
                   key={sName}
-                  className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
+                  className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"
                 >
                   {sName}
                 </th>

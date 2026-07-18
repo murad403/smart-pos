@@ -130,6 +130,7 @@ export interface PaymentItem {
     order: PaymentOrder;
     markAsMissMatch: boolean;
     isVerified: boolean;
+    verificationStatus?: "PENDING" | "MATCH" | "MISMATCH";
     cashier: {
         id: number;
         name: string;
@@ -232,6 +233,10 @@ export interface GetInventoryReportResponse {
         limit: number;
         total: number;
         pages: number;
+    };
+    meta?: {
+        lowStack: InventoryItem[];
+        outOfStock: InventoryItem[];
     };
     data: InventoryItem[];
 }

@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import { X, Copy, Download, Check } from "lucide-react";
+import { X, Copy, Download, Check, Printer } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -8,6 +8,365 @@ import {
   useGetOrderDetailsQuery,
 } from "@/redux/features/order/order.api";
 import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
+
+const formatInvoiceCurrency = (value: string | number) => {
+  const numericValue = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(numericValue)) return "Rp 0";
+  return `Rp ${numericValue.toLocaleString("en-US")}`;
+};
+
+const formatInvoiceDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day} ${month} ${year}, ${hours}:${minutes}`;
+};
+
+const generateInvoiceInnerHtml = (order: any, business: any) => {
+  const businessName = business?.name || "Smart POS";
+  const businessLogo = business?.logoUrl || "";
+  const businessAddress = business?.address || "";
+  const businessPhone = business?.contact || "";
+  const businessEmail = business?.email || "";
+  const feedbackMsg = business?.feedbackMsg || "Everything is working well. The system looks clean and easy to use.,";
+
+  const subtotal = Number(order.subtotal);
+  const total = Number(order.totalAmount);
+
+  const formattedSubtotal = formatInvoiceCurrency(subtotal);
+  const formattedTotal = formatInvoiceCurrency(total);
+
+  const menuCount = order.orderItems?.length || 0;
+  const menuSuffix = menuCount === 1 ? "1 menu" : `${menuCount} menu`;
+  const isPaid = order.payment?.some((p: any) => p.status === "PAID");
+  const unpaidHtml = !isPaid ? `
+    <div class="totals-row" style="color: #dc2626; font-weight: 700;">
+      <span>Payment Status</span>
+      <span>UNPAID</span>
+    </div>
+  ` : "";
+
+  const adjustmentsHtml = order.pricingAdjustments?.map((adj: any) => {
+    const amount = adj.type === "PERCENTAGE"
+      ? (subtotal * Number(adj.percentage || 0)) / 100
+      : Number(adj.fixedAmount);
+    const isNegative = amount < 0;
+    const formattedVal = formatInvoiceCurrency(Math.abs(amount));
+    const sign = isNegative ? "-" : "+";
+    const label = `${adj.level}${adj.type === "PERCENTAGE" ? ` (${adj.percentage}%)` : ""}`;
+    return `
+      <div class="totals-row">
+        <span>${label}</span>
+        <span>${sign}${formattedVal}</span>
+      </div>
+    `;
+  }).join("") || "";
+
+  const itemsHtml = order.orderItems?.map((item: any) => {
+    const priceVal = Number(item.promoPrice || item.unitPrice) * item.quantity;
+    const formattedPrice = formatInvoiceCurrency(priceVal);
+
+    let choicesHtml = "";
+    if (item.packetChoices && item.packetChoices.length > 0) {
+      choicesHtml = `
+        <div class="item-choices">
+          ${item.packetChoices.map((c: any) => `${c.section}: ${c.choice || c.item?.name || c.choiceItem?.name || ''}${c.quantity > 1 ? ` x${c.quantity}` : ''}`).join('<br/>')}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="item-row">
+        <div class="item-left">
+          <span class="item-qty">${item.quantity}x</span>
+          <div class="item-name-details">
+            <span class="item-name">${item.itemName.toUpperCase()}</span>
+            ${choicesHtml}
+          </div>
+        </div>
+        <span class="item-price">${formattedPrice}</span>
+      </div>
+    `;
+  }).join("") || "";
+
+  return `
+    <div class="header">
+      <div class="logo-container">
+        ${businessLogo ? `<img class="logo-image" src="${businessLogo}" alt="Logo" />` : `
+        <div class="logo-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2d3748" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width: 32px; height: 32px;">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
+            <line x1="6" y1="2" x2="6" y2="4"></line>
+            <line x1="10" y1="2" x2="10" y2="4"></line>
+            <line x1="14" y1="2" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        `}
+      </div>
+      <div class="brand-name">${businessName.toUpperCase()}</div>
+      <div class="address-info">
+        ${businessAddress}<br/>
+        ${businessPhone}<br/>
+        ${businessEmail}
+      </div>
+    </div>
+    
+    <div class="dashed-divider"></div>
+    <div class="receipt-title">Receipt</div>
+    <div class="dashed-divider"></div>
+    
+    <div class="order-type-box">
+      <span class="order-type-label">Order Type</span>
+      <div class="order-type-val-container">
+        <span class="order-type-value">${order.type === 'DINE_IN' ? 'Dine In' : order.type === 'TAKEAWAY' ? 'Takeaway' : order.type}</span>
+        <div class="checkmark-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="width: 10px; height: 10px;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="meta-grid">
+      <div>
+        <div class="meta-label">DATE</div>
+        <div class="meta-value">${formatInvoiceDate(order.createdAt)}</div>
+      </div>
+      <div>
+        <div class="meta-label">ORDER NUMBER</div>
+        <div class="order-num-value">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px; color: #94a3b8;">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          ${order.slug.toUpperCase()}
+        </div>
+      </div>
+      ${order.table ? `
+      <div class="table-section">
+        <div class="table-icon-container">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f172a;">
+            <path d="M6 9h12" />
+            <path d="M12 9v9" />
+            <path d="M8 18h8" />
+            <path d="M7 9a5 5 0 0 1 10 0" />
+          </svg>
+        </div>
+        <div>
+          <div class="table-number-label">Table Number</div>
+          <div class="table-number-value">${order.table.tableNumber}</div>
+        </div>
+      </div>
+      ` : ''}
+    </div>
+    
+    <div class="dashed-divider"></div>
+    <div class="section-title">Ordered Items</div>
+    <div class="item-list">
+      ${itemsHtml}
+    </div>
+    <div class="dashed-divider"></div>
+    
+    <div class="totals-box">
+      <div class="totals-row">
+        <span>Subtotal (${menuSuffix})</span>
+        <span>${formattedSubtotal}</span>
+      </div>
+      ${adjustmentsHtml}
+      ${unpaidHtml}
+      <div class="dashed-divider" style="margin: 8px 0;"></div>
+      <div class="totals-row total-amount">
+        <span>Total</span>
+        <span>${formattedTotal}</span>
+      </div>
+    </div>
+    
+    <div class="feedback-box">
+      <div class="feedback-top">
+        <div class="feedback-emoji-container">👍</div>
+        <div class="feedback-text">${feedbackMsg}</div>
+      </div>
+    </div>
+  `;
+};
+
+const generateInvoiceHtml = (order: any, business: any) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Receipt - ${order.slug}</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background-color: #ffffff;
+          color: #1e293b;
+          padding: 24px;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+        }
+        .receipt-container {
+          width: 380px;
+          background: #ffffff;
+          margin: 0 auto;
+        }
+        .header { text-align: center; margin-bottom: 16px; }
+        .logo-container { display: flex; justify-content: center; margin-bottom: 8px; }
+        .logo-image {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        .logo-circle {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 1.5px solid #2d3748;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .brand-name {
+          font-size: 20px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          color: #000000;
+          margin-bottom: 4px;
+        }
+        .address-info {
+          font-size: 11px;
+          color: #64748b;
+          line-height: 1.4;
+          font-weight: 500;
+        }
+        .dashed-divider {
+          border: none;
+          border-top: 1px dashed #cbd5e1;
+          margin: 12px 0;
+          height: 0;
+        }
+        .receipt-title {
+          font-family: Georgia, serif;
+          font-size: 22px;
+          font-weight: 700;
+          font-style: italic;
+          text-align: center;
+          color: #000000;
+          margin: 8px 0;
+        }
+        .order-type-box {
+          background-color: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px 14px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+        }
+        .order-type-label { font-size: 12px; color: #64748b; font-weight: 500; }
+        .order-type-val-container { display: flex; align-items: center; gap: 6px; }
+        .order-type-value { font-size: 13px; font-weight: 700; color: #000000; }
+        .checkmark-badge {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background-color: #22c55e;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .meta-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          row-gap: 12px;
+          column-gap: 16px;
+          font-size: 12px;
+          margin-bottom: 16px;
+          padding: 0 4px;
+        }
+        .meta-label { color: #64748b; margin-bottom: 4px; font-weight: 500; }
+        .meta-value { font-weight: 600; color: #0f172a; }
+        .order-num-value {
+          font-weight: 800;
+          color: #0f172a;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .table-section { display: flex; align-items: flex-start; gap: 8px; grid-column: span 2; }
+        .table-number-label { color: #64748b; font-size: 12px; font-weight: 500; }
+        .table-number-value { font-size: 16px; font-weight: 800; color: #000000; margin-top: 1px; }
+        .section-title { font-size: 14px; font-weight: 700; color: #000000; margin-bottom: 12px; padding: 0 4px; }
+        .item-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          font-size: 13px;
+          margin-bottom: 10px;
+          padding: 0 4px;
+        }
+        .item-left { display: flex; align-items: flex-start; gap: 6px; max-width: 75%; }
+        .item-qty { font-weight: 700; color: #000000; min-width: 20px; }
+        .item-name-details { display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; color: #1e293b; text-transform: uppercase; letter-spacing: 0.2px; }
+        .item-choices { font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.3; }
+        .item-price { font-weight: 600; color: #0f172a; }
+        .totals-box { font-size: 13px; padding: 0 4px; margin-bottom: 24px; }
+        .totals-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: #475569; }
+        .totals-row.bold { font-weight: 700; color: #0f172a; }
+        .totals-row.total-amount { font-size: 16px; font-weight: 800; color: #000000; margin-top: 12px; }
+        .feedback-box { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-top: 8px; }
+        .feedback-top { padding: 14px; display: flex; align-items: center; gap: 12px; background: #ffffff; }
+        .feedback-emoji-container {
+          font-size: 24px;
+          background: #fff6f0;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .feedback-text { font-size: 12.5px; font-weight: 600; color: #1e293b; line-height: 1.4; }
+        .feedback-button { border-top: 1px solid #e2e8f0; padding: 10px; text-align: center; font-size: 13px; font-weight: 700; color: #000000; background: #ffffff; }
+        
+        @media print {
+          body {
+            padding: 0;
+            background-color: white;
+          }
+          .receipt-container {
+            width: 100%;
+            max-width: 380px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+        <div class="receipt-container">
+          ${generateInvoiceInnerHtml(order, business)}
+        </div>
+    </body>
+    </html>
+  `;
+};
 
 interface OrderReceiptModalProps {
   orderId: number | null;
@@ -126,23 +485,10 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
   // Calculations
   const subtotalVal = Number(order.subtotal);
   const totalVal = Number(order.totalAmount);
-  const difference = totalVal - subtotalVal;
-
-  let platformFeeVal = 0;
-  let otherFeesVal = 0;
-
-  if (difference > 0) {
-    if (difference >= 1800) {
-      platformFeeVal = 1800;
-      otherFeesVal = difference - 1800;
-    } else {
-      otherFeesVal = difference;
-    }
-  }
 
   const menuCount = order.orderItems?.length || 0;
   const menuSuffix = menuCount === 1 ? "1 menu" : `${menuCount} menu`;
-  const paymentMethod = order.payment?.[0]?.method || "CASH";
+  const isPaid = order.payment?.some((payment) => payment.status === "PAID");
 
   const handleCopySlug = () => {
     navigator.clipboard.writeText(order.slug);
@@ -180,8 +526,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
       feedbackLinesCount = Math.max(1, lines.length);
     }
 
-    const topHalfHeight = feedbackLinesCount === 1 ? 44 : (feedbackLinesCount * 14 + 12);
-    const feedbackBoxHeight = topHalfHeight + 31;
+    const feedbackBoxHeight = feedbackLinesCount === 1 ? 48 : (feedbackLinesCount * 14 + 18);
 
     const width = 385;
     const itemCount = order.orderItems?.length || 0;
@@ -195,7 +540,10 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     const hasTable = order.type === "DINE_IN" && order.table;
     const baseHeight = hasTable ? 425 : 380;
     const listHeight = itemCount * 30 + choiceCount * 18;
-    const footerHeight = 240 + (feedbackBoxHeight - 75);
+
+    const adjustmentCount = order.pricingAdjustments?.length || 0;
+    const extraRows = adjustmentCount + (isPaid ? 0 : 1);
+    const footerHeight = 165 + (extraRows - 3) * 18 + feedbackBoxHeight;
     const height = baseHeight + listHeight + footerHeight;
 
     const canvas = document.createElement("canvas");
@@ -413,7 +761,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
           nextY += 15;
           ctx.fillStyle = "#64748b";
           ctx.font = "500 11px 'Inter', -apple-system, sans-serif";
-          const choiceText = `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ""
+          const choiceText = `${c.section}: ${c.choice || (c as any).item?.name || (c as any).choiceItem?.name || ''}${c.quantity > 1 ? ` x${c.quantity}` : ""
             }`;
           ctx.fillText(choiceText, 50, nextY);
         });
@@ -432,31 +780,33 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     ctx.fillText(formatReceiptCurrency(subtotalVal), 360, nextY);
     ctx.textAlign = "left";
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Platform Fee", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillText(formatReceiptCurrency(platformFeeVal), 360, nextY);
-    ctx.textAlign = "left";
+    order.pricingAdjustments?.forEach((adj: any) => {
+      nextY += 18;
+      const amount = adj.type === "PERCENTAGE"
+        ? (subtotalVal * Number(adj.percentage || 0)) / 100
+        : Number(adj.fixedAmount);
+      const isNegative = amount < 0;
+      const formattedVal = formatReceiptCurrency(Math.abs(amount));
+      const sign = isNegative ? "-" : "+";
+      const label = `${adj.level}${adj.type === "PERCENTAGE" ? ` (${adj.percentage}%)` : ""}`;
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Other fees", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillText(formatReceiptCurrency(otherFeesVal), 360, nextY);
-    ctx.textAlign = "left";
+      ctx.fillStyle = "#475569";
+      ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
+      ctx.fillText(label, 24, nextY);
+      ctx.textAlign = "right";
+      ctx.fillText(`${sign}${formattedVal}`, 360, nextY);
+      ctx.textAlign = "left";
+    });
 
-    nextY += 18;
-    ctx.fillStyle = "#475569";
-    ctx.font = "500 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Payment Method", 24, nextY);
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 13px 'Inter', -apple-system, sans-serif";
-    ctx.fillText(paymentMethod, 360, nextY);
-    ctx.textAlign = "left";
+    if (!isPaid) {
+      nextY += 18;
+      ctx.fillStyle = "#dc2626";
+      ctx.font = "bold 13px 'Inter', -apple-system, sans-serif";
+      ctx.fillText("Payment Status", 24, nextY);
+      ctx.textAlign = "right";
+      ctx.fillText("UNPAID", 360, nextY);
+      ctx.textAlign = "left";
+    }
 
     nextY += 12;
     drawDashedLine(nextY);
@@ -485,12 +835,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     }
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(24, nextY + topHalfHeight);
-    ctx.lineTo(361, nextY + topHalfHeight);
-    ctx.stroke();
-
-    const avatarCenterY = nextY + (topHalfHeight / 2);
+    const avatarCenterY = nextY + (feedbackBoxHeight / 2);
     ctx.fillStyle = "#fff5f0";
     ctx.beginPath();
     ctx.arc(52, avatarCenterY, 14, 0, 2 * Math.PI);
@@ -524,18 +869,13 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     }
 
     if (lines.length === 1) {
-      ctx.fillText(lines[0], 74, nextY + (topHalfHeight / 2) + 4);
+      ctx.fillText(lines[0], 74, nextY + (feedbackBoxHeight / 2) + 4);
     } else {
-      const startY = nextY + (topHalfHeight / 2) - ((lines.length - 1) * 14 / 2) + 4;
+      const startY = nextY + (feedbackBoxHeight / 2) - ((lines.length - 1) * 14 / 2) + 4;
       lines.forEach((line, index) => {
         ctx.fillText(line, 74, startY + (index * 14));
       });
     }
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 12px 'Inter', -apple-system, sans-serif";
-    ctx.fillText("Give Feedback", 192, nextY + topHalfHeight + 20);
 
     try {
       const pngUrl = canvas.toDataURL("image/png");
@@ -549,6 +889,36 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
     } catch (err) {
       console.error("Canvas export failed", err);
       toast.error("Failed to export receipt image.");
+    }
+  };
+
+  const handlePrint = () => {
+    if (!order) return;
+
+    let iframe = document.getElementById("print-invoice-iframe") as HTMLIFrameElement;
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "print-invoice-iframe";
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
+    }
+
+    const htmlContent = generateInvoiceHtml(order, business);
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      }, 500);
     }
   };
 
@@ -718,7 +1088,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
                         <div className="text-[10px] text-slate-500 mt-1 space-y-0.5">
                           {item.packetChoices.map((choice, cidx) => (
                             <div key={cidx} className="font-medium">
-                              • {choice.section}: {choice.choice}
+                              • {choice.section}: {choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || ""}
                               {choice.quantity > 1 ? ` x${choice.quantity}` : ""}
                             </div>
                           ))}
@@ -746,24 +1116,31 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
                   {formatReceiptCurrency(subtotalVal)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Platform Fee</span>
-                <span className="text-slate-900 font-semibold">
-                  {formatReceiptCurrency(platformFeeVal)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Other fees</span>
-                <span className="text-slate-900 font-semibold">
-                  {formatReceiptCurrency(otherFeesVal)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Payment Method</span>
-                <span className="text-slate-950 font-bold uppercase">
-                  {paymentMethod}
-                </span>
-              </div>
+              {order.pricingAdjustments?.map((adj) => {
+                const amount = adj.type === "PERCENTAGE"
+                  ? (subtotalVal * Number(adj.percentage || 0)) / 100
+                  : Number(adj.fixedAmount);
+                const isNegative = amount < 0;
+                const formattedValue = formatReceiptCurrency(Math.abs(amount));
+                return (
+                  <div key={adj.id} className="flex justify-between">
+                    <span>
+                      {adj.level}
+                      {adj.type === "PERCENTAGE" && ` (${adj.percentage}%)`}
+                    </span>
+                    <span className="text-slate-900 font-semibold">
+                      {isNegative ? `-${formattedValue}` : `+${formattedValue}`}
+                    </span>
+                  </div>
+                );
+              })}
+
+              {!isPaid && (
+                <div className="flex justify-between text-red-600 font-bold">
+                  <span>Payment Status</span>
+                  <span>UNPAID</span>
+                </div>
+              )}
 
               {/* Total Row */}
               <div className="border-t border-dashed border-slate-300 pt-3 flex justify-between items-center mt-4">
@@ -810,8 +1187,16 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({
           </button>
           <button
             type="button"
+            onClick={handlePrint}
+            className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 cursor-pointer"
+          >
+            <Printer size={16} />
+            Print
+          </button>
+          <button
+            type="button"
             onClick={handleDownloadPNG}
-            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
+            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-colors flex whitespace-nowrap px-2 items-center justify-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
           >
             <Download size={16} />
             Download PNG

@@ -1,30 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client"
-import React from "react"
+import React, { useLayoutEffect } from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
-import { Armchair, Boxes, CalendarRange, ChevronDown, CreditCard, Fuel, Grid2x2, HandCoins, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, Utensils, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
-import brandLogo from "@/assets/logo/logo.png"
+import { ChevronDown, CreditCard, Fuel, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter, Link } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
-import { clearUserData, getUserData } from "@/utils/auth"
+import { clearUserData, getUserData, saveUserData } from "@/utils/auth"
 import { isRouteAllowed, DEFAULT_ROLE_ROUTE } from "@/utils/rbac"
 import { toast } from "sonner"
+import logo from "@/assets/logo/logo2.png";
+import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
+import { useSearchParams } from "next/navigation"
 
 
 
 function SidebarBrand() {
   return (
-    <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-1">
-      <div className="flex size-11 items-center justify-center rounded-2xl bg-[#F7F7F7] shadow-sm ring-1 ring-slate-200 group-data-[collapsible=icon]:size-9">
-        <Image src={brandLogo} alt="SmartPOS" className="h-7 w-7 object-contain group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6" priority />
-      </div>
-      <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-        <p className="text-lg font-semibold tracking-tight text-slate-950">SmartPOS</p>
+    <Link href="/dashboard" className="flex items-center justify-center group-data-[collapsible=icon]:py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-1">
+      <div className="flex items-center justify-center">
+        <Image src={logo} alt="logo" className="h-16 w-30 object-contain group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10" priority />
       </div>
     </Link>
   )
@@ -36,6 +35,8 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const t = useTranslations("Common");
   const [user, setUser] = React.useState<any>(null);
+
+
 
   React.useEffect(() => {
     setProfileOpen(pathName.startsWith("/profile"));
@@ -75,7 +76,6 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
     // { label: t("item"), icon: Utensils, href: "/item" },
     { label: t("productionStation"), icon: Fuel, href: "/production-station" },
     { label: t("production"), icon: Speaker, href: "/production" },
-    { label: t("manageTable"), icon: Armchair, href: "/manage-table" },
     // { label: t("shiftWorkflow"), icon: CalendarRange, href: "/shift-workflow" },
     { label: t("order"), icon: ShoppingBag, href: "/order" },
   ]
@@ -254,24 +254,25 @@ function Topbar({
   const isMobile = windowWidth < 768;
   const isMobileAdmin = user?.role?.toUpperCase() === "ADMIN" && isMobile;
   const isMobileOwner = user?.role?.toUpperCase() === "OWNER" && isMobile;
+  const path = user?.role?.toLowerCase() === "ADMIN" ? "/mobile-admin-layout" : "/mobile-owner-layout";
 
   return (
     <header className={cn(
       "sticky top-0 z-20 border-b border-slate-200/80 bg-white",
       (pathname === "/mobile-admin-layout" || pathname === "/mobile-owner-layout") && "hidden md:block"
     )}>
-      <div className="flex py-3.5 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex py-3 items-center justify-between gap-2.5 px-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-2">
           {isMobileAdmin ? (
             <Link
-              href="/mobile-admin-layout"
+              href={path}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
             >
               <ArrowLeft className="size-5" />
             </Link>
           ) : isMobileOwner ? (
             <Link
-              href="/mobile-owner-layout"
+              href={path}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none"
             >
               <ArrowLeft className="size-5" />
@@ -279,12 +280,9 @@ function Topbar({
           ) : selectedDevice !== "touchscreen" ? (
             <SidebarTrigger className="-ml-1 text-slate-700 hover:bg-slate-100" />
           ) : (
-            <Link href="/dashboard" className="flex items-center gap-3 px-1 py-0.5">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-[#F7F7F7] shadow-sm ring-1 ring-slate-200">
-                <Image src={brandLogo} alt="SmartPOS" className="h-7 w-7 object-contain" priority />
-              </div>
-              <div className="min-w-0">
-                <p className="text-lg font-semibold tracking-tight text-slate-950">SmartPOS</p>
+            <Link href="/dashboard" className="flex items-center justify-center group-data-[collapsible=icon]:py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-1">
+              <div className="flex items-center justify-center">
+                <Image src={logo} alt="logo" className="h-16 w-30 object-contain group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10" priority />
               </div>
             </Link>
           )}
@@ -293,11 +291,11 @@ function Topbar({
           </div> */}
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           {/* Device Selector Dropdown */}
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none">
+              <button className="flex h-10 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2.5 sm:px-3.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 cursor-pointer outline-none">
                 <SelectedDeviceIcon className="size-4 text-slate-500" />
                 <span className="hidden sm:inline">{selectedDeviceLabel}</span>
                 <ChevronDown className="size-3.5 text-slate-400" />
@@ -323,7 +321,7 @@ function Topbar({
                 );
               })}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
           <div className="flex items-center rounded-2xl border border-slate-200 bg-[#f3f4f6] p-1 shadow-sm">
             <button
@@ -331,7 +329,7 @@ function Topbar({
                 e.stopPropagation();
                 handleLocaleChange("en");
               }}
-              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${locale === "en" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
+              className={`rounded-xl px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-medium transition-all ${locale === "en" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
             >
               EN
             </button>
@@ -340,7 +338,7 @@ function Topbar({
                 e.stopPropagation();
                 handleLocaleChange("id");
               }}
-              className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${locale === "id" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
+              className={`rounded-xl px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-medium transition-all ${locale === "id" ? "bg-white text-[#1A56DB] shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "text-slate-500 hover:text-slate-700"}`}
             >
               ID
             </button>
@@ -349,19 +347,19 @@ function Topbar({
           {user && user.role?.toUpperCase() !== "USER" && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 text-left outline-none">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden">
+                <button className="flex items-center gap-1.5 sm:gap-3 text-left outline-none">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden shrink-0">
                     {user?.photoUrl ? (
                       <Image width={500} height={500} src={user.photoUrl} alt="Avatar" className="h-full w-full object-cover" />
                     ) : (
                       <User className="size-5" />
                     )}
                   </div>
-                  <div className="min-w-0 leading-tight">
+                  <div className="hidden sm:block min-w-0 leading-tight">
                     <div className="text-sm font-medium text-slate-950 sm:text-base">{displayUser.name}</div>
                     <div className="text-xs text-slate-500 sm:text-sm">{displayUser.role}</div>
                   </div>
-                  <ChevronDown className="size-4 text-slate-400" />
+                  <ChevronDown className="size-3.5 text-slate-400 shrink-0" />
                 </button>
               </DropdownMenuTrigger>
 
@@ -404,6 +402,14 @@ function Topbar({
 }
 
 const MainWrapper = ({ children }: { children: React.ReactNode }) => {
+  const searchParams = useSearchParams();
+  const [customerSignIn] = useCustomerSignInMutation();
+
+  useLayoutEffect(() => {
+    const table = searchParams.get("table");
+    if (table) localStorage.setItem("table", table);
+  }, []);
+
   const pathName = usePathname();
   const router = useRouter();
   const [isChecking, setIsChecking] = React.useState(true);
@@ -470,41 +476,62 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   };
 
   React.useEffect(() => {
-    const currentUser = getUserData();
-    if (currentUser) {
-      const role = currentUser.role || "";
-      const isMobile = windowWidth < 768;
+    const checkAuth = async () => {
+      let currentUser = getUserData();
 
-      let allowed = isRouteAllowed(role, pathName);
-
-      const upperRole = role.toUpperCase();
-      // Prevent desktop ADMINs from accessing mobile-admin-layout
-      if (upperRole === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
-        allowed = false;
+      if (!currentUser && (pathName === "/menu" || pathName.startsWith("/menu/"))) {
+        try {
+          setIsChecking(true);
+          const result = await customerSignIn().unwrap();
+          saveUserData(result.data, true);
+          window.dispatchEvent(new Event("selectedDeviceChanged"));
+          currentUser = result.data;
+        } catch (err) {
+          console.error("Auto customer login failed:", err);
+          setIsAuthorized(false);
+          router.push("/auth/welcome");
+          setIsChecking(false);
+          return;
+        }
       }
-      // Prevent desktop OWNERs from accessing mobile-owner-layout
-      if (upperRole === "OWNER" && !isMobile && pathName === "/mobile-owner-layout") {
-        allowed = false;
-      }
 
-      if (allowed) {
-        setIsAuthorized(true);
+      if (currentUser) {
+        const role = currentUser.role || "";
+        const isMobile = windowWidth < 768;
+
+        let allowed = isRouteAllowed(role, pathName);
+
+        const upperRole = role.toUpperCase();
+        // Prevent desktop ADMINs from accessing mobile-admin-layout
+        if (upperRole === "ADMIN" && !isMobile && pathName === "/mobile-admin-layout") {
+          allowed = false;
+        }
+        // Prevent desktop OWNERs from accessing mobile-owner-layout
+        if (upperRole === "OWNER" && !isMobile && pathName === "/mobile-owner-layout") {
+          allowed = false;
+        }
+
+        if (allowed) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
+          let defaultRoute = DEFAULT_ROLE_ROUTE[upperRole] || "/auth/welcome";
+          if (upperRole === "ADMIN" && isMobile) {
+            defaultRoute = "/mobile-admin-layout";
+          } else if (upperRole === "OWNER" && isMobile) {
+            defaultRoute = "/mobile-owner-layout";
+          }
+          router.push(defaultRoute);
+        }
       } else {
         setIsAuthorized(false);
-        let defaultRoute = DEFAULT_ROLE_ROUTE[upperRole] || "/auth/welcome";
-        if (upperRole === "ADMIN" && isMobile) {
-          defaultRoute = "/mobile-admin-layout";
-        } else if (upperRole === "OWNER" && isMobile) {
-          defaultRoute = "/mobile-owner-layout";
-        }
-        router.push(defaultRoute);
+        router.push("/auth/welcome");
       }
-    } else {
-      setIsAuthorized(false);
-      router.push("/auth/welcome");
-    }
-    setIsChecking(false);
-  }, [pathName, router, windowWidth]);
+      setIsChecking(false);
+    };
+
+    checkAuth();
+  }, [pathName, router, windowWidth, customerSignIn]);
 
   if (isChecking || !isAuthorized) {
     return (

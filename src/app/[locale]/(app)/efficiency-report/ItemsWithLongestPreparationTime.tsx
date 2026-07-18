@@ -97,7 +97,7 @@ const ItemsWithLongestPreparationTime: React.FC<Props> = ({ longestPrepTimeItems
       </h3>
 
       {stations.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {stations.map((station, idx) => {
             // Find max prepTime in this station's items to scale progress bar width
             const maxPrep = Math.max(...station.items.map(item => getSeconds(item.prepTime)), 1);

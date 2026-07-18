@@ -34,7 +34,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   const [isDeleteSectionOpen, setIsDeleteSectionOpen] = React.useState(false);
   const [deletingSection, setDeletingSection] = React.useState<{ id: number; name: string } | null>(null);
   const [activeSectionId, setActiveSectionId] = React.useState<number | null>(null);
-  const [editingSectionId, setEditingSectionId] = React.useState<number | null>(null);
+  const [editingSectionId, setEditingSectionId] = React.useState<number | null>(null); 
   const [isEditItemOpen, setIsEditItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<any>(null);
 
@@ -134,11 +134,10 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("menuTab")}</h1>
-        <p className="mt-1 text-sm text-slate-600">Track stock levels and identify shortages</p>
       </div>
 
       {/* Control Bar */}
@@ -226,7 +225,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
           </p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           {sections.map((section, index) => (
             <MenuCards
               key={section.id}

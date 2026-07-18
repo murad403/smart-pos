@@ -74,7 +74,7 @@ export default function SignInPage({ params }: { params?: Promise<{ locale: stri
                 toast.error(errorMsg);
             }
         } catch (err: any) {
-            console.error("Sign-in error:", err);
+            // console.error("Sign-in error:", err);
             const errorMessage = err?.data?.message || err?.message || "An unexpected error occurred. Please try again.";
             setAuthError(errorMessage);
             toast.error(errorMessage);

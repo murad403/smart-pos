@@ -74,7 +74,7 @@ const Summary: React.FC<Props> = ({ summary, isLoading }) => {
                 {t("summary")}
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 {cards.map((card, idx) => (
                     <div
                         key={idx}

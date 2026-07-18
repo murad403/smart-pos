@@ -3,6 +3,7 @@
 import { X, ShoppingBag, CreditCard, Clock, MapPin, ClipboardList, Printer, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
+import { useGetTableDetailsQuery } from "@/redux/features/table/table.api";
 import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
 import { Order } from "@/redux/features/order/order.type";
 
@@ -81,7 +82,10 @@ const generateInvoiceInnerHtml = (order: Order, business: any) => {
     if (item.packetChoices && item.packetChoices.length > 0) {
       choicesHtml = `
         <div class="item-choices">
-          ${item.packetChoices.map(c => `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ''}`).join('<br/>')}
+          ${item.packetChoices.map(c => {
+            const choiceName = c.choice || (c as any).item?.name || (c as any).choiceItem?.name || "";
+            return `${c.section}: ${c.quantity}x ${choiceName}`;
+          }).join('<br/>')}
         </div>
       `;
     }
@@ -388,6 +392,20 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
     { skip: !orderId }
   );
 
+  const orderData = detailsRes?.data;
+
+  const { data: tableRes } = useGetTableDetailsQuery(
+    orderData?.tableId as number,
+    { skip: !orderData?.tableId || !orderId }
+  );
+
+  const order: Order | undefined = orderData
+    ? {
+        ...orderData,
+        table: orderData.table || tableRes?.data || null,
+      }
+    : undefined;
+
   if (!orderId) return null;
 
   if (isLoading) {
@@ -406,8 +424,8 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
       </div>
     );
   }
-
-  const order: Order | undefined = detailsRes?.data;
+  
+    console.log(order)
 
   const handlePrint = () => {
     if (!order) return;
@@ -667,7 +685,8 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
             nextY += 15;
             ctx.fillStyle = "#64748b";
             ctx.font = "500 10.5px 'Inter', -apple-system, sans-serif";
-            const choiceText = `${c.section}: ${c.choice}${c.quantity > 1 ? ` x${c.quantity}` : ''}`;
+            const choiceName = c.choice || (c as any).item?.name || (c as any).choiceItem?.name || "";
+            const choiceText = `${c.section}: ${c.quantity}x ${choiceName}`;
             ctx.fillText(choiceText, 50, nextY);
           });
         }
@@ -893,7 +912,7 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
           <div className="rounded-xl border border-slate-100 p-2.5 bg-slate-50/30">
             <p className="text-slate-400 font-bold uppercase tracking-wider">{t("table")}</p>
             <p className="text-sm font-semibold text-slate-800 mt-0.5">
-              {order.table ? `#${order.table.tableNumber}` : "No Table"}
+              {order?.table ? `#${order.table.tableNumber}` : "No Table"}
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 p-2.5 bg-slate-50/30">
@@ -944,14 +963,14 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
                         {t("packetChoices") || "Combo Selections"}
                       </p>
                       <div className="space-y-0.5">
-                        {item.packetChoices?.map((choice, cIdx) => (
-                          <p key={cIdx} className="text-xs text-slate-500">
-                            {choice.section}: <span className="font-medium text-slate-700">{choice.choice}</span>
-                            {choice.quantity > 1 && (
-                              <span className="text-slate-400 text-[10px] ml-1">x{choice.quantity}</span>
-                            )}
-                          </p>
-                        ))}
+                        {item.packetChoices?.map((choice, cIdx) => {
+                          const choiceName = choice.choice || (choice as any).item?.name || (choice as any).choiceItem?.name || "";
+                          return (
+                            <p key={cIdx} className="text-xs text-slate-500">
+                              {choice.section}: <span className="font-medium text-slate-700">{choice.quantity}x {choiceName}</span>
+                            </p>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
