@@ -644,7 +644,8 @@
     "noPayment": "No payment information.",
     "notes": "Notes",
     "productionStation": "Station",
-    "packetChoices": "Packet Choices"
+    "packetChoices": "Packet Choices",
+    "deleteOrder": "Delete Order"
   },
   "PendingPayments": {
     "title": "Pending Payment Orders",
@@ -680,8 +681,14 @@
     "cameraNotSupported": "Camera is not supported in this browser.",
     "cameraNotReady": "Camera is not ready yet.",
     "cameraCaptureFailed": "Failed to capture image.",
-    "cameraOpenFailed": "Unable to open the camera.",
-    "closeCamera": "Close camera"
+    "cameraOpenFailed": "Failed to open camera.",
+    "closeCamera": "Close camera",
+    "deleteOrderTitle": "Delete Order?",
+    "deleteOrderDesc": "Are you sure you want to delete order",
+    "actionCannotBeUndone": "This action cannot be undone.",
+    "orderDeletedSuccess": "Order payment deleted successfully.",
+    "orderDeleteFailed": "Failed to delete order payment.",
+    "delete": "Delete"
   },
   "PaymentsHistory": {
     "title": "Payments History",

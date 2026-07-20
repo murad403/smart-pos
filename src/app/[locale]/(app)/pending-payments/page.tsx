@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { BadgeDollarSign, ClipboardClock, Eye, SquarePen } from "lucide-react";
+import { BadgeDollarSign, ClipboardClock, Eye, SquarePen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api";
 import CustomPagination from "@/components/shared/CustomPagination";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
 import SubmitOrderPaymentModal from "@/components/modal/SubmitOrderPaymentModal";
+import DeleteOrderPaymentModal from "@/components/modal/DeleteOrderPaymentModal";
 import { Order } from "@/redux/features/order/order.type";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -24,6 +25,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
   const limit = 15;
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedPaymentOrder, setSelectedPaymentOrder] = useState<Order | null>(null);
+  const [selectedDeleteOrder, setSelectedDeleteOrder] = useState<Order | null>(null);
 
   const { data: ordersRes, isLoading, isFetching } = useGetPendingPaymentOrdersQuery({
     page: currentPage,
@@ -155,7 +157,7 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                       <td className="px-6 py-4 text-xs font-medium text-slate-500">
                         {new Date(order.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-center flex justify-center items-center">
+                      <td className="px-6 py-4 text-center flex justify-center items-center gap-1">
                         <button
                           onClick={() => setSelectedOrderId(order.id)}
                           className="rounded-full p-2 text-slate-400 cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition"
@@ -179,6 +181,14 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
                         >
                           <BadgeDollarSign size={16} />
                           <span className="text-sm">{tOrder("pay")}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDeleteOrder(order)}
+                          className="rounded-full p-2 text-slate-400 cursor-pointer hover:bg-red-50 hover:text-red-600 transition"
+                          title={tOrder("deleteOrder") || "Delete Order"}
+                        >
+                          <Trash2 size={16} />
                         </button>
                       </td>
                     </tr>
@@ -211,6 +221,12 @@ const PendingPaymentsPage = ({ params }: { params?: Promise<{ locale: string }> 
         key={selectedPaymentOrder?.id ?? "payment-modal"}
         order={selectedPaymentOrder}
         onClose={() => setSelectedPaymentOrder(null)}
+      />
+
+      <DeleteOrderPaymentModal
+        key={selectedDeleteOrder?.id ?? "delete-modal"}
+        order={selectedDeleteOrder}
+        onClose={() => setSelectedDeleteOrder(null)}
       />
       <style
         dangerouslySetInnerHTML={{

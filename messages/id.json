@@ -646,7 +646,8 @@
     "noPayment": "Tidak ada informasi pembayaran.",
     "notes": "Catatan",
     "productionStation": "Stasiun",
-    "packetChoices": "Pilihan Paket"
+    "packetChoices": "Pilihan Paket",
+    "deleteOrder": "Hapus Pesanan"
   },
   "PendingPayments": {
     "title": "Pesanan Menunggu Pembayaran",
@@ -683,7 +684,13 @@
     "cameraNotReady": "Kamera belum siap.",
     "cameraCaptureFailed": "Gagal mengambil gambar.",
     "cameraOpenFailed": "Tidak dapat membuka kamera.",
-    "closeCamera": "Tutup kamera"
+    "closeCamera": "Tutup kamera",
+    "deleteOrderTitle": "Hapus Pesanan?",
+    "deleteOrderDesc": "Apakah Anda yakin ingin menghapus pesanan",
+    "actionCannotBeUndone": "Tindakan ini tidak dapat dibatalkan.",
+    "orderDeletedSuccess": "Pembayaran pesanan berhasil dihapus.",
+    "orderDeleteFailed": "Gagal menghapus pembayaran pesanan.",
+    "delete": "Hapus"
   },
   "PaymentsHistory": {
     "title": "Riwayat Pembayaran",
