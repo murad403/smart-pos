@@ -201,8 +201,12 @@
     "alerts": "Peringatan",
     "paymentMismatchDetected": "Ketidaksesuaian pembayaran terdeteksi",
     "lowStockAlert": "Peringatan stok rendah",
-    "difference": "selisih",
-    "unitsLeft": "unit tersisa"
+    "unitsLeft": "unit tersisa",
+    "downloadPdf": "Unduh PDF",
+    "downloadReportModalTitle": "Unduh Laporan Bisnis",
+    "downloadReportModalDesc": "Pilih rentang tanggal untuk membuat dan mengunduh laporan gabungan dasbor dan penjualan.",
+    "downloading": "Membuat PDF...",
+    "download": "Unduh"
   },
   "Reports": {
     "title": "Laporan",

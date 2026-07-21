@@ -299,7 +299,9 @@ const dashboardApi = baseApi.injectEndpoints({
 
 export const {
     useGetAnalyticsQuery,
+    useLazyGetAnalyticsQuery,
     useGetSalesReportsQuery,
+    useLazyGetSalesReportsQuery,
     useGetPaymentsQuery,
     useGetPaymentDetailsQuery,
     useGetInventoryReportQuery,

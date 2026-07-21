@@ -7,12 +7,15 @@ import TopSellingItems from "./TopSellingItems";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
 import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
+import DownloadAllReports from "@/components/modal/DownloadAllReports";
+import { Download } from "lucide-react";
 
 
 const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const t = useTranslations("Dashboard");
 
   // Set default dates to today on mount
@@ -43,11 +46,20 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
       {/* Page Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t("title")}</h1>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(s, e) => { setStartDate(s); setEndDate(e); }}
+          />
+          <button
+            onClick={() => setIsDownloadModalOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-teal-700 transition cursor-pointer"
+          >
+            <Download size={16} />
+            <span>{t("downloadPdf")}</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Row */}
@@ -67,6 +79,10 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <TopSellingItems items={analyticsData?.topSellingItems} isLoading={isLoading} />
       </div>
+
+      {isDownloadModalOpen && (
+        <DownloadAllReports onClose={() => setIsDownloadModalOpen(false)} />
+      )}
     </div>
   );
 };

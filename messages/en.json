@@ -201,8 +201,12 @@
     "alerts": "Alerts",
     "paymentMismatchDetected": "Payment mismatch detected",
     "lowStockAlert": "Low stock alert",
-    "difference": "difference",
-    "unitsLeft": "units left"
+    "unitsLeft": "units left",
+    "downloadPdf": "Download PDF",
+    "downloadReportModalTitle": "Download Business Report",
+    "downloadReportModalDesc": "Select a date range to generate and download a combined dashboard and sales report.",
+    "downloading": "Generating PDF...",
+    "download": "Download"
   },
   "Reports": {
     "title": "Reports",
