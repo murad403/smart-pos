@@ -69,8 +69,8 @@ const AddCategoryModal: React.FC<Props> = ({ open, onClose }) => {
           isVisible: sec.isVisible !== false,
           visibleOnQrTable: sec.visibleOnQrTable !== false,
           visibleOnTouchscreen: sec.visibleOnTouchscreen !== false,
-          visibleOnService: sec.visibleOnService !== false,
-          visibleOnAdmin: sec.visibleOnAdmin !== false,
+          visibleOnService: true,
+          visibleOnAdmin: true,
           orientationKiosk: sec.orientationKiosk || "LANDSCAPE",
           orientationService: sec.orientationService || "PORTRAIT",
         }))
@@ -135,11 +135,11 @@ const AddCategoryModal: React.FC<Props> = ({ open, onClose }) => {
       const payload = {
         sections: sectionsState.map((sec) => ({
           id: sec.id,
-          isVisible: sec.visibleOnQrTable || sec.visibleOnTouchscreen || sec.visibleOnService || sec.visibleOnAdmin,
+          isVisible: sec.visibleOnQrTable || sec.visibleOnTouchscreen || true || true,
           visibleOnQrTable: sec.visibleOnQrTable,
           visibleOnTouchscreen: sec.visibleOnTouchscreen,
-          visibleOnService: sec.visibleOnService,
-          visibleOnAdmin: sec.visibleOnAdmin,
+          visibleOnService: true,
+          visibleOnAdmin: true,
           orientationKiosk: sec.orientationKiosk,
           orientationService: sec.orientationService,
         }))
@@ -338,14 +338,14 @@ const AddCategoryModal: React.FC<Props> = ({ open, onClose }) => {
                   </div>
                   <div className="flex justify-center items-center">
                     <ImageCheckbox
-                      checked={sec.visibleOnService}
-                      onChange={() => handleToggleAccess(sec.id, 'visibleOnService')}
+                      checked={true}
+                      disabled={true}
                     />
                   </div>
                   <div className="flex justify-center items-center">
                     <ImageCheckbox
-                      checked={sec.visibleOnAdmin}
-                      onChange={() => handleToggleAccess(sec.id, 'visibleOnAdmin')}
+                      checked={true}
+                      disabled={true}
                     />
                   </div>
                 </div>
@@ -379,14 +379,15 @@ const AddCategoryModal: React.FC<Props> = ({ open, onClose }) => {
   );
 };
 
-const ImageCheckbox = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
+const ImageCheckbox = ({ checked, onChange, disabled }: { checked: boolean; onChange?: () => void; disabled?: boolean }) => (
   <button
     type="button"
-    onClick={onChange}
+    disabled={disabled}
+    onClick={disabled ? undefined : onChange}
     className={`flex h-6 w-6 items-center justify-center rounded-[6px] border-2 transition-all duration-200 shrink-0 ${checked
       ? "border-[#3B82F6] bg-[#3B82F6] text-white"
       : "border-gray-100 bg-[#F1F5F9] hover:border-gray-200"
-      }`}
+      } ${disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer"}`}
   >
     {checked && <Check size={14} strokeWidth={4} />}
   </button>
