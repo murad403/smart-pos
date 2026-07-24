@@ -85,4 +85,7 @@ export const getUserData = (): UserData | null => {
 export const clearUserData = () => {
     if (typeof window === "undefined") return;
     localStorage.removeItem(USER_COOKIE_KEY);
+    localStorage.removeItem("selectedDevice");
+    localStorage.removeItem("table");
+    localStorage.removeItem("tableId");
 };
