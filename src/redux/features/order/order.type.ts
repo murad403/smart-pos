@@ -132,3 +132,16 @@ export interface SubmitOrderPaymentResponse {
     message: string;
     data: Payment;
 }
+
+export interface UpdateOrderPricingAdjustmentItem {
+    id?: number;
+    level: string;
+    type: "PERCENTAGE" | "FIXED_AMOUNT";
+    percentage?: number | null;
+    fixedAmount?: number | null;
+}
+
+export interface UpdateOrderPricingAdjustmentsRequest {
+    pricingAdjustments: UpdateOrderPricingAdjustmentItem[];
+}
+

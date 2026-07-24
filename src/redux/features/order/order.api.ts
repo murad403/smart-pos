@@ -1,5 +1,5 @@
 import baseApi from "../../api/api";
-import { GetAllOrdersResponse, GetOrderDetailsResponse, SubmitOrderPaymentRequest, SubmitOrderPaymentResponse } from "./order.type";
+import { GetAllOrdersResponse, GetOrderDetailsResponse, SubmitOrderPaymentRequest, SubmitOrderPaymentResponse, UpdateOrderPricingAdjustmentsRequest } from "./order.type";
 
 
 const orderApi = baseApi.injectEndpoints({
@@ -121,6 +121,21 @@ const orderApi = baseApi.injectEndpoints({
             },
             providesTags: ["orders"]
         }),
+
+
+        
+        // for admin control************************************
+        updateOrderPricingAdjustment: builder.mutation<any, { id: number; data: UpdateOrderPricingAdjustmentsRequest }>({
+            query: ({ id, data }) => {
+                return {
+                    url: `/orders/${id}/pricing-adjustments`,
+                    method: "PATCH",
+                    body: data,
+                };
+            },
+            invalidatesTags: ["orders"]
+        }),
+
     }),
 });
 
@@ -135,5 +150,6 @@ export const {
     useEditOrderMutation,
     useSendOrderToProductionMutation,
     useSubmitOrderPaymentMutation,
-    useGetCurrentCustomerOrdersQuery
+    useGetCurrentCustomerOrdersQuery,
+    useUpdateOrderPricingAdjustmentMutation
 } = orderApi;
