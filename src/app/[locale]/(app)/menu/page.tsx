@@ -17,6 +17,7 @@ import SelectPacketChoicesModal from "@/components/modal/SelectPacketChoicesModa
 import CreateOrderModal from "@/components/modal/CreateOrderModal";
 import EditOrderModal from "@/components/modal/EditOrderModal";
 import OrderReceiptModal from "@/components/modal/OrderReceiptModal";
+import { useShowMenu } from "@/hooks/use-show-menu";
 
 const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     if (params) React.use(params);
@@ -190,25 +191,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
     );
     const sections = sectionsRes?.data ?? [];
 
-    const filteredSections = React.useMemo(() => {
-        return sections.filter((section: any) => {
-            if (section.isVisible === false) return false;
-            if (!selectedDevice) return true;
-
-            switch (selectedDevice) {
-                case "qrcode":
-                    return section.visibleOnQrTable !== false;
-                case "touchscreen":
-                    return section.visibleOnTouchscreen !== false;
-                case "admin":
-                    return section.visibleOnAdmin !== false;
-                case "service":
-                    return section.visibleOnService !== false;
-                default:
-                    return true;
-            }
-        });
-    }, [sections, selectedDevice]);
+    const filteredSections = useShowMenu(sections);
     const isLoadingSectionsData = isMenusLoading || isSectionsLoading || (menus.length > 0 && !currentMenuId);
 
 
