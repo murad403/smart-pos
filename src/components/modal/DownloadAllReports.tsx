@@ -215,7 +215,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={handleDownload}
-              className="flex-1 rounded-xl bg-teal-600 py-3 text-[15px] font-semibold text-white shadow-lg shadow-teal-600/25 transition hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 rounded-xl bg-blue-600 py-3 text-[15px] font-semibold text-white shadow-lg shadow-teal-600/25 transition hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2"
               disabled={isGenerating || !startDate || !endDate}
             >
               {isGenerating ? (
@@ -422,11 +422,11 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                           {/* Bar */}
                           <div 
                             style={{ height: `${Math.max(heightPercent, 4)}%` }}
-                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-teal-600" : "bg-teal-600/30 hover:bg-teal-600/50"}`}
+                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                           >
                             {/* Tooltip bubble on non-zero value */}
                             {d.revenue > 0 && (
-                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-teal-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
                                 <span>{formatCurrency(d.revenue)}</span>
                                 {/* Triangle pointer */}
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-teal-600" />
@@ -478,11 +478,11 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                           {/* Bar */}
                           <div 
                             style={{ height: `${Math.max(heightPercent, 4)}%` }}
-                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-teal-600" : "bg-teal-600/30 hover:bg-teal-600/50"}`}
+                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                           >
                             {/* Tooltip bubble on non-zero value */}
                             {d.orders > 0 && (
-                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-teal-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
                                 <span>{d.orders} {locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}</span>
                                 {/* Triangle pointer */}
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-teal-600" />
@@ -621,7 +621,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                       {/* Legend details */}
                       <div className="flex flex-col gap-1.5 text-[9px] font-semibold text-slate-700">
                         <div className="flex items-center gap-1.5">
-                          <span className="size-2 rounded-full bg-teal-600 block" />
+                          <span className="size-2 rounded-full bg-blue-600 block" />
                           <span>
                             Dine-in: <strong className="text-slate-900">{getOrderBreakdown().dineIn} orders</strong> ({Math.round(getOrderBreakdown().dineInPercentage)}%)
                           </span>
@@ -654,7 +654,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                             {/* Bar segment */}
                             <div 
                               style={{ height: `${Math.max(height, 5)}%` }}
-                              className={`w-3.5 rounded-t-sm transition-all duration-300 ${hourData.count > 0 ? "bg-teal-600" : "bg-teal-600/10"}`}
+                              className={`w-3.5 rounded-t-sm transition-all duration-300 ${hourData.count > 0 ? "bg-blue-600" : "bg-blue-600/10"}`}
                             />
                             {/* Hour label below bar */}
                             <span className="text-[6.5px] font-bold text-slate-400 mt-1 uppercase scale-90 leading-none">
