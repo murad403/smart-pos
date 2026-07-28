@@ -215,7 +215,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
             <button
               type="button"
               onClick={handleDownload}
-              className="flex-1 rounded-xl bg-blue-600 py-3 text-[15px] font-semibold text-white shadow-lg shadow-teal-600/25 transition hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 rounded-xl bg-blue-600 py-3 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
               disabled={isGenerating || !startDate || !endDate}
             >
               {isGenerating ? (
@@ -298,11 +298,11 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
 
                 {/* Report Info */}
                 <div className="text-right">
-                  <h1 className="text-2xl font-black text-teal-600 uppercase tracking-tight">
+                  <h1 className="text-2xl font-black text-blue-600 uppercase tracking-tight">
                     {locale === "id" ? "LAPORAN PENJUALAN" : "SALES REPORT"}
                   </h1>
                   <div className="mt-1 flex items-center justify-end gap-1.5 text-slate-700 text-xs font-semibold">
-                    <Calendar size={14} className="text-teal-600" />
+                    <Calendar size={14} className="text-blue-600" />
                     <span>{formatDateRangeText(startDate, endDate)}</span>
                   </div>
                   <p className="text-[9px] text-slate-400 mt-0.5">
@@ -319,7 +319,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                       {locale === "id" ? "Total Penjualan" : "Total Sales"}
                     </span>
-                    <div className="flex size-6 items-center justify-center rounded-full bg-teal-50 text-teal-600">
+                    <div className="flex size-6 items-center justify-center rounded-full bg-blue-50 text-blue-600">
                       <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                       </svg>
@@ -403,7 +403,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-tight">
                       {tReports("salesSummary") || "Sales Summary"} <span className="text-[10px] text-slate-400 font-normal normal-case">(Revenue)</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-teal-600">
+                    <span className="text-[10px] font-bold text-blue-600">
                       Total: {formatCurrency(reportAnalytics.overview?.totalRevenue)}
                     </span>
                   </div>
@@ -429,7 +429,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
                                 <span>{formatCurrency(d.revenue)}</span>
                                 {/* Triangle pointer */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-teal-600" />
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
                               </div>
                             )}
                           </div>
@@ -459,7 +459,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-tight">
                       {tReports("ordersCount") || "Orders Count"} <span className="text-[10px] text-slate-400 font-normal normal-case">(Orders)</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-teal-600 font-mono">
+                    <span className="text-[10px] font-bold text-blue-600 font-mono">
                       Total: {reportAnalytics.overview?.totalOrders} orders
                     </span>
                   </div>
@@ -485,7 +485,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
                                 <span>{d.orders} {locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}</span>
                                 {/* Triangle pointer */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-teal-600" />
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
                               </div>
                             )}
                           </div>
@@ -556,7 +556,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                             <td className="py-2 text-center font-bold text-slate-800">
                               {item.quantity}
                             </td>
-                            <td className="py-2 pr-2 text-right font-bold text-teal-600 font-mono">
+                            <td className="py-2 pr-2 text-right font-bold text-blue-600 font-mono">
                               {formatCurrency(item.revenue)}
                             </td>
                           </tr>
