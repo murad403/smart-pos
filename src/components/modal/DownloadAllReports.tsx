@@ -26,7 +26,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
   // Selected date ranges for report generation
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  
+
   // Local loading state for PDF generation
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -123,7 +123,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
 
       const pdfWidth = 210; // A4 width in mm
       const pdfHeight = 297; // A4 height in mm
-      
+
       // Since our canvas is designed to match A4 aspect ratio, fit it exactly into A4 page
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
 
@@ -248,7 +248,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
           >
             {/* Inner Content Wrapper */}
             <div className="flex flex-col h-full justify-between">
-              
+
               {/* 1. HEADER SECTION */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 {/* Logo & Store Details */}
@@ -396,7 +396,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
 
               {/* 3. CHARTS ROW: SALES SUMMARY & ORDERS COUNT */}
               <div className="grid grid-cols-2 gap-4 mt-4">
-                
+
                 {/* Chart A: Sales Summary */}
                 <div className="border border-slate-100 rounded-2xl p-4 bg-white shadow-xs">
                   <div className="flex items-center justify-between mb-3">
@@ -420,7 +420,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                       return (
                         <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
                           {/* Bar */}
-                          <div 
+                          <div
                             style={{ height: `${Math.max(heightPercent, 4)}%` }}
                             className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                           >
@@ -476,7 +476,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                       return (
                         <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
                           {/* Bar */}
-                          <div 
+                          <div
                             style={{ height: `${Math.max(heightPercent, 4)}%` }}
                             className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                           >
@@ -513,7 +513,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
 
               {/* 4. DETAILS ROW: TOP PRODUCTS & ORDER DETAILS */}
               <div className="grid grid-cols-5 gap-4 mt-4">
-                
+
                 {/* Column Left (3 cols width): Top Products Table */}
                 <div className="col-span-3 border border-slate-100 rounded-2xl p-4 bg-white shadow-xs">
                   <div className="flex items-center justify-between mb-3">
@@ -575,7 +575,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
 
                 {/* Column Right (2 cols width): Order Type + Orders by Hour */}
                 <div className="col-span-2 flex flex-col gap-4">
-                  
+
                   {/* Order Type Donut Section */}
                   <div className="border border-slate-100 rounded-2xl p-4 bg-white shadow-xs flex flex-col justify-between h-31.5">
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-tight">
@@ -652,7 +652,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                         return (
                           <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
                             {/* Bar segment */}
-                            <div 
+                            <div
                               style={{ height: `${Math.max(height, 5)}%` }}
                               className={`w-3.5 rounded-t-sm transition-all duration-300 ${hourData.count > 0 ? "bg-blue-600" : "bg-blue-600/10"}`}
                             />
