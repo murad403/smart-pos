@@ -602,7 +602,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                                   cy="34"
                                   r={radius}
                                   fill="transparent"
-                                  stroke="#0d9488"
+                                  stroke="#2563eb"
                                   strokeWidth="6"
                                   strokeDasharray={circ}
                                   strokeDashoffset={offset}
@@ -611,7 +611,7 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               </svg>
                               <div className="absolute text-[8px] font-black text-slate-900 flex flex-col items-center">
                                 <span className="leading-none">{Math.round(dine)}%</span>
-                                <span className="text-[6.5px] text-slate-400 uppercase tracking-tight font-bold">Dine</span>
+                                <span className="text-[6.5px] text-slate-700 uppercase tracking-tight font-bold">Dine</span>
                               </div>
                             </>
                           );
@@ -654,8 +654,17 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                             {/* Bar segment */}
                             <div
                               style={{ height: `${Math.max(height, 5)}%` }}
-                              className={`w-3.5 rounded-t-sm transition-all duration-300 ${hourData.count > 0 ? "bg-blue-600" : "bg-blue-600/10"}`}
-                            />
+                              className={`w-3.5 rounded-t-sm transition-all duration-300 relative ${hourData.count > 0 ? "bg-blue-600" : "bg-blue-600/10"}`}
+                            >
+                              {/* Tooltip bubble on non-zero value */}
+                              {hourData.count > 0 && (
+                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                                  <span>{hourData.count} {locale === "id" ? "pesanan" : hourData.count === 1 ? "order" : "orders"}</span>
+                                  {/* Triangle pointer */}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                </div>
+                              )}
+                            </div>
                             {/* Hour label below bar */}
                             <span className="text-[6.5px] font-bold text-slate-400 mt-1 uppercase scale-90 leading-none">
                               {formatHourLabel(hourData.hour)}
