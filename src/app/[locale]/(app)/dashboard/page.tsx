@@ -44,7 +44,7 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
           />
           <button
             onClick={() => setIsDownloadModalOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-teal-700 transition cursor-pointer"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-blue-700 transition cursor-pointer"
           >
             <Download size={16} />
             <span>{t("downloadPdf")}</span>
