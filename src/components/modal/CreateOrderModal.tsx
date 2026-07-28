@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Image from "next/image";

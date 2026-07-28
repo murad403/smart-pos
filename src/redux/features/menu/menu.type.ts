@@ -38,7 +38,8 @@ export interface AddMenuResponse {
 }
 
 export interface UpdateMenuBody {
-    name: string;
+    name?: string;
+    isVisible?: boolean;
 }
 
 export interface UpdateMenuResponse {

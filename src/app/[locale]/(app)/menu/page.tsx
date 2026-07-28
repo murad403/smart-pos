@@ -29,7 +29,7 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
     // Fetch dynamic menus
     const { data: menuRes, isLoading: isMenusLoading } = useGetAllMenuQuery();
-    const menus = menuRes?.data ?? [];
+    const menus = (menuRes?.data ?? []).filter((menu: any) => menu.isVisible !== false);
 
     const [selectedCategory, setSelectedCategory] = React.useState("");
 
@@ -197,8 +197,10 @@ const Page = ({ params }: { params?: Promise<{ locale: string }> }) => {
 
     // Set default category name when menus load
     React.useEffect(() => {
-        if (menus.length > 0 && !selectedCategory) {
-            setSelectedCategory(menus[0].name);
+        if (menus.length > 0) {
+            if (!selectedCategory || !menus.some((m) => m.name === selectedCategory)) {
+                setSelectedCategory(menus[0].name);
+            }
         }
     }, [menus, selectedCategory]);
 
