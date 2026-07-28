@@ -8,6 +8,7 @@ import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
 import { useGetSalesReportsQuery } from "@/redux/features/dashboard/dashboard.api";
 import OrdersCount from "./OrdersCount";
+import { formatDateString } from "@/lib/formateDateString";
 
 const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
@@ -20,14 +21,6 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
     setEndDate(new Date());
   }, []);
 
-  // Helper to format Date object as YYYY-MM-DD in local timezone
-  const formatDateString = (date: Date | null) => {
-    if (!date) return undefined;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   // Fetch report data
   const { data: salesReportRes, isLoading } = useGetSalesReportsQuery({

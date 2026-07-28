@@ -12,6 +12,7 @@ import {
 } from "@/redux/features/dashboard/dashboard.api";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
+import { formatDateString } from "@/lib/formateDateString";
 
 interface DownloadAllReportsProps {
   onClose: () => void;
@@ -49,15 +50,6 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
   // States to hold fetched report data for rendering
   const [reportAnalytics, setReportAnalytics] = useState<any>(null);
   const [reportSales, setReportSales] = useState<any>(null);
-
-  // Format date helper: YYYY-MM-DD
-  const formatDateString = (date: Date | null) => {
-    if (!date) return undefined;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   // Currency helper
   const formatCurrency = (val: number | string | null | undefined) => {

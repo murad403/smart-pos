@@ -9,6 +9,7 @@ import ItemsWithLongestPreparationTime from "./ItemsWithLongestPreparationTime";
 import DetailedReport from "./DetailedReport";
 import Summary from "./Summary";
 import { toast } from "sonner";
+import { formatDateString } from "@/lib/formateDateString";
 
 const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);
@@ -20,15 +21,6 @@ const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }>
     setStartDate(new Date());
     setEndDate(new Date());
   }, []);
-
-  // Helper to format Date object as YYYY-MM-DD
-  const formatDateString = (date: Date | null) => {
-    if (!date) return undefined;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
 
   // Fetch efficiency report data
   const { data: reportRes, isLoading } = useGetEfficiencyReportsQuery({

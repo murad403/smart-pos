@@ -5,8 +5,9 @@ import { Link, useRouter } from "@/i18n/routing";
 import { useSidebar } from "@/components/ui/sidebar";
 import { getUserData } from "@/utils/auth";
 import { useTranslations } from "next-intl";
-import { useGetAnalyticsQuery, useGetPaymentsQuery } from "@/redux/features/dashboard/dashboard.api";
+import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
 import DashboardStats from "../dashboard/DashboardStats";
+import { formatDateString } from "@/lib/formateDateString";
 
 const MobileOwnerLayoutPage = () => {
     const t = useTranslations("Common");
@@ -28,14 +29,16 @@ const MobileOwnerLayoutPage = () => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, [router]);
+    
+
+    const todayStr = formatDateString(new Date());
 
     // Fetch Dashboard Analytics
-    const { data: analyticsRes, isLoading: isLoadingAnalytics } = useGetAnalyticsQuery();
+    const { data: analyticsRes, isLoading: isLoadingAnalytics } = useGetAnalyticsQuery({
+        startDate: todayStr,
+        endDate: todayStr,
+    });
     const analyticsData = analyticsRes?.data;
-
-    // Fetch Recent Orders (Limit: 5)
-    // const { data: paymentsRes, isLoading: isLoadingPayments } = useGetPaymentsQuery({ limit: 5 });
-    // const paymentsData = paymentsRes?.data;
 
     const userName = user?.name || "John Wick";
     const userPhoto = user?.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";

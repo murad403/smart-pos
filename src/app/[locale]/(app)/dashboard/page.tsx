@@ -1,7 +1,6 @@
 "use client";
 import { useState, use, useEffect } from "react";
 import DashboardStats from "./DashboardStats";
-import SalesOverTime from "./SalesOverTime";
 import OrdersPerHour from "./OrdersPerHour";
 import TopSellingItems from "./TopSellingItems";
 import DateRangePicker from "@/components/shared/DateRangePicker";
@@ -9,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
 import DownloadAllReports from "@/components/modal/DownloadAllReports";
 import { Download } from "lucide-react";
+import { formatDateString } from "@/lib/formateDateString";
 
 
 const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
@@ -24,16 +24,6 @@ const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => 
     setEndDate(new Date());
   }, []);
 
-  // Helper function to format Date object as YYYY-MM-DD format in local timezone
-  const formatDateString = (date: Date | null) => {
-    if (!date) return undefined;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  // Fetch dashboard data based on selected start and end dates
   const { data: analyticsRes, isLoading } = useGetAnalyticsQuery({
     startDate: formatDateString(startDate || new Date()),
     endDate: formatDateString(endDate || new Date()),
