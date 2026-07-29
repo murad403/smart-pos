@@ -421,7 +421,16 @@
     "levelServiceCharge": "SERVICE CHARGE",
     "typePercentage": "Percentage (%)",
     "typeFixedAmount": "Fixed Amount (Rp)",
-    "delete": "Delete"
+    "delete": "Delete",
+    "additionalPricingAdjustments": "Additional Pricing Adjustments",
+    "additionalPricingAdjustmentsSubtitle": "Manage additional preset pricing adjustments for your products or orders.",
+    "addAdditionalAdjustment": "Add Additional Pricing Adjustment",
+    "editAdditionalAdjustment": "Edit Additional Pricing Adjustment",
+    "deleteAdditionalAdjustment": "Delete Additional Pricing Adjustment",
+    "deleteAdditionalConfirm": "Are you sure you want to delete this additional pricing adjustment?",
+    "successCreateAdditional": "Additional pricing adjustment created successfully",
+    "successUpdateAdditional": "Additional pricing adjustment updated successfully",
+    "successDeleteAdditional": "Additional pricing adjustment deleted successfully"
   },
   "Validation": {
     "businessNameRequired": "Business name is required",

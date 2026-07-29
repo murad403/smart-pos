@@ -423,7 +423,16 @@
     "levelServiceCharge": "BIAYA LAYANAN",
     "typePercentage": "Persentase (%)",
     "typeFixedAmount": "Jumlah Tetap (Rp)",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "additionalPricingAdjustments": "Penyesuaian Harga Tambahan",
+    "additionalPricingAdjustmentsSubtitle": "Kelola penyesuaian harga preset tambahan untuk produk atau pesanan Anda.",
+    "addAdditionalAdjustment": "Tambah Penyesuaian Harga Tambahan",
+    "editAdditionalAdjustment": "Ubah Penyesuaian Harga Tambahan",
+    "deleteAdditionalAdjustment": "Hapus Penyesuaian Harga Tambahan",
+    "deleteAdditionalConfirm": "Apakah Anda yakin ingin menghapus penyesuaian harga tambahan ini?",
+    "successCreateAdditional": "Penyesuaian harga tambahan berhasil dibuat",
+    "successUpdateAdditional": "Penyesuaian harga tambahan berhasil diperbarui",
+    "successDeleteAdditional": "Penyesuaian harga tambahan berhasil dihapus"
   },
   "Validation": {
     "businessNameRequired": "Nama bisnis wajib diisi",

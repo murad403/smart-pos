@@ -43,3 +43,43 @@ export interface UpdatePriceAdjustmentBody {
   percentage?: number | null;
   fixedAmount?: number | null;
 }
+
+export interface AdditionalPricingAdjustment {
+  id: number;
+  level: string;
+  percentage: string | null;
+  fixedAmount: string | null;
+  type: "PERCENTAGE" | "FIXED_AMOUNT" | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetAllAdditionalPricingAdjustmentsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  pagination: Pagination;
+  data: AdditionalPricingAdjustment[];
+}
+
+export interface GetAdditionalPricingAdjustmentDetailsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: AdditionalPricingAdjustment;
+}
+
+export interface CreateAdditionalPricingAdjustmentBody {
+  level: string;
+  type: "PERCENTAGE" | "FIXED_AMOUNT" | string;
+  percentage?: number | null;
+  fixedAmount?: number | null;
+}
+
+export interface UpdateAdditionalPricingAdjustmentBody {
+  level?: string;
+  type?: "PERCENTAGE" | "FIXED_AMOUNT" | string;
+  percentage?: number | null;
+  fixedAmount?: number | null;
+}
+

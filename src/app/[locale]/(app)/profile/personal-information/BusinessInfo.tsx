@@ -219,18 +219,17 @@ const BusinessInfo = () => {
             </div>
           </div>
         </div>
+        <div className="flex justify-end mt-5">
+          <Button
+            type="submit"
+            disabled={isUpdatingBusiness}
+            className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUpdatingBusiness ? t("saving") || "Saving..." : t("saveChanges")}
+          </Button>
+        </div>
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isUpdatingBusiness}
-          className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isUpdatingBusiness ? t("saving") || "Saving..." : t("saveChanges")}
-        </Button>
-      </div>
     </form>
   );
 };

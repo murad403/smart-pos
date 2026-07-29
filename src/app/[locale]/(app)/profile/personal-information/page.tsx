@@ -15,6 +15,7 @@ import CustomPagination from "@/components/shared/CustomPagination";
 import { Plus, Edit, Trash2, Loader2, X, AlertTriangle, Armchair } from "lucide-react";
 import BusinessInfo from "./BusinessInfo";
 import { Link } from "@/i18n/routing";
+import PricingAdjustmentPreset from "./PricingAdjustmentPreset";
 
 const profileSchema = (t: any) => z.object({
   businessName: z.string().min(1, t("nameRequired")),
@@ -406,10 +407,7 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Social Media Section */}
-        <div className="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] sm:p-8">
           <p className="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t("socialMedia")}</p>
           <div className="space-y-6">
             <div className="space-y-1.5">
@@ -428,17 +426,16 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
               />
             </div>
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={isUpdating}
-            className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isUpdating ? t("saving") || "Saving..." : t("saveChanges")}
-          </Button>
+          <div className="flex justify-end mt-5">
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="h-12 max-w-50 rounded-xl bg-[#3B82F6] text-lg font-semibold text-white shadow-xl shadow-blue-500/20 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdating ? t("saving") || "Saving..." : t("saveChanges")}
+            </Button>
+          </div>
         </div>
       </form>
 
@@ -545,6 +542,8 @@ const ProfileInformationPage = ({ params }: { params?: Promise<{ locale: string 
           </div>
         )}
       </div>
+
+      <PricingAdjustmentPreset />
 
       {/* Add / Edit Modal Dialog */}
       {isAdjModalOpen && (
