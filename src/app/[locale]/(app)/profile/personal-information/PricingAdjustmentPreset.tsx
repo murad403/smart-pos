@@ -121,7 +121,7 @@ const PricingAdjustmentPreset = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5">
         <div>
           <h2 className="text-xl font-bold text-slate-900">
-            {tp("additionalPricingAdjustments") || "Additional Pricing Adjustments"}
+            {tp("additionalPricingAdjustments") || "Additional Pricing Adjustments Preset"}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             {tp("additionalPricingAdjustmentsSubtitle") || "Manage additional preset pricing adjustments for your products or orders."}
