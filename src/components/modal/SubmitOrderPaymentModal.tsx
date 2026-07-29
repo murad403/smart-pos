@@ -300,7 +300,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
               </span>
               <input
                 type="number"
-                value={changeAmount ?? ""}
+                value={changeAmount?.toFixed(2) ?? ""}
                 onChange={(event) => {
                   const v = event.target.value;
                   setChangeAmount(v === "" ? null : Number(v));
