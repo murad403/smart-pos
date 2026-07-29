@@ -2,15 +2,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
+import { Camera, Loader2, Plus, Trash2, Upload, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { openCameraStream, captureImageFromFile } from "@/lib/openCamera";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useSubmitOrderPaymentMutation } from "@/redux/features/order/order.api";
+import { useSubmitOrderPaymentMutation, useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
 import { Order, PaymentMethod } from "@/redux/features/order/order.type";
 import { Button } from "@/components/ui/button";
 import { getUserData } from "@/utils/auth";
+import UpdatePricingAdjustmentsModal from "./UpdatePricingAdjustmentsModal";
 
 interface SelectedProofImage {
   file: File;
@@ -35,6 +36,15 @@ const formatCurrency = (value: string | number) => {
 const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProps) => {
   const tPending = useTranslations("PendingPayments");
   const tPayment = useTranslations("Payment");
+
+  const { data: orderDetailsRes } = useGetOrderDetailsQuery(order?.id ?? null, { skip: !order?.id });
+  const activeOrder = orderDetailsRes?.data || order;
+
+  const currentUser = getUserData();
+  const isAdminOrOwner = currentUser?.role?.toUpperCase() === "ADMIN" || currentUser?.role?.toUpperCase() === "OWNER";
+
+  const [isEditingAdjustments, setIsEditingAdjustments] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
@@ -51,13 +61,13 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
   const [submitOrderPayment, { isLoading }] = useSubmitOrderPaymentMutation();
 
   useEffect(() => {
-    if (cashReceived !== null) {
+    if (cashReceived !== null && activeOrder) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setChangeAmount(cashReceived - Number(order?.totalAmount || 0));
+      setChangeAmount(cashReceived - Number(activeOrder.totalAmount || 0));
     } else {
       setChangeAmount(null);
     }
-  }, [cashReceived, order?.totalAmount]);
+  }, [cashReceived, activeOrder?.totalAmount]);
 
   useEffect(() => {
     selectedProofImagesRef.current = selectedProofImages;
@@ -104,7 +114,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
     }
   }, [isCameraOpen]);
 
-  if (!order) return null;
+  if (!activeOrder) return null;
 
   const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -200,7 +210,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
 
     try {
       await submitOrderPayment({
-        orderId: order.id,
+        orderId: activeOrder.id,
         method,
         cashierId,
         cashReceived: cashReceived,
@@ -236,7 +246,7 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
             <span>{tPending("paymentModalEyebrow") || "Submit payment proof"}</span>
           </div>
           <h2 className="mt-3 text-2xl font-bold text-slate-900">
-            {tPending("paymentModalTitle") || "Payment for order"} {order.slug}
+            {tPending("paymentModalTitle") || "Payment for order"} {activeOrder.slug}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
             {tPending("paymentModalSubtitle") || "Select a payment method and upload one or more proof images."}
@@ -246,15 +256,27 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
         <div className="mt-5 grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:grid-cols-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{tPending("orderNumber") || "Order #"}</p>
-            <p className="mt-1 text-sm font-bold text-slate-900">{order.slug}</p>
+            <p className="mt-1 text-sm font-bold text-slate-900">{activeOrder.slug}</p>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{tPending("customer") || "Customer"}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-700">{order.customerName || "-"}</p>
+            <p className="mt-1 text-sm font-semibold text-slate-700">{activeOrder.customerName || "-"}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{tPending("totalAmount") || "Total Amount"}</p>
-            <p className="mt-1 text-sm font-bold text-slate-900">{formatCurrency(order.totalAmount)}</p>
+            <div className="flex items-center justify-between sm:justify-start gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{tPending("totalAmount") || "Total Amount"}</p>
+              {isAdminOrOwner && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdjustments(true)}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-0.5 cursor-pointer transition"
+                >
+                  <Pencil size={11} />
+                  <span>Adjust</span>
+                </button>
+              )}
+            </div>
+            <p className="mt-1 text-sm font-bold text-slate-900">{formatCurrency(activeOrder.totalAmount)}</p>
           </div>
         </div>
 
@@ -443,6 +465,14 @@ const SubmitOrderPaymentModal = ({ order, onClose }: SubmitOrderPaymentModalProp
             <span>{isLoading ? (tPending("submittingPayment") || "Submitting...") : (tPending("submitPayment") || "Submit Payment")}</span>
           </Button>
         </div>
+
+        {activeOrder && (
+          <UpdatePricingAdjustmentsModal
+            open={isEditingAdjustments}
+            onClose={() => setIsEditingAdjustments(false)}
+            order={activeOrder}
+          />
+        )}
       </div>
     </div>
   );

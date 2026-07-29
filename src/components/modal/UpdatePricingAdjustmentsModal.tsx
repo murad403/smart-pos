@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { X, Plus, Trash2, Save, Percent, Coins, ChevronDown } from "lucide-react";
-import { useGetAllPriceAdjustmentsQuery } from "@/redux/features/price/price.api";
+import { useGetAllPriceAdjustmentsQuery, useGetAllAdditionalPricingAdjustmentQuery } from "@/redux/features/price/price.api";
 import { useUpdateOrderPricingAdjustmentMutation } from "@/redux/features/order/order.api";
 import { Order, UpdateOrderPricingAdjustmentItem } from "@/redux/features/order/order.type";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 
 interface UpdatePricingAdjustmentsModalProps {
   open: boolean;
@@ -22,14 +20,7 @@ interface LocalAdjustment {
   value: number;
 }
 
-const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps> = ({
-  open,
-  onClose,
-  order,
-}) => {
-  const t = useTranslations("Order");
-  const tp = useTranslations("Profile");
-
+const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps> = ({ open, onClose, order }) => {
   const [updateOrderPricingAdjustment, { isLoading: isUpdating }] =
     useUpdateOrderPricingAdjustmentMutation();
 
@@ -39,6 +30,12 @@ const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps
     { skip: !open }
   );
   const presets = presetsRes?.data ?? [];
+
+  const { data: additionalPresetsRes } = useGetAllAdditionalPricingAdjustmentQuery(
+    { limit: 100 },
+    { skip: !open }
+  );
+  const additionalPresets = additionalPresetsRes?.data ?? [];
 
   // Local state for tracking adjustments being edited
   const [adjustments, setAdjustments] = useState<LocalAdjustment[]>([]);
@@ -223,11 +220,10 @@ const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps
                         <button
                           type="button"
                           onClick={() => handleFieldChange(index, "type", "PERCENTAGE")}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                            adj.type === "PERCENTAGE"
+                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer ${adj.type === "PERCENTAGE"
                               ? "bg-blue-50 text-blue-600"
                               : "text-slate-500 hover:text-slate-700"
-                          }`}
+                            }`}
                         >
                           <Percent size={12} />
                           <span>Percentage</span>
@@ -235,11 +231,10 @@ const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps
                         <button
                           type="button"
                           onClick={() => handleFieldChange(index, "type", "FIXED_AMOUNT")}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                            adj.type === "FIXED_AMOUNT"
+                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer ${adj.type === "FIXED_AMOUNT"
                               ? "bg-blue-50 text-blue-600"
                               : "text-slate-500 hover:text-slate-700"
-                          }`}
+                            }`}
                         >
                           <Coins size={12} />
                           <span>Fixed</span>
@@ -297,23 +292,53 @@ const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps
                 </button>
 
                 {showPresetsDropdown && (
-                  <div className="absolute left-0 mt-1.5 z-110 w-64 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 max-h-56 overflow-y-auto">
-                    {presets.length === 0 ? (
+                  <div className="absolute left-0 mt-1.5 z-110 w-64 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 max-h-64 overflow-y-auto">
+                    {/* Standard Presets Section */}
+                    {presets.length > 0 && (
+                      <div className="mb-2">
+                        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-lg select-none">
+                          Pricing Adjustments
+                        </div>
+                        {presets.map((preset) => (
+                          <button
+                            key={`std-${preset.id}`}
+                            type="button"
+                            onClick={() => handleAddPreset(preset)}
+                            className="w-full text-left rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                          >
+                            <span className="font-bold text-slate-800">{preset.level}</span>{" "}
+                            <span className="text-slate-400 font-medium">
+                              ({preset.type === "PERCENTAGE" ? `${preset.percentage}%` : `Rp${Number(preset.fixedAmount).toLocaleString()}`})
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Additional Presets Section */}
+                    {additionalPresets.length > 0 && (
+                      <div>
+                        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-lg select-none">
+                          Additional Presets
+                        </div>
+                        {additionalPresets.map((preset) => (
+                          <button
+                            key={`add-${preset.id}`}
+                            type="button"
+                            onClick={() => handleAddPreset(preset)}
+                            className="w-full text-left rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                          >
+                            <span className="font-bold text-slate-800">{preset.level}</span>{" "}
+                            <span className="text-slate-400 font-medium">
+                              ({preset.type === "PERCENTAGE" ? `${preset.percentage}%` : `Rp${Number(preset.fixedAmount).toLocaleString()}`})
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {presets.length === 0 && additionalPresets.length === 0 && (
                       <p className="text-[11px] text-slate-400 p-3 text-center">No preset templates found in settings.</p>
-                    ) : (
-                      presets.map((preset) => (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => handleAddPreset(preset)}
-                          className="w-full text-left rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                        >
-                          <span className="font-bold text-slate-800">{preset.level}</span>{" "}
-                          <span className="text-slate-400 font-medium">
-                            ({preset.type === "PERCENTAGE" ? `${preset.percentage}%` : `Rp${Number(preset.fixedAmount).toLocaleString()}`})
-                          </span>
-                        </button>
-                      ))
                     )}
                   </div>
                 )}

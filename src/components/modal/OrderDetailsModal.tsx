@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { X, ShoppingBag, CreditCard, Clock, MapPin, ClipboardList, Printer, Download, Pencil } from "lucide-react";
+import { X, ShoppingBag, CreditCard, Clock, MapPin, ClipboardList, Printer, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useGetOrderDetailsQuery } from "@/redux/features/order/order.api";
 import { useGetTableDetailsQuery } from "@/redux/features/table/table.api";
 import { useGetBusinessInformationQuery } from "@/redux/features/dashboard/dashboard.api";
 import { Order } from "@/redux/features/order/order.type";
-import { getUserData } from "@/utils/auth";
-import UpdatePricingAdjustmentsModal from "./UpdatePricingAdjustmentsModal";
 
 
 
@@ -385,9 +383,6 @@ const generateInvoiceHtml = (order: Order, business: any) => {
 
 const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
   const t = useTranslations("Order");
-  const [isEditingAdjustments, setIsEditingAdjustments] = useState(false);
-  const currentUser = getUserData();
-  const isAdminOrOwner = currentUser?.role?.toUpperCase() === "ADMIN" || currentUser?.role?.toUpperCase() === "OWNER";
   const { data: businessRes } = useGetBusinessInformationQuery(undefined);
   const business = businessRes?.data;
 
@@ -1022,16 +1017,6 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
           <div className="mt-3.5 pt-3.5 border-t border-dashed border-slate-200 space-y-1.5 text-sm">
             <div className="flex justify-between items-center text-slate-600 font-bold text-xs uppercase tracking-wider mb-2">
               <span>Totals</span>
-              {isAdminOrOwner && (
-                <button
-                  type="button"
-                  onClick={() => setIsEditingAdjustments(true)}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 cursor-pointer transition"
-                >
-                  <Pencil size={12} />
-                  <span>Adjust Prices</span>
-                </button>
-              )}
             </div>
             <div className="flex justify-between text-slate-500">
               <span>{t("subtotal")}</span>
@@ -1099,11 +1084,6 @@ const OrderDetailsModal = ({ orderId, onClose }: OrderDetailsModalProps) => {
         </div>
       </div>
 
-      <UpdatePricingAdjustmentsModal
-        open={isEditingAdjustments}
-        onClose={() => setIsEditingAdjustments(false)}
-        order={order}
-      />
     </div>
   );
 };
