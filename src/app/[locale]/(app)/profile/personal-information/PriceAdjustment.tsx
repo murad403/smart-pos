@@ -280,7 +280,7 @@ const PriceAdjustment = () => {
                   {tp("value") || "Value"}{adjType === "PERCENTAGE" ? " (%)" : " (Rp)"} <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   value={adjValue}
                   onChange={(e) => setAdjValue(e.target.value)}
                   placeholder={adjType === "PERCENTAGE" ? "e.g., 10" : "e.g., 50"}

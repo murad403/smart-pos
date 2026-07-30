@@ -249,7 +249,7 @@ const UpdatePricingAdjustmentsModal: React.FC<UpdatePricingAdjustmentsModalProps
                       </label>
                       <div className="relative">
                         <input
-                          type="number"
+                          type="text"
                           step={adj.type === "PERCENTAGE" ? "0.01" : "1"}
                           value={adj.value || ""}
                           onChange={(e) => handleFieldChange(index, "value", parseFloat(e.target.value) || 0)}

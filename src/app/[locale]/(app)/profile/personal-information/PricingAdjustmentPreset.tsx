@@ -287,7 +287,7 @@ const PricingAdjustmentPreset = () => {
                   {tp("value") || "Value"}{type === "PERCENTAGE" ? " (%)" : " (Rp)"} <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   placeholder={type === "PERCENTAGE" ? "e.g., 10" : "e.g., 50"}
