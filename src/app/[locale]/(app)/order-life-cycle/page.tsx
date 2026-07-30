@@ -48,7 +48,7 @@ const OrderLifeCycle = () => {
 
     const getStepsForOrder = (orderStatus: string) => {
         const activeIdx = getActiveStepIndex(orderStatus);
-        
+
         return [
             {
                 label: t("inComing"),
@@ -145,32 +145,32 @@ const OrderLifeCycle = () => {
                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-center gap-4 sm:gap-2">
                                         {steps.map((step, idx) => (
                                             <React.Fragment key={idx}>
-                                                 <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 sm:flex-1 w-full sm:min-w-20">
-                                                     <button
-                                                         type="button"
-                                                         disabled
-                                                         className={`w-20 sm:w-full px-3 sm:px-4 py-3 rounded-lg font-semibold text-xs sm:text-sm ${step.color} ${step.textColor} flex items-center justify-center whitespace-nowrap relative`}
-                                                     >
-                                                         {step.hasIcon && (
-                                                             <span className="absolute left-2 flex items-center">🚫</span>
-                                                         )}
-                                                         {idx === activeIdx && (
-                                                             <span className="absolute left-2.5 flex h-2 w-2">
-                                                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                                             </span>
-                                                         )}
-                                                         <span>{step.label}</span>
-                                                     </button>
+                                                <div className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 sm:flex-1 w-full sm:min-w-20">
+                                                    <button
+                                                        type="button"
+                                                        disabled
+                                                        className={`w-20 sm:w-full px-3 sm:px-4 py-3 rounded-lg font-semibold text-xs sm:text-sm ${step.color} ${step.textColor} flex items-center justify-center whitespace-nowrap relative`}
+                                                    >
+                                                        {step.hasIcon && (
+                                                            <span className="absolute left-2 flex items-center">🚫</span>
+                                                        )}
+                                                        {idx === activeIdx && (
+                                                            <span className="absolute left-2.5 flex h-2 w-2">
+                                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                            </span>
+                                                        )}
+                                                        <span>{step.label}</span>
+                                                    </button>
 
-                                                     <div className="flex-1 text-center">
-                                                         <p className="text-sm md:text-base text-text-color font-semibold text-center">
-                                                             {step.subLabel}
-                                                         </p>
-                                                         <p className="text-xs md:text-sm text-text-color text-center max-w-full sm:max-w-35 mx-auto">
-                                                             {step.desc}
-                                                         </p>
-                                                     </div>
+                                                    <div className="flex-1 text-center">
+                                                        <p className="text-sm md:text-base text-text-color font-semibold text-center">
+                                                            {step.subLabel}
+                                                        </p>
+                                                        <p className="text-xs md:text-sm text-text-color text-center max-w-full sm:max-w-35 mx-auto">
+                                                            {step.desc}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
                                                 {idx < steps.length - 1 && (
@@ -219,9 +219,9 @@ const OrderLifeCycle = () => {
             </div>
 
             {/* Hidden audio element */}
-            <audio ref={audioRef} loop>
+            {/* <audio ref={audioRef} loop>
                 <source src="/alarm.mp3" type="audio/mpeg" />
-            </audio>
+            </audio> */}
         </div>
     );
 };

@@ -72,6 +72,44 @@ const CollectionPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio('/sounds/sound.mp3');
+    audio.loop = true;
+    audioRef.current = audio;
+    audio.play().catch((err) => {
+      console.log("Audio play blocked by browser autoplay policy:", err);
+    });
+  };
+
+  const playSoundRef = useRef(playSound);
+  useEffect(() => {
+    playSoundRef.current = playSound;
+  });
+
+  useEffect(() => {
+    const handleSilence = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+
+    window.addEventListener("click", handleSilence);
+    window.addEventListener("touchstart", handleSilence);
+    window.addEventListener("keydown", handleSilence);
+
+    return () => {
+      window.removeEventListener("click", handleSilence);
+      window.removeEventListener("touchstart", handleSilence);
+      window.removeEventListener("keydown", handleSilence);
+    };
+  }, []);
+
   const { data, isLoading, isFetching } = useGetAllCollectionQuery({
     status: activeTab,
     page: 1,
@@ -85,9 +123,16 @@ const CollectionPage = () => {
   // Sync local orders with RTK query data
   useEffect(() => {
     if (data?.data) {
-      setLocalOrders(data.data);
+      setLocalOrders((prev) => {
+        const realTimeOrders = prev.filter(
+          (localOrder) =>
+            localOrder.status === activeTab &&
+            !data.data.some((o) => o.id === localOrder.id)
+        );
+        return [...realTimeOrders, ...data.data];
+      });
     }
-  }, [data?.data]);
+  }, [data?.data, activeTab]);
 
   // Keep a ref to the current tab to prevent stale closures in socket events
   const activeTabRef = useRef(activeTab);
@@ -119,6 +164,7 @@ const CollectionPage = () => {
             if (prev.some((o) => o.id === newOrder.id)) {
               return prev;
             }
+            playSoundRef.current();
             return [newOrder, ...prev];
           });
         }

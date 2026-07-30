@@ -110,6 +110,44 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     return () => clearInterval(interval);
   }, []);
 
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const playSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio('/sounds/sound.mp3');
+    audio.loop = true;
+    audioRef.current = audio;
+    audio.play().catch((err) => {
+      console.log("Audio play blocked by browser autoplay policy:", err);
+    });
+  };
+
+  const playSoundRef = React.useRef(playSound);
+  React.useEffect(() => {
+    playSoundRef.current = playSound;
+  });
+
+  React.useEffect(() => {
+    const handleSilence = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+
+    window.addEventListener("click", handleSilence);
+    window.addEventListener("touchstart", handleSilence);
+    window.addEventListener("keydown", handleSilence);
+
+    return () => {
+      window.removeEventListener("click", handleSilence);
+      window.removeEventListener("touchstart", handleSilence);
+      window.removeEventListener("keydown", handleSilence);
+    };
+  }, []);
+
   const { data, isLoading, isFetching } = useGetAllProductionsQuery({
     page: 1,
     limit: 100,
@@ -166,6 +204,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
             if (prev.some((o) => o.id === mappedOrder.id)) {
               return prev;
             }
+            playSoundRef.current();
             return [mappedOrder, ...prev];
           });
         }
