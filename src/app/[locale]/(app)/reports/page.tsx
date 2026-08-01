@@ -49,12 +49,13 @@ const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
         </div>
       </div>
 
-      {/* Sales Summary + Monthly Earning */}
       <SalesSummary
         salesSummary={reportData?.salesSummary}
         monthlyEarnings={reportData?.monthlyEarnings}
         period={reportData?.period}
         isLoading={isLoading}
+        startDate={startDate}
+        endDate={endDate}
       />
       <OrdersCount salesSummary={reportData?.salesSummary} isLoading={isLoading} />
 

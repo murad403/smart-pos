@@ -12,6 +12,8 @@ interface SalesSummaryProps {
     monthlyEarnings?: MonthlyEarnings;
     period?: SalesReportPeriod;
     isLoading?: boolean;
+    startDate?: Date | null;
+    endDate?: Date | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -26,19 +28,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: SalesSummaryProps) => {
+const SalesSummary = ({ salesSummary, period, isLoading, startDate, endDate }: SalesSummaryProps) => {
     const t = useTranslations("Reports");
     const locale = useLocale();
 
     if (isLoading) {
         return (
             <div className="space-y-4">
-                <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm h-[320px] animate-pulse flex flex-col">
+                <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm h-80 animate-pulse flex flex-col">
                     <div className="h-6 w-40 bg-slate-100 rounded mb-2" />
                     <div className="h-4 w-60 bg-slate-50 rounded mb-5" />
                     <div className="flex-1 bg-slate-50 rounded" />
                 </div>
-                <div className="rounded-2xl bg-blue-50 px-6 py-5 h-[94px] animate-pulse flex items-center justify-between">
+                <div className="rounded-2xl bg-blue-50 px-6 py-5 h-23.5 animate-pulse flex items-center justify-between">
                     <div className="h-10 w-48 bg-blue-100 rounded" />
                     <div className="h-10 w-24 bg-blue-100 rounded" />
                 </div>
@@ -46,15 +48,20 @@ const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: Sale
         );
     }
 
-    const formatDateRange = (startStr?: string, endStr?: string) => {
-        if (!startStr || !endStr) return "";
+    const formatDateRange = (
+        startInput?: string | Date | null,
+        endInput?: string | Date | null
+    ) => {
+        if (!startInput || !endInput) return "";
         try {
-            const start = new Date(startStr);
-            const end = new Date(endStr);
-            const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
-            return `${start.toLocaleDateString(locale === "id" ? "id-ID" : "en-US", options)} – ${end.toLocaleDateString(locale === "id" ? "id-ID" : "en-US", options)}`;
+            const start = typeof startInput === "string" ? new Date(startInput) : startInput;
+            const end = typeof endInput === "string" ? new Date(endInput) : endInput;
+            const options: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
+            const formattedStart = start.toLocaleDateString(locale === "id" ? "id-ID" : "en-GB", options);
+            const formattedEnd = end.toLocaleDateString(locale === "id" ? "id-ID" : "en-GB", options);
+            return `${formattedStart} – ${formattedEnd}`;
         } catch {
-            return `${startStr} – ${endStr}`;
+            return "";
         }
     };
 
@@ -84,9 +91,9 @@ const SalesSummary = ({ salesSummary, monthlyEarnings, period, isLoading }: Sale
             {/* Chart card */}
             <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-slate-900">{t("salesSummary")}</h2>
-                {period && (
+                {(startDate || period) && (
                     <p className="mt-0.5 text-sm font-medium text-blue-500">
-                        {formatDateRange(period.startDate, period.endDate)}
+                        {formatDateRange(startDate || period?.startDate, endDate || period?.endDate)}
                     </p>
                 )}
                 <div className="mt-5">
