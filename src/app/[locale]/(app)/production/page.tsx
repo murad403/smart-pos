@@ -9,6 +9,8 @@ import { ProductionOrder, ProductionOrderStatus, ProductionSource } from "@/redu
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
+import { useSocket } from "@/hooks/ws";
+import { useSound } from "@/hooks/sound";
 
 
 
@@ -110,43 +112,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     return () => clearInterval(interval);
   }, []);
 
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
-
-  const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    const audio = new Audio('/sounds/sound.mp3');
-    audio.loop = true;
-    audioRef.current = audio;
-    audio.play().catch((err) => {
-      console.log("Audio play blocked by browser autoplay policy:", err);
-    });
-  };
-
-  const playSoundRef = React.useRef(playSound);
-  React.useEffect(() => {
-    playSoundRef.current = playSound;
-  });
-
-  React.useEffect(() => {
-    const handleSilence = () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-
-    window.addEventListener("click", handleSilence);
-    window.addEventListener("touchstart", handleSilence);
-    window.addEventListener("keydown", handleSilence);
-
-    return () => {
-      window.removeEventListener("click", handleSilence);
-      window.removeEventListener("touchstart", handleSilence);
-      window.removeEventListener("keydown", handleSilence);
-    };
-  }, []);
+  const playSoundRef = useSound();
 
   const { data, isLoading, isFetching } = useGetAllProductionsQuery({
     page: 1,
@@ -168,28 +134,13 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     }
   }, [data?.data]);
 
-  // Keep a ref to the current source filter to prevent stale closures in socket events
-  const sourceFilterRef = React.useRef(sourceFilter);
-  React.useEffect(() => {
-    sourceFilterRef.current = sourceFilter;
-  }, [sourceFilter]);
-
-  // Handle Socket connection and events
-  React.useEffect(() => {
-    let socket: any = null;
-
-    const connectSocket = () => {
-      if (!window.io) return;
-
-      socket = window.io(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
-        transports: ["websocket"],
-      });
-
-      socket.on("connect", () => {
-        console.log("Socket connected successfully to Production Namespace");
-      });
-
-      socket.on("newOrder", (newOrder: any) => {
+  // Handle Socket connection and events via custom hook
+  useSocket({
+    onConnect: () => {
+      console.log("Socket connected successfully to Production Namespace");
+    },
+    events: {
+      newOrder: (newOrder: any) => {
         console.log("Received newOrder socket event:", newOrder);
 
         const mappedOrder: ProductionOrder = {
@@ -197,8 +148,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
           status: newOrder.status === "PENDING" ? "PENDING_PROCESSING" : newOrder.status,
         };
 
-        const currentFilter = sourceFilterRef.current;
-        if (!currentFilter || mappedOrder.source === currentFilter) {
+        if (!sourceFilter || mappedOrder.source === sourceFilter) {
           setLocalOrders((prev) => {
             // Check for duplicates
             if (prev.some((o) => o.id === mappedOrder.id)) {
@@ -208,42 +158,9 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
             return [mappedOrder, ...prev];
           });
         }
-      });
-
-      socket.on("connect_error", (err: any) => {
-        console.error("Socket connection error:", err);
-      });
-    };
-
-    const scriptId = "socket-io-cdn-script";
-    let script = document.getElementById(scriptId) as HTMLScriptElement;
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://cdn.socket.io/4.7.5/socket.io.min.js";
-      script.async = true;
-      script.onload = () => {
-        connectSocket();
-      };
-      document.body.appendChild(script);
-    } else {
-      if (window.io) {
-        connectSocket();
-      } else {
-        script.addEventListener("load", connectSocket);
-      }
-    }
-
-    return () => {
-      if (socket) {
-        socket.disconnect();
-      }
-      if (script) {
-        script.removeEventListener("load", connectSocket);
-      }
-    };
-  }, []);
+      },
+    },
+  });
 
   const filteredOrders = useMemo(() => {
     const user = getUserData() as any;

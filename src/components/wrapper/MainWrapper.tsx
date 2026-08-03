@@ -16,6 +16,8 @@ import { toast } from "sonner"
 import logo from "@/assets/logo/logo2.png";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { useSearchParams } from "next/navigation"
+import { useSocket } from "@/hooks/ws"
+import { useSound } from "@/hooks/sound"
 
 
 
@@ -29,7 +31,7 @@ function SidebarBrand() {
   )
 }
 
-function AppSidebar({ windowWidth }: { windowWidth?: number }) {
+function AppSidebar({ windowWidth, blinkPayments }: { windowWidth?: number; blinkPayments: boolean }) {
   const pathName = usePathname();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
@@ -104,15 +106,23 @@ function AppSidebar({ windowWidth }: { windowWidth?: number }) {
                       asChild
                       tooltip={item.label}
                       className={cn(
-                        "h-11 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
+                        "h-11 rounded-lg px-3 text-sm font-medium transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
                         item.href === pathName
                           ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
-                          : "hover:bg-slate-100 hover:text-slate-950"
+                          : item.href === "/pending-payments" && blinkPayments
+                            ? "bg-red-50 text-red-600 animate-pulse border border-red-300"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                       )}
                     >
-                      <Link href={item.href} className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0">
+                      <Link href={item.href} className="relative flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
                         <item.icon className="size-4" />
                         <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                        {item.href === "/pending-payments" && blinkPayments && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 flex h-2.5 w-2.5 group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:translate-y-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                          </span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -415,6 +425,40 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isChecking, setIsChecking] = React.useState(true);
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const [selectedDevice, setSelectedDevice] = React.useState<string>("qrcode");
+
+  const [blinkPayments, setBlinkPayments] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("blink_payments");
+      if (stored === "true") {
+        setBlinkPayments(true);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (pathName === "/pending-payments") {
+      setBlinkPayments(false);
+      localStorage.setItem("blink_payments", "false");
+    }
+  }, [pathName]);
+
+  const playSoundRef = useSound();
+
+  useSocket({
+    events: {
+      pendingPayment: (data: any) => {
+        console.log("Received pendingPayment socket event:", data);
+        const currentUser = getUserData();
+        if (currentUser?.role?.toUpperCase() === "ADMIN") {
+          playSoundRef.current();
+          setBlinkPayments(true);
+          localStorage.setItem("blink_payments", "true");
+        }
+      }
+    }
+  });
   const [windowWidth, setWindowWidth] = React.useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
   const prevWidthRef = React.useRef<number | null>(null);
 
@@ -544,7 +588,7 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider defaultOpen>
       <div className="flex min-h-screen w-full bg-[#F7F7F7] text-slate-900">
-        {selectedDevice !== "touchscreen" && <AppSidebar windowWidth={windowWidth} />}
+        {selectedDevice !== "touchscreen" && <AppSidebar windowWidth={windowWidth} blinkPayments={blinkPayments} />}
 
         <SidebarInset className="flex min-h-screen flex-col bg-[#F7F7F7]">
           <Topbar selectedDevice={selectedDevice} onDeviceChange={handleDeviceChange} windowWidth={windowWidth} />

@@ -8,6 +8,8 @@ import { CollectionOrder } from "@/redux/features/collection/collection.type";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
+import { useSocket } from "@/hooks/ws";
+import { useSound } from "@/hooks/sound";
 
 
 declare global {
@@ -72,43 +74,7 @@ const CollectionPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    const audio = new Audio('/sounds/sound.mp3');
-    audio.loop = true;
-    audioRef.current = audio;
-    audio.play().catch((err) => {
-      console.log("Audio play blocked by browser autoplay policy:", err);
-    });
-  };
-
-  const playSoundRef = useRef(playSound);
-  useEffect(() => {
-    playSoundRef.current = playSound;
-  });
-
-  useEffect(() => {
-    const handleSilence = () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-
-    window.addEventListener("click", handleSilence);
-    window.addEventListener("touchstart", handleSilence);
-    window.addEventListener("keydown", handleSilence);
-
-    return () => {
-      window.removeEventListener("click", handleSilence);
-      window.removeEventListener("touchstart", handleSilence);
-      window.removeEventListener("keydown", handleSilence);
-    };
-  }, []);
+  const playSoundRef = useSound();
 
   const { data, isLoading, isFetching } = useGetAllCollectionQuery({
     status: activeTab,
@@ -134,31 +100,15 @@ const CollectionPage = () => {
     }
   }, [data?.data, activeTab]);
 
-  // Keep a ref to the current tab to prevent stale closures in socket events
-  const activeTabRef = useRef(activeTab);
-  useEffect(() => {
-    activeTabRef.current = activeTab;
-  }, [activeTab]);
-
-  // Handle Socket connection and events
-  useEffect(() => {
-    let socket: any = null;
-
-    const connectSocket = () => {
-      if (!window.io) return;
-
-      socket = window.io(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
-        transports: ["websocket"],
-      });
-
-      socket.on("connect", () => {
-        console.log("Socket connected successfully to Collection/OrderReady Namespace");
-      });
-
-      socket.on("orderReady", (newOrder: any) => {
+  // Handle Socket connection and events via custom hook
+  useSocket({
+    onConnect: () => {
+      console.log("Socket connected successfully to Collection/OrderReady Namespace");
+    },
+    events: {
+      orderReady: (newOrder: any) => {
         console.log("Received orderReady socket event:", newOrder);
-
-        if (activeTabRef.current === "READY") {
+        if (activeTab === "READY") {
           setLocalOrders((prev) => {
             // Check for duplicates
             if (prev.some((o) => o.id === newOrder.id)) {
@@ -168,42 +118,9 @@ const CollectionPage = () => {
             return [newOrder, ...prev];
           });
         }
-      });
-
-      socket.on("connect_error", (err: any) => {
-        console.error("Socket connection error:", err);
-      });
-    };
-
-    const scriptId = "socket-io-cdn-script";
-    let script = document.getElementById(scriptId) as HTMLScriptElement;
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://cdn.socket.io/4.7.5/socket.io.min.js";
-      script.async = true;
-      script.onload = () => {
-        connectSocket();
-      };
-      document.body.appendChild(script);
-    } else {
-      if (window.io) {
-        connectSocket();
-      } else {
-        script.addEventListener("load", connectSocket);
-      }
-    }
-
-    return () => {
-      if (socket) {
-        socket.disconnect();
-      }
-      if (script) {
-        script.removeEventListener("load", connectSocket);
-      }
-    };
-  }, []);
+      },
+    },
+  });
 
   const sortedOrders = useMemo(() => {
     return [...localOrders].sort((left, right) => {
@@ -242,21 +159,19 @@ const CollectionPage = () => {
         <div className="flex bg-slate-100 p-1 rounded-xl w-fit border border-slate-200">
           <button
             onClick={() => setActiveTab("READY")}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === "READY"
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === "READY"
                 ? "bg-white text-emerald-600 shadow-sm"
                 : "text-slate-600 hover:text-slate-800"
-            }`}
+              }`}
           >
             {t("readyTab")}
           </button>
           <button
             onClick={() => setActiveTab("PICKED_UP")}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === "PICKED_UP"
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === "PICKED_UP"
                 ? "bg-white text-slate-700 shadow-sm"
                 : "text-slate-600 hover:text-slate-800"
-            }`}
+              }`}
           >
             {t("completedTab")}
           </button>
@@ -291,9 +206,8 @@ const CollectionPage = () => {
               return (
                 <article
                   key={order.id}
-                  className={`rounded-xl border border-slate-200 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border-l-3 ${
-                    statusView[order.status as keyof typeof statusView]?.cardClass || "border-l-slate-200 bg-white"
-                  }`}
+                  className={`rounded-xl border border-slate-200 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border-l-3 ${statusView[order.status as keyof typeof statusView]?.cardClass || "border-l-slate-200 bg-white"
+                    }`}
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
@@ -302,9 +216,8 @@ const CollectionPage = () => {
                         <span className="text-xs font-semibold text-slate-455">-</span>
                         <span className="text-xs font-semibold text-slate-500">{toClock(order.createdAt)}</span>
                         <span
-                          className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md border ${
-                            statusView[order.status as keyof typeof statusView]?.statusClass || "text-slate-605"
-                          } bg-white/70`}
+                          className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md border ${statusView[order.status as keyof typeof statusView]?.statusClass || "text-slate-605"
+                            } bg-white/70`}
                         >
                           {t(statusTextKeys[order.status])}
                         </span>
