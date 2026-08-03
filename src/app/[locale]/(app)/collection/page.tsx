@@ -92,7 +92,7 @@ const CollectionPage = () => {
       setLocalOrders((prev) => {
         const realTimeOrders = prev.filter(
           (localOrder) =>
-            localOrder.status === activeTab &&
+            (localOrder.status === activeTab || !localOrder.status) &&
             !data.data.some((o) => o.id === localOrder.id)
         );
         return [...realTimeOrders, ...data.data];
@@ -100,15 +100,29 @@ const CollectionPage = () => {
     }
   }, [data?.data, activeTab]);
 
+  // Keep a ref to the current tab to prevent stale closures in socket events
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
   // Handle Socket connection and events via custom hook
   useSocket({
     onConnect: () => {
       console.log("Socket connected successfully to Collection/OrderReady Namespace");
     },
     events: {
-      orderReady: (newOrder: any) => {
-        console.log("Received orderReady socket event:", newOrder);
-        if (activeTab === "READY") {
+      orderReady: (eventData: any) => {
+        console.log("Received orderReady socket event:", eventData);
+        const rawOrder = eventData?.order || eventData?.data || eventData;
+        if (!rawOrder || !rawOrder.id) return;
+
+        const newOrder: CollectionOrder = {
+          ...rawOrder,
+          status: rawOrder.status || "READY",
+        };
+
+        if (activeTabRef.current === "READY") {
           setLocalOrders((prev) => {
             // Check for duplicates
             if (prev.some((o) => o.id === newOrder.id)) {
@@ -134,6 +148,7 @@ const CollectionPage = () => {
     setActiveActionId(orderId);
     try {
       await pickupOrder(orderId).unwrap();
+      setLocalOrders((prev) => prev.filter((o) => o.id !== orderId));
       toast.success(t("successMessage"));
     } catch (error: unknown) {
       const apiError = error as { data?: { message?: string }; message?: string };

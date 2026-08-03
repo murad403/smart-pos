@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { CheckCircle2, Eye, Loader2, Package2, ShoppingBag, XCircle } from "lucide-react";
+import { CheckCircle2, Eye, Loader2, Package2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { getUserData } from "@/utils/auth";
@@ -134,6 +134,12 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     }
   }, [data?.data]);
 
+  // Keep a ref to the current source filter to prevent stale closures in socket events
+  const sourceFilterRef = React.useRef(sourceFilter);
+  React.useEffect(() => {
+    sourceFilterRef.current = sourceFilter;
+  }, [sourceFilter]);
+
   // Handle Socket connection and events via custom hook
   useSocket({
     onConnect: () => {
@@ -148,7 +154,8 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
           status: newOrder.status === "PENDING" ? "PENDING_PROCESSING" : newOrder.status,
         };
 
-        if (!sourceFilter || mappedOrder.source === sourceFilter) {
+        const currentFilter = sourceFilterRef.current;
+        if (!currentFilter || mappedOrder.source === currentFilter) {
           setLocalOrders((prev) => {
             // Check for duplicates
             if (prev.some((o) => o.id === mappedOrder.id)) {
