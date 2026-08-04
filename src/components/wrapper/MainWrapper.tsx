@@ -21,7 +21,7 @@ import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.ap
 import { useSound } from "@/providers/SoundProvider"
 import productionApi, { useGetAllProductionsQuery } from "@/redux/features/production/production.api"
 import { useAppDispatch } from "@/redux/hooks"
-import { useGetAllCollectionQuery } from "@/redux/features/collection/collection.api"
+import collectionApi, { useGetAllCollectionQuery } from "@/redux/features/collection/collection.api"
 
 
 
@@ -73,7 +73,8 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   }
   function handleNewCollection(dataSnapshot: any) {
     console.log("New Collection Detected : ", dataSnapshot)
-    setTimeout(refetchAllCollections, 10e3);
+    dispatch(collectionApi.util.invalidateTags(["collection"]));
+    refetchAllCollections();
     handleBlinkCollection();
     sound?.playSound();
   }

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
 import { statusView, toClock, toDuration, toElapsed } from "@/lib/formatter";
+import { SocketEvent, useSocket } from "@/providers/SocketProvider";
 
 
 declare global {
@@ -33,7 +34,9 @@ const CollectionPage = () => {
   }, []);
 
 
-  const { data, isLoading, isFetching } = useGetAllCollectionQuery({
+  const socket = useSocket();
+
+  const { data, isLoading, isFetching, refetch } = useGetAllCollectionQuery({
     status: activeTab,
     page: 1,
     limit: 100,
@@ -62,6 +65,36 @@ const CollectionPage = () => {
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
+
+  // Listen to real-time socket events
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleOrderReady = (snapshot: any) => {
+      console.log("Collection page received socket event:", snapshot);
+      refetch();
+      if (snapshot && typeof snapshot === "object" && snapshot.id) {
+        setLocalOrders((prev) => {
+          const currentTab = activeTabRef.current;
+          if (snapshot.status && snapshot.status !== currentTab) {
+            return prev.filter((o) => o.id !== snapshot.id);
+          }
+          if (prev.some((o) => o.id === snapshot.id)) {
+            return prev.map((o) => (o.id === snapshot.id ? { ...o, ...snapshot } : o));
+          }
+          return [snapshot, ...prev];
+        });
+      }
+    };
+
+    socket.on(SocketEvent.orderReady, handleOrderReady);
+    socket.on(SocketEvent.newOrder, handleOrderReady);
+
+    return () => {
+      socket.off(SocketEvent.orderReady, handleOrderReady);
+      socket.off(SocketEvent.newOrder, handleOrderReady);
+    };
+  }, [socket, refetch]);
 
 
 

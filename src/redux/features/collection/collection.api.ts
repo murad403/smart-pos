@@ -32,3 +32,5 @@ export const {
     useGetAllCollectionQuery,
     usePickupOrderCollectionMutation,
 } = collectionApi;
+
+export default collectionApi;
