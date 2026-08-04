@@ -21,6 +21,7 @@ import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.ap
 import { useSound } from "@/providers/SoundProvider"
 import productionApi, { useGetAllProductionsQuery } from "@/redux/features/production/production.api"
 import { useAppDispatch } from "@/redux/hooks"
+import { useGetAllCollectionQuery } from "@/redux/features/collection/collection.api"
 
 
 
@@ -42,6 +43,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const [blinkPayments, setBlinkPayments] = React.useState(false);
   const [blinkProduction, setBlinkProduction] = React.useState(false);
+  const [blinkCollection, setBlinkCollection] = React.useState(false);
 
   const socket = useSocket();
   const sound = useSound();
@@ -53,6 +55,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const dispatch = useAppDispatch();
   const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
   const { refetch: refetchAllProductions } = useGetAllProductionsQuery();
+  const { refetch: refetchAllCollections } = useGetAllCollectionQuery();
 
 
   function handleNewPendingPayment(dataSnapshot: any) {
@@ -68,9 +71,15 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
     handleBlinkProduction();
     sound?.playSound();
   }
+  function handleNewCollection(dataSnapshot: any) {
+    console.log("New Collection Detected : ", dataSnapshot)
+    setTimeout(refetchAllCollections, 10e3);
+    handleBlinkCollection();
+    sound?.playSound();
+  }
 
 
-  
+
   function handleBlinkPayment() {
     setBlinkPayments(true);
 
@@ -88,6 +97,14 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
       sound?.stopSound();
     }, 1e4);
   }
+  function handleBlinkCollection() {
+    setBlinkCollection(true);
+
+    setTimeout(() => {
+      setBlinkCollection(false);
+      sound?.stopSound();
+    }, 1e4);
+  }
 
 
 
@@ -97,10 +114,12 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
 
       socket?.on(SocketEvent.pendingPayment, (snapshot) => handleNewPendingPayment(snapshot));
       socket?.on(SocketEvent.newOrder, (snapshot) => handleNewProduction(snapshot));
+      socket?.on(SocketEvent.orderReady, (snapshot) => handleNewCollection(snapshot));
 
       function unsubscribe() {
         socket?.off(SocketEvent.pendingPayment);
         socket?.off(SocketEvent.newOrder);
+        socket?.off(SocketEvent.orderReady);
       }
 
       return unsubscribe;
@@ -176,7 +195,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
                         "h-11 rounded-lg px-3 text-sm font-medium transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
                         item.href === pathName
                           ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
-                          : (item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction)
+                          : (item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction) || (item.href === "/collection" && blinkCollection)
                             ? "bg-red-50 text-red-600 animate-pulse border border-red-300"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                       )}
@@ -184,7 +203,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
                       <Link href={item.href} className="relative flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
                         <item.icon className="size-4" />
                         <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                        {(item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction) && (
+                        {(item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction) || (item.href === "/collection" && blinkCollection) && (
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 flex h-2.5 w-2.5 group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:translate-y-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
