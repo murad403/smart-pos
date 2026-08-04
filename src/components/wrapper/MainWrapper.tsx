@@ -16,8 +16,8 @@ import { toast } from "sonner"
 import logo from "@/assets/logo/logo2.png";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { useSearchParams } from "next/navigation"
-import { useSocket } from "@/hooks/ws"
 import { useSound } from "@/hooks/sound"
+import { useSocket } from "@/providers/SocketProvider"
 
 
 
@@ -203,6 +203,7 @@ function Topbar({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = React.useState<any>(null);
+  const socket = useSocket();
 
   React.useEffect(() => {
     setUser(getUserData());
@@ -358,12 +359,18 @@ function Topbar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1.5 sm:gap-3 text-left outline-none">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 overflow-hidden shrink-0">
+                  <div className="relative flex size-10 items-center justify-center rounded-full bg-[#1A56DB] text-white shadow-sm sm:size-11 shrink-0">
                     {user?.photoUrl ? (
-                      <Image width={500} height={500} src={user.photoUrl} alt="Avatar" className="h-full w-full object-cover" />
+                      <Image width={500} height={500} src={user.photoUrl} alt="Avatar" className="h-full w-full object-cover rounded-full" />
                     ) : (
                       <User className="size-5" />
                     )}
+
+
+                    {/* Socket connectivity indentifier */}
+                    <div className="absolute bottom-0 right-0.5 size-2.5 rounded-full" style={{
+                      backgroundColor: socket?.connected ? "#0d0" : "#aaa"
+                    }}></div>
                   </div>
                   <div className="hidden sm:block min-w-0 leading-tight">
                     <div className="text-sm font-medium text-slate-950 sm:text-base">{displayUser.name}</div>
@@ -446,19 +453,7 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
 
   const playSoundRef = useSound();
 
-  useSocket({
-    events: {
-      pendingPayment: (data: any) => {
-        console.log("Received pendingPayment socket event:", data);
-        const currentUser = getUserData();
-        if (currentUser?.role?.toUpperCase() === "ADMIN") {
-          playSoundRef.current();
-          setBlinkPayments(true);
-          localStorage.setItem("blink_payments", "true");
-        }
-      }
-    }
-  });
+
   const [windowWidth, setWindowWidth] = React.useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
   const prevWidthRef = React.useRef<number | null>(null);
 

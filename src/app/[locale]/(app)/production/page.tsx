@@ -9,7 +9,6 @@ import { ProductionOrder, ProductionOrderStatus, ProductionSource } from "@/redu
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
-import { useSocket } from "@/hooks/ws";
 import { useSound } from "@/hooks/sound";
 
 
@@ -139,35 +138,6 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
   React.useEffect(() => {
     sourceFilterRef.current = sourceFilter;
   }, [sourceFilter]);
-
-  // Handle Socket connection and events via custom hook
-  useSocket({
-    onConnect: () => {
-      console.log("Socket connected successfully to Production Namespace");
-    },
-    events: {
-      newOrder: (newOrder: any) => {
-        console.log("Received newOrder socket event:", newOrder);
-
-        const mappedOrder: ProductionOrder = {
-          ...newOrder,
-          status: newOrder.status === "PENDING" ? "PENDING_PROCESSING" : newOrder.status,
-        };
-
-        const currentFilter = sourceFilterRef.current;
-        if (!currentFilter || mappedOrder.source === currentFilter) {
-          setLocalOrders((prev) => {
-            // Check for duplicates
-            if (prev.some((o) => o.id === mappedOrder.id)) {
-              return prev;
-            }
-            playSoundRef.current();
-            return [mappedOrder, ...prev];
-          });
-        }
-      },
-    },
-  });
 
   const filteredOrders = useMemo(() => {
     const user = getUserData() as any;
