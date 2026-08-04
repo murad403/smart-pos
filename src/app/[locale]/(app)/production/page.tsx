@@ -9,7 +9,6 @@ import { ProductionOrder, ProductionOrderStatus, ProductionSource } from "@/redu
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
-import { useSound } from "@/hooks/sound";
 
 
 
@@ -111,7 +110,6 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     return () => clearInterval(interval);
   }, []);
 
-  const playSoundRef = useSound();
 
   const { data, isLoading, isFetching } = useGetAllProductionsQuery({
     page: 1,

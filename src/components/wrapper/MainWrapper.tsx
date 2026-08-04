@@ -16,9 +16,9 @@ import { toast } from "sonner"
 import logo from "@/assets/logo/logo2.png";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { useSearchParams } from "next/navigation"
-import { useSound } from "@/hooks/sound"
 import { SocketEvent, useSocket } from "@/providers/SocketProvider"
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api"
+import { useSound } from "@/providers/SoundProvider"
 
 
 
@@ -42,6 +42,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const [user, setUser] = React.useState<any>(null);
   const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
   const [blinkPayments, setBlinkPayments] = React.useState(false);
+  const sound = useSound();
 
   const socket = useSocket();
 
@@ -49,6 +50,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
     console.log("New Pending Payment Detected : ", dataSnapshot)
     action();
     handleBlinkPayment();
+    sound?.playSound();
   }
 
   function handleBlinkPayment() {
@@ -56,6 +58,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
 
     setTimeout(() => {
       setBlinkPayments(false);
+      sound?.stopSound();
     }, 1e4);
   }
 
@@ -472,7 +475,6 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
 
 
 
-  const playSoundRef = useSound();
 
 
   const [windowWidth, setWindowWidth] = React.useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);

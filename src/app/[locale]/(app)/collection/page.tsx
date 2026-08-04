@@ -8,7 +8,6 @@ import { CollectionOrder } from "@/redux/features/collection/collection.type";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
-import { useSound } from "@/hooks/sound";
 
 
 declare global {
@@ -73,7 +72,6 @@ const CollectionPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const playSoundRef = useSound();
 
   const { data, isLoading, isFetching } = useGetAllCollectionQuery({
     status: activeTab,
