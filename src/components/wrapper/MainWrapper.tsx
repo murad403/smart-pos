@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation"
 import { SocketEvent, useSocket } from "@/providers/SocketProvider"
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api"
 import { useSound } from "@/providers/SoundProvider"
+import { useGetAllProductionsQuery } from "@/redux/features/production/production.api"
 
 
 
@@ -36,19 +37,25 @@ function SidebarBrand() {
 
 function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const pathName = usePathname();
-  const router = useRouter();
-  const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
-  const t = useTranslations("Common");
   const [user, setUser] = React.useState<any>(null);
-  const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
+  const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const [blinkPayments, setBlinkPayments] = React.useState(false);
-  const sound = useSound();
+  const [blinkProduction, setBlinkProduction] = React.useState(false);
 
   const socket = useSocket();
+  const sound = useSound();
 
-  function handleNewPendingPayment(dataSnapshot: any, action: () => void) {
+  const router = useRouter();
+  const t = useTranslations("Common");
+
+
+  const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
+  const { refetch: refetchAllProductions } = useGetAllProductionsQuery();
+
+
+  function handleNewPendingPayment(dataSnapshot: any) {
     console.log("New Pending Payment Detected : ", dataSnapshot)
-    action();
+    setTimeout(refetchPendingPaymentOrders, 10e3);
     handleBlinkPayment();
     sound?.playSound();
   }
@@ -62,15 +69,32 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
     }, 1e4);
   }
 
+  function handleBlinkProduction() {
+    setBlinkProduction(true);
+
+    setTimeout(() => {
+      setBlinkProduction(false);
+      sound?.stopSound();
+    }, 1e4);
+  }
+
+  function handleNewProduction(dataSnapshot: any,) {
+    console.log("New Order Detected : ", dataSnapshot)
+    setTimeout(refetchAllProductions, 10e3);
+    handleBlinkProduction();
+    sound?.playSound();
+  }
+
 
   useEffect(
     () => {
-      const eventName = SocketEvent.pendingPayment;
 
-      socket?.on(eventName, (snapshot) => handleNewPendingPayment(snapshot, refetchPendingPaymentOrders));
+      socket?.on(SocketEvent.pendingPayment, (snapshot) => handleNewPendingPayment(snapshot));
+      socket?.on(SocketEvent.newOrder, (snapshot) => handleNewProduction(snapshot));
 
       function unsubscribe() {
-        socket?.off(eventName);
+        socket?.off(SocketEvent.pendingPayment);
+        socket?.off(SocketEvent.newOrder);
       }
 
       return unsubscribe;
