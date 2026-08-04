@@ -19,7 +19,8 @@ import { useSearchParams } from "next/navigation"
 import { SocketEvent, useSocket } from "@/providers/SocketProvider"
 import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api"
 import { useSound } from "@/providers/SoundProvider"
-import { useGetAllProductionsQuery } from "@/redux/features/production/production.api"
+import productionApi, { useGetAllProductionsQuery } from "@/redux/features/production/production.api"
+import { useAppDispatch } from "@/redux/hooks"
 
 
 
@@ -49,6 +50,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const t = useTranslations("Common");
 
 
+  const dispatch = useAppDispatch();
   const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
   const { refetch: refetchAllProductions } = useGetAllProductionsQuery();
 
@@ -59,7 +61,16 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
     handleBlinkPayment();
     sound?.playSound();
   }
+  function handleNewProduction(dataSnapshot: any,) {
+    console.log("New Order Detected : ", dataSnapshot)
+    dispatch(productionApi.util.invalidateTags(["productions"]));
+    refetchAllProductions();
+    handleBlinkProduction();
+    sound?.playSound();
+  }
 
+
+  
   function handleBlinkPayment() {
     setBlinkPayments(true);
 
@@ -78,12 +89,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
     }, 1e4);
   }
 
-  function handleNewProduction(dataSnapshot: any,) {
-    console.log("New Order Detected : ", dataSnapshot)
-    setTimeout(refetchAllProductions, 10e3);
-    handleBlinkProduction();
-    sound?.playSound();
-  }
+
 
 
   useEffect(
@@ -170,7 +176,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
                         "h-11 rounded-lg px-3 text-sm font-medium transition-colors group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0",
                         item.href === pathName
                           ? "bg-[#1A56DB] text-white shadow-lg shadow-[#1A56DB]/20 hover:bg-[#1A56DB] hover:text-white"
-                          : item.href === "/pending-payments" && blinkPayments
+                          : (item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction)
                             ? "bg-red-50 text-red-600 animate-pulse border border-red-300"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                       )}
@@ -178,7 +184,7 @@ function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
                       <Link href={item.href} className="relative flex items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
                         <item.icon className="size-4" />
                         <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                        {item.href === "/pending-payments" && blinkPayments && (
+                        {(item.href === "/pending-payments" && blinkPayments) || (item.href === "/production" && blinkProduction) && (
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 flex h-2.5 w-2.5 group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:translate-y-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>

@@ -63,3 +63,5 @@ export const {
     useReadyOrderMutation,
     usePickupOrderMutation
 } = productionApi;
+
+export default productionApi;

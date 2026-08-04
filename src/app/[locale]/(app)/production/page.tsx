@@ -9,6 +9,7 @@ import { ProductionOrder, ProductionOrderStatus, ProductionSource } from "@/redu
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
+import { SocketEvent, useSocket } from "@/providers/SocketProvider";
 
 
 
@@ -110,42 +111,43 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
     return () => clearInterval(interval);
   }, []);
 
+  const socket = useSocket();
 
-  const { data, isLoading, isFetching } = useGetAllProductionsQuery({
+  const { data, isLoading, isFetching, refetch } = useGetAllProductionsQuery({
     page: 1,
     limit: 100,
     source: sourceFilter || undefined,
   });
+
+  React.useEffect(() => {
+    if (!socket) return;
+
+    const handleNewOrder = () => {
+      refetch();
+    };
+
+    socket.on(SocketEvent.newOrder, handleNewOrder);
+
+    return () => {
+      socket.off(SocketEvent.newOrder, handleNewOrder);
+    };
+  }, [socket, refetch]);
 
   const [acceptOrder] = useAcceptOrderMutation();
   const [cancelOrder] = useCancelOrderMutation();
   const [readyOrder] = useReadyOrderMutation();
   const [pickupOrder] = usePickupOrderMutation();
 
-  const [localOrders, setLocalOrders] = useState<ProductionOrder[]>([]);
-
-  // Sync local orders with RTK query data
-  React.useEffect(() => {
-    if (data?.data) {
-      setLocalOrders(data.data);
-    }
-  }, [data?.data]);
-
-  // Keep a ref to the current source filter to prevent stale closures in socket events
-  const sourceFilterRef = React.useRef(sourceFilter);
-  React.useEffect(() => {
-    sourceFilterRef.current = sourceFilter;
-  }, [sourceFilter]);
-
   const filteredOrders = useMemo(() => {
+    const rawOrders = data?.data || [];
     const user = getUserData() as any;
     const stationId = user?.productionStationId;
 
     if (!stationId) {
-      return localOrders;
+      return rawOrders;
     }
 
-    return localOrders
+    return rawOrders
       .map((order) => {
         const filteredItems = order.orderItems
           .map((item) => {
@@ -173,7 +175,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
         };
       })
       .filter((order) => order.orderItems.length > 0);
-  }, [localOrders]);
+  }, [data?.data]);
 
   const sortedOrders = useMemo(() => {
     return [...filteredOrders].sort((left, right) => {
