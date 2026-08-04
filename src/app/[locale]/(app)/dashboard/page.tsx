@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
 import DownloadAllReports from "@/components/modal/DownloadAllReports";
 import { Download } from "lucide-react";
-import { formatDateString } from "@/lib/formateDateString";
+import { formatDateString } from "@/lib/formatter";
 
 
 const DashboardPage = ({ params }: { params?: Promise<{ locale: string }> }) => {

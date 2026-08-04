@@ -8,7 +8,7 @@ import DateRangePicker from "@/components/shared/DateRangePicker";
 import { useTranslations } from "next-intl";
 import { useGetSalesReportsQuery } from "@/redux/features/dashboard/dashboard.api";
 import OrdersCount from "./OrdersCount";
-import { formatDateString } from "@/lib/formateDateString";
+import { formatDateString } from "@/lib/formatter";
 
 const ReportsPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);

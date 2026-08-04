@@ -8,6 +8,7 @@ import { CollectionOrder } from "@/redux/features/collection/collection.type";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
+import { statusView, toClock, toDuration, toElapsed } from "@/lib/formatter";
 
 
 declare global {
@@ -16,47 +17,6 @@ declare global {
   }
 }
 
-const statusView = {
-  READY: {
-    cardClass: "border-l-emerald-500 bg-emerald-50/35",
-    statusClass: "text-emerald-600",
-  },
-  PICKED_UP: {
-    cardClass: "border-l-slate-400 bg-slate-100/70",
-    statusClass: "text-slate-600",
-  },
-};
-
-const toClock = (dateString: string) => {
-  const value = new Date(dateString);
-  if (Number.isNaN(value.getTime())) return "-";
-  return value.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
-
-const toElapsed = (startDateString: string | null | undefined) => {
-  if (!startDateString) return "";
-  const start = new Date(startDateString).getTime();
-  if (Number.isNaN(start)) return "";
-  const diffInSeconds = Math.max(0, Math.floor((Date.now() - start) / 1000));
-  const minutes = Math.floor(diffInSeconds / 60);
-  const seconds = diffInSeconds % 60;
-  return `${minutes}m ${seconds}s`;
-};
-
-const toDuration = (startDateString: string | null | undefined, endDateString: string | null | undefined) => {
-  if (!startDateString || !endDateString) return "";
-  const start = new Date(startDateString).getTime();
-  const end = new Date(endDateString).getTime();
-  if (Number.isNaN(start) || Number.isNaN(end)) return "";
-  const diffInSeconds = Math.max(0, Math.floor((end - start) / 1000));
-  const minutes = Math.floor(diffInSeconds / 60);
-  const seconds = diffInSeconds % 60;
-  return `${minutes}m ${seconds}s`;
-};
 
 const CollectionPage = () => {
   const t = useTranslations("CollectionPage");

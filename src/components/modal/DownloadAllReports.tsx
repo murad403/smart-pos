@@ -12,7 +12,7 @@ import {
 } from "@/redux/features/dashboard/dashboard.api";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
-import { formatDateString } from "@/lib/formateDateString";
+import { formatDateString } from "@/lib/formatter";
 
 interface DownloadAllReportsProps {
   onClose: () => void;

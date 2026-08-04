@@ -7,7 +7,7 @@ import { getUserData } from "@/utils/auth";
 import { useTranslations } from "next-intl";
 import { useGetAnalyticsQuery } from "@/redux/features/dashboard/dashboard.api";
 import DashboardStats from "../dashboard/DashboardStats";
-import { formatDateString } from "@/lib/formateDateString";
+import { formatDateString } from "@/lib/formatter";
 
 const MobileOwnerLayoutPage = () => {
     const t = useTranslations("Common");
@@ -29,7 +29,7 @@ const MobileOwnerLayoutPage = () => {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, [router]);
-    
+
 
     const todayStr = formatDateString(new Date());
 

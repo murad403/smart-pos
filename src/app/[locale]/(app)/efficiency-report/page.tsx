@@ -9,7 +9,7 @@ import ItemsWithLongestPreparationTime from "./ItemsWithLongestPreparationTime";
 import DetailedReport from "./DetailedReport";
 import Summary from "./Summary";
 import { toast } from "sonner";
-import { formatDateString } from "@/lib/formateDateString";
+import { formatDateString } from "@/lib/formatter";
 
 const EfficiencyReportPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) use(params);

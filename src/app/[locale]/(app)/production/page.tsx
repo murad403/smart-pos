@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
 import { SocketEvent, useSocket } from "@/providers/SocketProvider";
+import { statusView, toClock, toDuration, toElapsed } from "@/lib/formatter";
 
 
 
@@ -30,70 +31,9 @@ const statusPriority: Record<ProductionOrderStatus, number> = {
   CANCELLED: 4,
 };
 
-const statusView: Record<ProductionOrderStatus, {
-  cardClass: string;
-  statusClass: string;
-}> = {
-  PENDING_PROCESSING: {
-    cardClass: "border-l-red-500 bg-red-50/35",
-    statusClass: "text-red-700",
-  },
-  PROCESSING: {
-    cardClass: "border-l-blue-500 bg-blue-50/35",
-    statusClass: "text-blue-600",
-  },
-  READY: {
-    cardClass: "border-l-emerald-500 bg-emerald-50/35",
-    statusClass: "text-emerald-600",
-  },
-  PICKED_UP: {
-    cardClass: "border-l-slate-400 bg-slate-100/70",
-    statusClass: "text-slate-600",
-  },
-  CANCELLED: {
-    cardClass: "border-l-rose-500 bg-rose-50/50",
-    statusClass: "text-rose-700",
-  },
-};
 
 const sourceOptions: ProductionSource[] = ["QR_TABLE", "TOUCHSCREEN", "STAFF", "ADMIN"];
 
-const toClock = (dateString: string) => {
-  const value = new Date(dateString);
-
-  if (Number.isNaN(value.getTime())) return "-";
-
-  return value.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
-
-const toElapsed = (startDateString: string | null | undefined) => {
-  if (!startDateString) return "";
-
-  const start = new Date(startDateString).getTime();
-
-  if (Number.isNaN(start)) return "";
-
-  const diffInSeconds = Math.max(0, Math.floor((Date.now() - start) / 1000));
-  const minutes = Math.floor(diffInSeconds / 60);
-  const seconds = diffInSeconds % 60;
-
-  return `${minutes}m ${seconds}s`;
-};
-
-const toDuration = (startDateString: string | null | undefined, endDateString: string | null | undefined) => {
-  if (!startDateString || !endDateString) return "";
-  const start = new Date(startDateString).getTime();
-  const end = new Date(endDateString).getTime();
-  if (Number.isNaN(start) || Number.isNaN(end)) return "";
-  const diffInSeconds = Math.max(0, Math.floor((end - start) / 1000));
-  const minutes = Math.floor(diffInSeconds / 60);
-  const seconds = diffInSeconds % 60;
-  return `${minutes}m ${seconds}s`;
-};
 
 const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
