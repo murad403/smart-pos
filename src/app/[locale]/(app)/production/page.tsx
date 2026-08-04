@@ -64,6 +64,7 @@ const ProductionPage = ({ params }: { params?: Promise<{ locale: string }> }) =>
 
     const handleNewOrder = () => {
       refetch();
+      // window?.location.reload();
     };
 
     socket.on(SocketEvent.newOrder, handleNewOrder);

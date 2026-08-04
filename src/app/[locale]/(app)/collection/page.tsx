@@ -88,11 +88,11 @@ const CollectionPage = () => {
     };
 
     socket.on(SocketEvent.orderReady, handleOrderReady);
-    socket.on(SocketEvent.newOrder, handleOrderReady);
+    // socket.on(SocketEvent.newOrder, handleOrderReady);
 
     return () => {
       socket.off(SocketEvent.orderReady, handleOrderReady);
-      socket.off(SocketEvent.newOrder, handleOrderReady);
+      // socket.off(SocketEvent.newOrder, handleOrderReady);
     };
   }, [socket, refetch]);
 
