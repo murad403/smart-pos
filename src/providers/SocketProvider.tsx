@@ -67,3 +67,12 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 };
 
 export default SocketProvider;
+
+
+export const SocketEvent = {
+    "newOrder": "newOrder",
+    "orderReady": "orderReady",
+    "pendingPayment": "pendingPayment"
+};
+
+export type SocketEvent = keyof typeof SocketEvent;

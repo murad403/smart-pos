@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client"
-import React, { useLayoutEffect } from "react"
+import React, { useEffect, useLayoutEffect } from "react"
 // Trigger MainWrapper rebuild to reload translations
 import Image from "next/image"
 import { ChevronDown, CreditCard, Fuel, LayoutDashboard, LogOut, Package, ReceiptText, Repeat, ShoppingBag, Speaker, User, QrCode, Monitor, Shield, Smartphone, Calculator, BellDot, Pencil, ShieldCheck, ArrowLeft, File } from "lucide-react"
@@ -17,7 +17,8 @@ import logo from "@/assets/logo/logo2.png";
 import { useCustomerSignInMutation } from "@/redux/features/auth/auth.api";
 import { useSearchParams } from "next/navigation"
 import { useSound } from "@/hooks/sound"
-import { useSocket } from "@/providers/SocketProvider"
+import { SocketEvent, useSocket } from "@/providers/SocketProvider"
+import { useGetPendingPaymentOrdersQuery } from "@/redux/features/order/order.api"
 
 
 
@@ -31,14 +32,47 @@ function SidebarBrand() {
   )
 }
 
-function AppSidebar({ windowWidth, blinkPayments }: { windowWidth?: number; blinkPayments: boolean }) {
+
+
+function AppSidebar({ windowWidth, }: { windowWidth?: number }) {
   const pathName = usePathname();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = React.useState(pathName.startsWith("/profile"));
   const t = useTranslations("Common");
   const [user, setUser] = React.useState<any>(null);
+  const { refetch: refetchPendingPaymentOrders } = useGetPendingPaymentOrdersQuery();
+  const [blinkPayments, setBlinkPayments] = React.useState(false);
+
+  const socket = useSocket();
+
+  function handleNewPendingPayment(dataSnapshot: any, action: () => void) {
+    console.log("New Pending Payment Detected : ", dataSnapshot)
+    action();
+    handleBlinkPayment();
+  }
+
+  function handleBlinkPayment() {
+    setBlinkPayments(true);
+
+    setTimeout(() => {
+      setBlinkPayments(false);
+    }, 1e4);
+  }
 
 
+  useEffect(
+    () => {
+      const eventName = SocketEvent.pendingPayment;
+
+      socket?.on(eventName, (snapshot) => handleNewPendingPayment(snapshot, refetchPendingPaymentOrders));
+
+      function unsubscribe() {
+        socket?.off(eventName);
+      }
+
+      return unsubscribe;
+    }
+    , [socket]);
 
   React.useEffect(() => {
     setProfileOpen(pathName.startsWith("/profile"));
@@ -433,23 +467,10 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const [selectedDevice, setSelectedDevice] = React.useState<string>("qrcode");
 
-  const [blinkPayments, setBlinkPayments] = React.useState(false);
 
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("blink_payments");
-      if (stored === "true") {
-        setBlinkPayments(true);
-      }
-    }
-  }, []);
 
-  React.useEffect(() => {
-    if (pathName === "/pending-payments") {
-      setBlinkPayments(false);
-      localStorage.setItem("blink_payments", "false");
-    }
-  }, [pathName]);
+
+
 
   const playSoundRef = useSound();
 
@@ -583,7 +604,7 @@ const MainWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider defaultOpen>
       <div className="flex min-h-screen w-full bg-[#F7F7F7] text-slate-900">
-        {selectedDevice !== "touchscreen" && <AppSidebar windowWidth={windowWidth} blinkPayments={blinkPayments} />}
+        {selectedDevice !== "touchscreen" && <AppSidebar windowWidth={windowWidth} />}
 
         <SidebarInset className="flex min-h-screen flex-col bg-[#F7F7F7]">
           <Topbar selectedDevice={selectedDevice} onDeviceChange={handleDeviceChange} windowWidth={windowWidth} />

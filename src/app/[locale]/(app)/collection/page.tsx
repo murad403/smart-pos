@@ -8,7 +8,6 @@ import { CollectionOrder } from "@/redux/features/collection/collection.type";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrderDetailsModal from "@/components/modal/OrderDetailsModal";
-import { useSocket } from "@/hooks/ws";
 import { useSound } from "@/hooks/sound";
 
 
@@ -106,35 +105,8 @@ const CollectionPage = () => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
-  // Handle Socket connection and events via custom hook
-  useSocket({
-    onConnect: () => {
-      console.log("Socket connected successfully to Collection/OrderReady Namespace");
-    },
-    events: {
-      orderReady: (eventData: any) => {
-        console.log("Received orderReady socket event:", eventData);
-        const rawOrder = eventData?.order || eventData?.data || eventData;
-        if (!rawOrder || !rawOrder.id) return;
 
-        const newOrder: CollectionOrder = {
-          ...rawOrder,
-          status: rawOrder.status || "READY",
-        };
 
-        if (activeTabRef.current === "READY") {
-          setLocalOrders((prev) => {
-            // Check for duplicates
-            if (prev.some((o) => o.id === newOrder.id)) {
-              return prev;
-            }
-            playSoundRef.current();
-            return [newOrder, ...prev];
-          });
-        }
-      },
-    },
-  });
 
   const sortedOrders = useMemo(() => {
     return [...localOrders].sort((left, right) => {
@@ -175,8 +147,8 @@ const CollectionPage = () => {
           <button
             onClick={() => setActiveTab("READY")}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === "READY"
-                ? "bg-white text-emerald-600 shadow-sm"
-                : "text-slate-600 hover:text-slate-800"
+              ? "bg-white text-emerald-600 shadow-sm"
+              : "text-slate-600 hover:text-slate-800"
               }`}
           >
             {t("readyTab")}
@@ -184,8 +156,8 @@ const CollectionPage = () => {
           <button
             onClick={() => setActiveTab("PICKED_UP")}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === "PICKED_UP"
-                ? "bg-white text-slate-700 shadow-sm"
-                : "text-slate-600 hover:text-slate-800"
+              ? "bg-white text-slate-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-800"
               }`}
           >
             {t("completedTab")}
