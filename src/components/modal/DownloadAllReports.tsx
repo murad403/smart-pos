@@ -436,7 +436,13 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                         const heightPercent = ((d.revenue || 0) / maxRevenue) * 75;
                         const isPeak = d.revenue > 0 && d.revenue === maxRevenue;
                         const showLabel = shouldShowChartLabel(idx, totalCount, stepVal);
-                        const showValueTooltip = totalCount <= 10 ? d.revenue > 0 : isPeak;
+                        const showValueTooltip = d.revenue > 0;
+
+                        const tooltipText = totalCount <= 10
+                          ? formatCurrency(d.revenue)
+                          : d.revenue >= 1_000_000
+                          ? `${(d.revenue / 1_000_000).toFixed(1)}M`
+                          : `${(d.revenue / 1_000).toFixed(0)}k`;
 
                         return (
                           <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
@@ -448,12 +454,12 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               }}
                               className={`rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                             >
-                              {/* Tooltip bubble on non-zero or peak value */}
+                              {/* Tooltip bubble on non-zero value */}
                               {showValueTooltip && (
-                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                  <span>{formatCurrency(d.revenue)}</span>
+                                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1 py-0.5 rounded shadow-xs text-[7px] leading-none whitespace-nowrap z-10">
+                                  <span>{tooltipText}</span>
                                   {/* Triangle pointer */}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-blue-600" />
                                 </div>
                               )}
                             </div>
@@ -513,7 +519,11 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                         const heightPercent = ((d.orders || 0) / maxOrders) * 75;
                         const isPeak = d.orders > 0 && d.orders === maxOrders;
                         const showLabel = shouldShowChartLabel(idx, totalCount, stepVal);
-                        const showValueTooltip = totalCount <= 10 ? d.orders > 0 : isPeak;
+                        const showValueTooltip = d.orders > 0;
+
+                        const tooltipText = totalCount <= 10
+                          ? `${d.orders} ${locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}`
+                          : `${d.orders}`;
 
                         return (
                           <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
@@ -525,12 +535,12 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               }}
                               className={`rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
                             >
-                              {/* Tooltip bubble on non-zero or peak value */}
+                              {/* Tooltip bubble on non-zero value */}
                               {showValueTooltip && (
-                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                  <span>{d.orders} {locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}</span>
+                                <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1 py-0.5 rounded shadow-xs text-[7px] leading-none whitespace-nowrap z-10">
+                                  <span>{tooltipText}</span>
                                   {/* Triangle pointer */}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-blue-600" />
                                 </div>
                               )}
                             </div>
@@ -711,7 +721,11 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                           const height = ((hourData.count || 0) / maxCount) * 85;
                           const isPeak = hourData.count > 0 && hourData.count === maxCount;
                           const showHourLabel = idx % hourStep === 0 || idx === totalHours - 1;
-                          const showHourTooltip = totalHours <= 10 ? hourData.count > 0 : isPeak;
+                          const showHourTooltip = hourData.count > 0;
+
+                          const tooltipText = totalHours <= 10
+                            ? `${hourData.count} ${locale === "id" ? "pesanan" : hourData.count === 1 ? "order" : "orders"}`
+                            : `${hourData.count}`;
 
                           return (
                             <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
@@ -725,10 +739,10 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                               >
                                 {/* Tooltip bubble on non-zero value */}
                                 {showHourTooltip && (
-                                  <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                    <span>{hourData.count} {locale === "id" ? "pesanan" : hourData.count === 1 ? "order" : "orders"}</span>
+                                  <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1 py-0.5 rounded shadow-xs text-[7px] leading-none whitespace-nowrap z-10">
+                                    <span>{tooltipText}</span>
                                     {/* Triangle pointer */}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-blue-600" />
                                   </div>
                                 )}
                               </div>
