@@ -297,7 +297,13 @@
     "verifyPayment": "Verify Payment",
     "verifySuccess": "Payment verified successfully",
     "cancel": "Cancel",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "mismatchDetected": "Mismatch Detected",
+    "provideCorrectAmount": "Please provide the correct amount received.",
+    "correctAmountLabel": "Correct Amount *",
+    "reasonRemarksLabel": "Reason / Remarks (Optional)",
+    "reasonPlaceholder": "Enter reason or remarks",
+    "confirmMismatch": "Confirm Mismatch"
   },
   "Profile": {
     "ownerProfile": "Owner Profile",

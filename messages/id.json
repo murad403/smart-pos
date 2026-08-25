@@ -297,7 +297,13 @@
     "verifyPayment": "Verifikasi Pembayaran",
     "verifySuccess": "Pembayaran berhasil diverifikasi",
     "cancel": "Batal",
-    "submitting": "Mengirimkan..."
+    "submitting": "Mengirimkan...",
+    "mismatchDetected": "Ketidaksesuaian Terdeteksi",
+    "provideCorrectAmount": "Silakan masukkan jumlah yang benar yang diterima.",
+    "correctAmountLabel": "Jumlah yang Benar *",
+    "reasonRemarksLabel": "Alasan / Catatan (Opsional)",
+    "reasonPlaceholder": "Masukkan alasan atau catatan",
+    "confirmMismatch": "Konfirmasi Ketidaksesuaian"
   },
   "Profile": {
     "ownerProfile": "Profil Pemilik",

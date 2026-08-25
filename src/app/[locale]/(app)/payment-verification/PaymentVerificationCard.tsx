@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ImageOff, Loader2 } from "lucide-react";
+import { AlertTriangle, ImageOff, Loader2 } from "lucide-react";
 import { useChangeVerificationStatusMutation } from "@/redux/features/dashboard/dashboard.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
@@ -33,21 +34,26 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
   const t = useTranslations("Payment");
   const [changeVerificationStatus, { isLoading: isUpdating }] = useChangeVerificationStatusMutation();
 
-  const handleStatusChange = async (status: "MATCH" | "MISMATCH") => {
+  const [showMismatchSection, setShowMismatchSection] = useState(false);
+  const [correctAmount, setCorrectAmount] = useState<string>("");
+  const [mismatchReason, setMismatchReason] = useState<string>("");
+
+  const handleMatch = async () => {
+    setShowMismatchSection(false);
     const userData = getUserData();
-    const verifiedById = userData?.id ?? 9;
+    const verifiedById = userData?.id ?? 4;
 
     try {
       const response = await changeVerificationStatus({
         paymentId: Number(item.id),
         data: {
-          status,
+          status: "MATCH",
           verifiedById,
         },
       }).unwrap();
 
       if (response.success) {
-        toast.success(response.message || `Payment marked as ${status} successfully`);
+        toast.success(response.message || `Payment marked as MATCH successfully`);
       } else {
         toast.error(response.message || "Failed to update verification status");
       }
@@ -55,6 +61,55 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
       toast.error(err?.data?.message || err?.message || "Failed to update verification status");
     }
   };
+
+  const handleMismatchClick = () => {
+    setShowMismatchSection(true);
+  };
+
+  const handleCancelMismatch = () => {
+    setShowMismatchSection(false);
+    setCorrectAmount("");
+    setMismatchReason("");
+  };
+
+  const handleConfirmMismatch = async () => {
+    if (!correctAmount || isNaN(Number(correctAmount)) || Number(correctAmount) <= 0) {
+      toast.error("Please enter a valid correct amount");
+      return;
+    }
+
+    const userData = getUserData();
+    const verifiedById = userData?.id ?? 4;
+
+    const payload: any = {
+      status: "MISMATCH",
+      verifiedById,
+      correctAmount: Number(correctAmount),
+    };
+
+    if (mismatchReason.trim()) {
+      payload.mismatchReason = mismatchReason.trim();
+    }
+
+    try {
+      const response = await changeVerificationStatus({
+        paymentId: Number(item.id),
+        data: payload,
+      }).unwrap();
+
+      if (response.success) {
+        toast.success(response.message || `Payment marked as MISMATCH successfully`);
+        setShowMismatchSection(false);
+        setCorrectAmount("");
+        setMismatchReason("");
+      } else {
+        toast.error(response.message || "Failed to update verification status");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || "Failed to update verification status");
+    }
+  };
+
   const imgSrc = item.image;
 
   return (
@@ -124,7 +179,7 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
       <div className="mt-2 space-y-2">
         <button
           type="button"
-          onClick={() => handleStatusChange("MATCH")}
+          onClick={handleMatch}
           disabled={isUpdating}
           className="w-full rounded-md border border-slate-200 bg-green-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-green-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
         >
@@ -133,7 +188,7 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
         </button>
         <button
           type="button"
-          onClick={() => handleStatusChange("MISMATCH")}
+          onClick={handleMismatchClick}
           disabled={isUpdating}
           className="w-full rounded-md border border-slate-200 bg-red-500 cursor-pointer py-2 text-xs font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-1.5"
         >
@@ -141,6 +196,79 @@ const PaymentVerificationCard = ({ item, onViewDetails, onVerify }: PaymentVerif
           {t("mismatch")}
         </button>
       </div>
+
+      {/* Mismatch Form Section */}
+      {showMismatchSection && (
+        <div className="mt-3 rounded-xl border border-red-200 bg-red-50/60 p-3.5 sm:p-4 text-slate-800">
+          <div className="flex items-start gap-2 mb-3">
+            <AlertTriangle size={18} className="text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-red-600 leading-tight">
+                {t("mismatchDetected") || "Mismatch Detected"}
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {t("provideCorrectAmount") || "Please provide the correct amount received."}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* Correct Amount Input */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                {t("correctAmountLabel") || "Correct Amount *"}
+              </label>
+              <div className="flex items-center rounded-lg border border-slate-200 bg-white overflow-hidden focus-within:border-red-400 focus-within:ring-1 focus-within:ring-red-400">
+                <span className="bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
+                  Rp
+                </span>
+                <input
+                  type="number"
+                  value={correctAmount}
+                  onChange={(e) => setCorrectAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-1.5 text-xs font-medium text-slate-800 outline-none bg-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Reason / Remarks Input */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                {t("reasonRemarksLabel") || "Reason / Remarks (Optional)"}
+              </label>
+              <input
+                type="text"
+                value={mismatchReason}
+                onChange={(e) => setMismatchReason(e.target.value)}
+                placeholder={t("reasonPlaceholder") || "Enter reason or remarks"}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-3.5 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleCancelMismatch}
+              disabled={isUpdating}
+              className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
+            >
+              {t("cancel") || "Cancel"}
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmMismatch}
+              disabled={isUpdating}
+              className="rounded-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+            >
+              {isUpdating && <Loader2 size={12} className="animate-spin" />}
+              {t("confirmMismatch") || "Confirm Mismatch"}
+            </button>
+          </div>
+        </div>
+      )}
 
 
 
