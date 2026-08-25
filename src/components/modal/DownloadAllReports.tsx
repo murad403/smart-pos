@@ -144,6 +144,20 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
     return reportSales?.salesSummary || [];
   };
 
+  const getStepInterval = (total: number) => {
+    if (total <= 10) return 1;
+    if (total <= 20) return 3;
+    if (total <= 35) return 5;
+    return Math.ceil(total / 7);
+  };
+
+  const shouldShowChartLabel = (idx: number, total: number, step: number) => {
+    if (total <= 10) return true;
+    if (idx === 0 || idx === total - 1) return true;
+    if (idx % step === 0 && total - 1 - idx >= Math.floor(step / 2)) return true;
+    return false;
+  };
+
   const getTopSellingItems = () => {
     return reportSales?.topSellingItems || [];
   };
@@ -409,42 +423,63 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                   </div>
 
                   {/* SVG Bar Chart Wrapper */}
-                  <div className="h-32 flex items-end justify-between px-2 pt-6 pb-2 border-b border-slate-100 relative bg-slate-50/50 rounded-xl">
+                  <div className="h-32 flex items-end justify-between px-2 pt-6 pb-2 border-b border-slate-100 relative bg-slate-50/50 rounded-xl gap-0.5">
                     {/* Render static, styled bars based on report sales summary data */}
-                    {getSalesSummary().slice(-7).map((d: any, idx: number, arr: any[]) => {
-                      const revenues = arr.map(item => item.revenue || 0);
+                    {(() => {
+                      const salesData = getSalesSummary();
+                      const totalCount = salesData.length;
+                      const revenues = salesData.map((item: any) => item.revenue || 0);
                       const maxRevenue = Math.max(...revenues, 1);
-                      const heightPercent = ((d.revenue || 0) / maxRevenue) * 75; // Cap at 75% for tooltip spacing
-                      const isPeak = d.revenue > 0 && d.revenue === maxRevenue;
+                      const stepVal = getStepInterval(totalCount);
 
-                      return (
-                        <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
-                          {/* Bar */}
-                          <div
-                            style={{ height: `${Math.max(heightPercent, 4)}%` }}
-                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
-                          >
-                            {/* Tooltip bubble on non-zero value */}
-                            {d.revenue > 0 && (
-                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                <span>{formatCurrency(d.revenue)}</span>
-                                {/* Triangle pointer */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                      return salesData.map((d: any, idx: number) => {
+                        const heightPercent = ((d.revenue || 0) / maxRevenue) * 75;
+                        const isPeak = d.revenue > 0 && d.revenue === maxRevenue;
+                        const showLabel = shouldShowChartLabel(idx, totalCount, stepVal);
+                        const showValueTooltip = totalCount <= 10 ? d.revenue > 0 : isPeak;
+
+                        return (
+                          <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
+                            {/* Bar */}
+                            <div
+                              style={{
+                                height: `${Math.max(heightPercent, 4)}%`,
+                                width: totalCount <= 7 ? "24px" : totalCount <= 12 ? "14px" : totalCount <= 22 ? "8px" : totalCount <= 35 ? "5px" : "3px",
+                              }}
+                              className={`rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
+                            >
+                              {/* Tooltip bubble on non-zero or peak value */}
+                              {showValueTooltip && (
+                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                                  <span>{formatCurrency(d.revenue)}</span>
+                                  {/* Triangle pointer */}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            {/* Label below axis */}
+                            {showLabel && (
+                              <div className="absolute top-full mt-1.5 flex flex-col items-center whitespace-nowrap z-10">
+                                {totalCount <= 10 ? (
+                                  <>
+                                    <span className="text-[8px] font-semibold text-slate-700 leading-none">
+                                      {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { weekday: "short" })}
+                                    </span>
+                                    <span className="text-[7px] text-slate-400 mt-0.5">
+                                      {new Date(d.date).getDate()}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-[7px] font-semibold text-slate-600 leading-none">
+                                    {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short" })}
+                                  </span>
+                                )}
                               </div>
                             )}
                           </div>
-                          {/* Label below axis */}
-                          <div className="absolute top-full mt-1.5 flex flex-col items-center">
-                            <span className="text-[8px] font-semibold text-slate-700 leading-none">
-                              {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { weekday: "short" })}
-                            </span>
-                            <span className="text-[7px] text-slate-400 mt-0.5">
-                              {new Date(d.date).getDate()}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                     {getSalesSummary().length === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-400">
                         No Sales Data Available
@@ -465,42 +500,63 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                   </div>
 
                   {/* SVG Bar Chart Wrapper */}
-                  <div className="h-32 flex items-end justify-between px-2 pt-6 pb-2 border-b border-slate-100 relative bg-slate-50/50 rounded-xl">
+                  <div className="h-32 flex items-end justify-between px-2 pt-6 pb-2 border-b border-slate-100 relative bg-slate-50/50 rounded-xl gap-0.5">
                     {/* Render static, styled bars based on report sales summary data */}
-                    {getSalesSummary().slice(-7).map((d: any, idx: number, arr: any[]) => {
-                      const orders = arr.map(item => item.orders || 0);
-                      const maxOrders = Math.max(...orders, 1);
-                      const heightPercent = ((d.orders || 0) / maxOrders) * 75; // Cap at 75% for tooltip spacing
-                      const isPeak = d.orders > 0 && d.orders === maxOrders;
+                    {(() => {
+                      const salesData = getSalesSummary();
+                      const totalCount = salesData.length;
+                      const ordersArr = salesData.map((item: any) => item.orders || 0);
+                      const maxOrders = Math.max(...ordersArr, 1);
+                      const stepVal = getStepInterval(totalCount);
 
-                      return (
-                        <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
-                          {/* Bar */}
-                          <div
-                            style={{ height: `${Math.max(heightPercent, 4)}%` }}
-                            className={`w-7 rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
-                          >
-                            {/* Tooltip bubble on non-zero value */}
-                            {d.orders > 0 && (
-                              <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                <span>{d.orders} {locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}</span>
-                                {/* Triangle pointer */}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                      return salesData.map((d: any, idx: number) => {
+                        const heightPercent = ((d.orders || 0) / maxOrders) * 75;
+                        const isPeak = d.orders > 0 && d.orders === maxOrders;
+                        const showLabel = shouldShowChartLabel(idx, totalCount, stepVal);
+                        const showValueTooltip = totalCount <= 10 ? d.orders > 0 : isPeak;
+
+                        return (
+                          <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
+                            {/* Bar */}
+                            <div
+                              style={{
+                                height: `${Math.max(heightPercent, 4)}%`,
+                                width: totalCount <= 7 ? "24px" : totalCount <= 12 ? "14px" : totalCount <= 22 ? "8px" : totalCount <= 35 ? "5px" : "3px",
+                              }}
+                              className={`rounded-t-md transition-all duration-300 relative ${isPeak ? "bg-blue-600" : "bg-blue-600/30 hover:bg-blue-600/50"}`}
+                            >
+                              {/* Tooltip bubble on non-zero or peak value */}
+                              {showValueTooltip && (
+                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                                  <span>{d.orders} {locale === "id" ? "pesanan" : d.orders === 1 ? "order" : "orders"}</span>
+                                  {/* Triangle pointer */}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            {/* Label below axis */}
+                            {showLabel && (
+                              <div className="absolute top-full mt-1.5 flex flex-col items-center whitespace-nowrap z-10">
+                                {totalCount <= 10 ? (
+                                  <>
+                                    <span className="text-[8px] font-semibold text-slate-700 leading-none">
+                                      {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { weekday: "short" })}
+                                    </span>
+                                    <span className="text-[7px] text-slate-400 mt-0.5">
+                                      {new Date(d.date).getDate()}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-[7px] font-semibold text-slate-600 leading-none">
+                                    {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short" })}
+                                  </span>
+                                )}
                               </div>
                             )}
                           </div>
-                          {/* Label below axis */}
-                          <div className="absolute top-full mt-1.5 flex flex-col items-center">
-                            <span className="text-[8px] font-semibold text-slate-700 leading-none">
-                              {new Date(d.date).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { weekday: "short" })}
-                            </span>
-                            <span className="text-[7px] text-slate-400 mt-0.5">
-                              {new Date(d.date).getDate()}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                     {getSalesSummary().length === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-slate-400">
                         No Orders Data Available
@@ -643,35 +699,49 @@ const DownloadAllReports: React.FC<DownloadAllReportsProps> = ({ onClose }) => {
                     </h3>
 
                     {/* Miniature Bars */}
-                    <div className="h-14 flex items-end justify-between px-1 border-b border-slate-50 relative mt-1 bg-slate-50/30 rounded-lg pt-2 pb-0.5">
-                      {getOrdersPerHour().slice(-8).map((hourData: any, idx: number, arr: any[]) => {
-                        const counts = arr.map(h => h.count || 0);
+                    <div className="h-14 flex items-end justify-between px-1 border-b border-slate-50 relative mt-1 bg-slate-50/30 rounded-lg pt-2 pb-0.5 gap-0.5">
+                      {(() => {
+                        const hourlyData = getOrdersPerHour();
+                        const totalHours = hourlyData.length;
+                        const counts = hourlyData.map((h: any) => h.count || 0);
                         const maxCount = Math.max(...counts, 1);
-                        const height = ((hourData.count || 0) / maxCount) * 85;
+                        const hourStep = totalHours <= 10 ? 1 : totalHours <= 16 ? 2 : 3;
 
-                        return (
-                          <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group">
-                            {/* Bar segment */}
-                            <div
-                              style={{ height: `${Math.max(height, 5)}%` }}
-                              className={`w-3.5 rounded-t-sm transition-all duration-300 relative ${hourData.count > 0 ? "bg-blue-600" : "bg-blue-600/10"}`}
-                            >
-                              {/* Tooltip bubble on non-zero value */}
-                              {hourData.count > 0 && (
-                                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
-                                  <span>{hourData.count} {locale === "id" ? "pesanan" : hourData.count === 1 ? "order" : "orders"}</span>
-                                  {/* Triangle pointer */}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
-                                </div>
-                              )}
+                        return hourlyData.map((hourData: any, idx: number) => {
+                          const height = ((hourData.count || 0) / maxCount) * 85;
+                          const isPeak = hourData.count > 0 && hourData.count === maxCount;
+                          const showHourLabel = idx % hourStep === 0 || idx === totalHours - 1;
+                          const showHourTooltip = totalHours <= 10 ? hourData.count > 0 : isPeak;
+
+                          return (
+                            <div key={idx} className="flex flex-col items-center justify-end flex-1 h-full relative group min-w-0">
+                              {/* Bar segment */}
+                              <div
+                                style={{
+                                  height: `${Math.max(height, 5)}%`,
+                                  width: totalHours <= 8 ? "14px" : totalHours <= 14 ? "8px" : "4px",
+                                }}
+                                className={`rounded-t-sm transition-all duration-300 relative ${isPeak ? "bg-blue-600" : hourData.count > 0 ? "bg-blue-600/60" : "bg-blue-600/10"}`}
+                              >
+                                {/* Tooltip bubble on non-zero value */}
+                                {showHourTooltip && (
+                                  <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded shadow-sm text-[8px] whitespace-nowrap z-10">
+                                    <span>{hourData.count} {locale === "id" ? "pesanan" : hourData.count === 1 ? "order" : "orders"}</span>
+                                    {/* Triangle pointer */}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[3.5px] border-transparent border-t-blue-600" />
+                                  </div>
+                                )}
+                              </div>
+                              {/* Hour label below bar */}
+                              {showHourLabel && (
+                                <span className="text-[6.5px] font-bold text-slate-400 mt-1 uppercase scale-90 leading-none whitespace-nowrap">
+                                  {formatHourLabel(hourData.hour)}
+                                </span>
+                               )}
                             </div>
-                            {/* Hour label below bar */}
-                            <span className="text-[6.5px] font-bold text-slate-400 mt-1 uppercase scale-90 leading-none">
-                              {formatHourLabel(hourData.hour)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          );
+                        });
+                      })()}
                       {getOrdersPerHour().length === 0 && (
                         <div className="absolute inset-0 flex items-center justify-center text-[8.5px] font-semibold text-slate-400">
                           No Hourly Data
