@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import item1 from "@/assets/images/menu1.jpg";
-import item2 from "@/assets/images/menu2.png";
 import spicyImage from "@/assets/tag/spicy.svg";
 import mustTryImage from "@/assets/tag/must_try.svg";
 import promoImage from "@/assets/tag/promo.svg";
@@ -56,10 +54,6 @@ type Props = {
   onEditItem?: (item: any) => void;
 };
 
-const imageMap = {
-  menu1: item1,
-  menu2: item2,
-};
 
 const PacketSlider = ({ packetSections }: { packetSections: any[] }) => {
   const choices = packetSections.flatMap(section =>
@@ -385,7 +379,7 @@ const MenuCards = ({ sectionId, sectionNumber, sectionName, layout, onAddItem, o
                           : "relative h-44 sm:h-48 lg:h-60 w-full"
                 }>
                   <Image
-                    src={item.imageUrl || imageMap[item.imageType]}
+                    src={item.imageUrl || ""}
                     alt={item.itemName}
                     fill
                     className="h-full w-full object-cover"
