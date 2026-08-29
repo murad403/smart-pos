@@ -268,7 +268,7 @@
     "proof": "Payment Proof",
     "subtitle": "Verify all cash transactions and detect fraud.",
     "verifyPaymentSubtitle": "Reconcile received cash against the total amount for order",
-    "searchPlaceholder": "Search order or staff...",
+    "searchPlaceholder": "Search...",
     "noTransactions": "No transactions found for this search.",
     "cashier": "Cashier",
     "staff": "Staff",

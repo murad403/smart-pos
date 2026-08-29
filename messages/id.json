@@ -268,7 +268,7 @@
     "proof": "Bukti Pembayaran",
     "subtitle": "Verifikasi semua transaksi tunai dan deteksi penipuan.",
     "verifyPaymentSubtitle": "Cocokkan uang tunai yang diterima dengan total pesanan",
-    "searchPlaceholder": "Cari pesanan atau staf...",
+    "searchPlaceholder": "Cari...",
     "noTransactions": "Tidak ada transaksi ditemukan untuk pencarian ini.",
     "cashier": "Kasir",
     "staff": "Staf",
