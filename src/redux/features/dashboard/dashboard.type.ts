@@ -158,6 +158,8 @@ export interface GetPaymentsQueryParams {
     status?: "PENDING" | "PAID" | "CANCELLED" | "";
     method?: "CASH" | "TRANSFER" | "OTHER" | "";
     search?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface PaymentDetailsOrderItem {

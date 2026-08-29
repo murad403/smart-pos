@@ -1,5 +1,5 @@
 import baseApi from "../../api/api";
-import { ChangeUserPasswordBody, ChangeUserPasswordResponse, AddUserBody, AddUserResponse, AnalyticsQueryParams, AnalyticsResponse, DeleteUserResponse, GetAllUsersQueryParams, GetAllUsersResponse, GetInventoryReportQueryParams, GetInventoryReportResponse, GetItemsQueryParams, GetItemsResponse, GetPaymentDetailsResponse, GetPaymentsQueryParams, GetPaymentsResponse, GetUserByIdResponse, GetOperatingHoursResponse, SalesReportResponse, StockAdjustBody, StockAdjustResponse, UpdateOperatingHoursBody, UpdateOperatingHoursResponse, GetInventoryLogsResponse, GetInventoryLogsQueryParams } from "./dashboard.type";
+import { ChangeUserPasswordBody, ChangeUserPasswordResponse, AddUserResponse, AnalyticsQueryParams, AnalyticsResponse, DeleteUserResponse, GetAllUsersQueryParams, GetAllUsersResponse, GetInventoryReportQueryParams, GetInventoryReportResponse, GetItemsQueryParams, GetItemsResponse, GetPaymentDetailsResponse, GetPaymentsQueryParams, GetPaymentsResponse, GetUserByIdResponse, GetOperatingHoursResponse, SalesReportResponse, StockAdjustBody, StockAdjustResponse, UpdateOperatingHoursBody, UpdateOperatingHoursResponse, GetInventoryLogsResponse, GetInventoryLogsQueryParams } from "./dashboard.type";
 
 
 
@@ -52,6 +52,8 @@ const dashboardApi = baseApi.injectEndpoints({
                 if (params?.status) queryParams.status = params.status;
                 if (params?.method) queryParams.method = params.method;
                 if (params?.search) queryParams.search = params.search;
+                if (params?.startDate) queryParams.startDate = params.startDate;
+                if (params?.endDate) queryParams.endDate = params.endDate;
 
                 return {
                     url: "/payments",

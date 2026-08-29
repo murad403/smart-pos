@@ -10,6 +10,8 @@ import CustomPagination from "@/components/shared/CustomPagination";
 import { useTranslations } from "next-intl";
 import { useGetPaymentsQuery } from "@/redux/features/dashboard/dashboard.api";
 import TodayPaymentVerification from "./TodayPaymentVerification";
+import DateRangePicker from "@/components/shared/DateRangePicker";
+import { formatDateString } from "@/lib/formatter";
 
 const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string }> }) => {
   if (params) React.use(params);
@@ -19,11 +21,16 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
   const [selectedItem, setSelectedItem] = useState<PaymentVerificationItem | null>(null);
   const [verifyingItem, setVerifyingItem] = useState<PaymentVerificationItem | null>(null);
 
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
   // Fetch payments list from API with page, limit, status, method, and search criteria
   const { data: paymentsRes, isLoading, refetch } = useGetPaymentsQuery({
     page: currentPage,
-    limit: 6,
+    limit: 9,
     search: searchQuery.trim() || undefined,
+    startDate: formatDateString(startDate),
+    endDate: formatDateString(endDate),
   });
 
   const payments = paymentsRes?.data ?? [];
@@ -74,6 +81,18 @@ const PaymentVerificationPage = ({ params }: { params?: Promise<{ locale: string
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Date Range Picker */}
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(start, end) => {
+              setStartDate(start);
+              setEndDate(end);
+              setCurrentPage(1);
+              setSelectedItem(null);
+            }}
+          />
+
           {/* Search Input */}
           <div className="relative">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
