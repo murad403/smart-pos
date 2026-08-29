@@ -1,11 +1,7 @@
 "use client";
-
 import React, { useRef, useState, useEffect } from "react";
 import { Camera, X, Loader2, CheckCircle2 } from "lucide-react";
-import {
-    useGetTodayPaymentsSummaryQuery,
-    useTodayPaymentsVerifyMutation,
-} from "@/redux/features/dashboard/dashboard.api";
+import { useGetTodayPaymentsSummaryQuery, useTodayPaymentsVerifyMutation,} from "@/redux/features/dashboard/dashboard.api";
 import { getUserData } from "@/utils/auth";
 import { toast } from "sonner";
 import { openCameraStream, captureImageFromFile } from "@/lib/openCamera";
@@ -21,13 +17,9 @@ const formatDate = (date: Date) =>
     });
 
 const TodayPaymentVerification = () => {
-    const { data: summaryRes, isLoading: isSummaryLoading } =
-        useGetTodayPaymentsSummaryQuery(undefined);
+    const { data: summaryRes, isLoading: isSummaryLoading } = useGetTodayPaymentsSummaryQuery(undefined);
     const summary = summaryRes?.data;
-
-    const [todayPaymentsVerify, { isLoading: isSubmitting }] =
-        useTodayPaymentsVerifyMutation();
-
+    const [todayPaymentsVerify, { isLoading: isSubmitting }] = useTodayPaymentsVerifyMutation();
     const [actualAmount, setActualAmount] = useState("");
     const [remark, setRemark] = useState("");
     const [proofFile, setProofFile] = useState<File | null>(null);
