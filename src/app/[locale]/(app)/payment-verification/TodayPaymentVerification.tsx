@@ -51,6 +51,7 @@ const TodayPaymentVerification = () => {
             actualSales: undefined,
             expensesCash: undefined,
             expenseRemark: "",
+            deposit: undefined,
             remark: "",
         },
     });
@@ -59,6 +60,7 @@ const TodayPaymentVerification = () => {
     const watchedActualIncomeCash = watch("actualIncomeCash");
     const watchedActualTransfer = watch("actualTransfer");
     const watchedExpensesCash = watch("expensesCash");
+    const watchedDeposit = watch("deposit");
 
     // Auto-update actualSales when actualIncomeCash or actualTransfer changes
     const handleActualIncomeCashChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,8 +88,9 @@ const TodayPaymentVerification = () => {
     const closingCash = useMemo(() => {
         const incomeCashNum = Number(watchedActualIncomeCash) || 0;
         const expensesCashNum = Number(watchedExpensesCash) || 0;
-        return totalOpeningCash + incomeCashNum - expensesCashNum;
-    }, [totalOpeningCash, watchedActualIncomeCash, watchedExpensesCash]);
+        const depositNum = Number(watchedDeposit) || 0;
+        return totalOpeningCash + incomeCashNum - expensesCashNum - depositNum;
+    }, [totalOpeningCash, watchedActualIncomeCash, watchedExpensesCash, watchedDeposit]);
 
     useEffect(() => {
         return () => {
@@ -209,6 +212,7 @@ const TodayPaymentVerification = () => {
             Number(values.actualSales) || parsedActualIncomeCash + parsedActualTransfer;
 
         const parsedExpensesCash = Number(values.expensesCash) || 0;
+        const parsedDeposit = Number(values.deposit) || 0;
         const parsedClosingCash = closingCash;
 
         const payloadData = {
@@ -225,6 +229,7 @@ const TodayPaymentVerification = () => {
 
             expensesCash: parsedExpensesCash,
             expenseRemark: values.expenseRemark?.trim() || undefined,
+            deposit: parsedDeposit,
             cashDeposit: [],
 
             closingCash: parsedClosingCash,
@@ -498,6 +503,25 @@ const TodayPaymentVerification = () => {
                                         placeholder="Enter remarks"
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400 transition-all"
                                     />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="deposit" className="block text-xs font-semibold text-slate-600 mb-1">
+                                        Deposit
+                                    </label>
+                                    <div className="relative flex items-center rounded-xl border border-slate-200 bg-slate-50/50 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all overflow-hidden">
+                                        <span className="bg-slate-100 px-3 py-2 text-xs font-bold text-slate-500 border-r border-slate-200">
+                                            Rp
+                                        </span>
+                                        <input
+                                            id="deposit"
+                                            type="number"
+                                            step="0.01"
+                                            {...register("deposit")}
+                                            placeholder="Enter amount"
+                                            className="w-full px-3 py-2 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 bg-transparent"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
